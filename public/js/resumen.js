@@ -68,13 +68,13 @@ function barraComposicion(c, escenario) {
 document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.map((d) => `
   <div class="tarjeta">
     <h3>${NOMBRE_TIPO[d.tipo]}</h3>
-    <div style="display:flex; justify-content:space-between; align-items:baseline;">
-      <span class="pill verde">Renuncia</span>
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
+      <span><span class="pill verde">Renuncia</span> <span class="una-salida">cada una cuesta</span></span>
       <b class="num" style="font-size:20px">${fmtQ(d.cR.total)}</b>
     </div>
     ${barraComposicion(d.cR, 'renuncia')}
-    <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:10px;">
-      <span class="pill ambar">Despido</span>
+    <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-top:10px;">
+      <span><span class="pill ambar">Despido</span> <span class="una-salida">cada uno cuesta</span></span>
       <b class="num" style="font-size:20px">${fmtQ(d.cD.total)}</b>
     </div>
     ${barraComposicion(d.cD, 'despido')}
@@ -84,7 +84,12 @@ document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.map((d) => `
       <span><i style="background:#8FA69B"></i>Reclutamiento</span>
       <span><i style="background:#0B7A55"></i>Salida</span>
     </div>
-    <p class="pie">Últimos 12 meses: ${fmtNum(d.salidas.renuncia)} renuncias y ${fmtNum(d.salidas.despido)} despidos → ${fmtQ(d.anual)}. Días de vacante: ${d.cal.dias} (${d.cal.fuente}).</p>
+    <div class="anual">
+      <div class="anual-eti">Acumulado anual de este tipo (volumen × costo)</div>
+      <div><b class="num anual-num">${fmtQ(d.anual)}</b>
+        <span class="anual-det">= ${fmtNum(d.salidas.renuncia)} ${d.salidas.renuncia === 1 ? 'renuncia' : 'renuncias'} + ${fmtNum(d.salidas.despido)} ${d.salidas.despido === 1 ? 'despido' : 'despidos'} en 12 meses</span></div>
+      <div class="anual-det">Días de vacante usados: ${d.cal.dias} (${d.cal.fuente}).</div>
+    </div>
   </div>`).join('');
 
 // ── hallazgos generados de los datos ───────────────────────────────────────

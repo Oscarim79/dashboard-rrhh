@@ -138,6 +138,16 @@ tr:last-child td { border-bottom: none; }
 .c-sal-r { background: var(--verde); }
 .c-sal-d { background: var(--ambar); }
 
+/* ── bloque de acumulado anual en las tarjetas por tipo ── */
+.una-salida { font-size: 12.5px; color: var(--tinta-suave); }
+.anual { border-top: 1px dashed var(--borde); margin-top: 12px; padding-top: 10px; }
+.anual-eti {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--tinta-suave); margin-bottom: 2px;
+}
+.anual-num { font-size: 20px; }
+.anual-det { font-size: 12.5px; color: var(--tinta-suave); }
+
 /* ── etiquetas ── */
 .pill { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; }
 .pill.verde { background: var(--verde-suave); color: var(--verde); }
