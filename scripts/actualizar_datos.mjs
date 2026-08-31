@@ -27,14 +27,26 @@ function sheetId() {
 
 const TIENDAS_CFG = JSON.parse(readFileSync(path.join(ROOT, 'config', 'tiendas.json'), 'utf8'));
 
-// ── descarga ───────────────────────────────────────────────────────────────
-async function descargar(id) {
+// ── descarga (con reintentos: Google a veces corta la conexión a medias) ───
+async function descargar(id, intentos = 3) {
   const url = `https://docs.google.com/spreadsheets/d/${id}/export?format=xlsx`;
-  const res = await fetch(url, { redirect: 'follow' });
-  if (!res.ok) throw new Error(`La descarga del sheet falló: HTTP ${res.status}. ¿Sigue compartido con enlace?`);
-  const ct = res.headers.get('content-type') ?? '';
-  if (ct.includes('text/html')) throw new Error('Google devolvió una página HTML en vez del Excel. Revisa que el sheet esté compartido con "cualquiera con el enlace".');
-  return Buffer.from(await res.arrayBuffer());
+  let ultimoError;
+  for (let i = 1; i <= intentos; i++) {
+    try {
+      const res = await fetch(url, { redirect: 'follow' });
+      if (!res.ok) throw new Error(`La descarga del sheet falló: HTTP ${res.status}. ¿Sigue compartido con enlace?`);
+      const ct = res.headers.get('content-type') ?? '';
+      if (ct.includes('text/html')) throw new Error('Google devolvió una página HTML en vez del Excel. Revisa que el sheet esté compartido con "cualquiera con el enlace".');
+      return Buffer.from(await res.arrayBuffer());
+    } catch (e) {
+      ultimoError = e;
+      if (i < intentos) {
+        console.log(`Descarga interrumpida (intento ${i} de ${intentos}), reintentando en ${i * 5}s…`);
+        await new Promise((r) => setTimeout(r, i * 5000));
+      }
+    }
+  }
+  throw ultimoError;
 }
 
 // ── fechas (el sheet usa M/D/YYYY y seriales de Excel) ─────────────────────
