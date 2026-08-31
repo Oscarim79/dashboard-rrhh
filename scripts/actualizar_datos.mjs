@@ -83,7 +83,7 @@ for (const nt of TIENDAS_CFG.noTiendas) for (const a of nt.alias) porAlias.set(a
 const AMBIGUOS = {
   'CHIQUIMULA': { 'ABI Q': 'Abi Q Chiquimula', OTRA: 'Chiquimula Centro' },
   'CAYALA': { 'ABI Q': 'Abi Q Cayalá', OTRA: 'Cayalá' },
-  'PRADERA CONCEPCION': { 'ABI Q': 'Abi Q Concepción', OTRA: 'Pradera Concepción' },
+  'PRADERA CONCEPCION': { 'ABI Q': 'Abi Q Concepción (Pradera CSV)', OTRA: 'Pradera Concepción' },
 };
 const porNombre = new Map(TIENDAS_CFG.tiendas.map((t) => [t.nombre, t]));
 function resolverLugar(lugarCrudo, empresaCruda) {
