@@ -23,8 +23,8 @@
 
 ## Siguiente — BLOQUEADO esperando a Oscar
 
-1. **Oscar debe confirmar o corregir el mapeo de lugares → tipo A / tipo B / no-es-tienda** (propuesta enviada en el chat).
-2. Oscar decide: ¿replicar la diferencia Internet(renuncia)/Telo(despido) del Excel o unificar canal?
+1. **Oscar debe confirmar o corregir el mapeo de lugares → tipo A / tipo B / no-es-tienda** (propuesta enviada en el chat; dijo que lo está consiguiendo).
+2. **Canales de atracción actualizados:** Oscar eliminó "Telo" y renombró "Ferias" → "Inversión de pauta para redes". Falta que GUARDE el Excel (está abierto con cambios sin guardar) para re-leer los montos finales y re-derivar los 4 valores de control.
 3. Oscar decide qué pestaña manda para rotación (propuesta: DATA para % mensual + INDICADOR para acumulado).
 4. Con eso confirmado → construir pipeline (`scripts/actualizar_datos.mjs`) + dashboard (paso 4) y luego repo + Action + Pages (paso 5).
 

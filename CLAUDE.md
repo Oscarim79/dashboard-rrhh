@@ -39,9 +39,14 @@ El Excel de referencia es `J:\Mi unidad\RRHH\COLABORADORES\COSTO DE ROTACIÓN PO
 **Detalles verificados contra el Excel (2026-08-31) — sin esto los controles NO cuadran:**
 - Semanas por mes = **4.33** (no 4.3333): jefe A/B = Q7,205.54 · coordinadora = Q3,325.64.
 - El 4º canal de atracción difiere por escenario: **Renuncia usa "Internet" Q5,000/mes → Q500**
-  prorrateado; **Despido usa "Telo" Q2,700/mes → Q270**. (Así está en el Excel de Oscar;
-  posible inconsistencia suya — pendiente que Oscar decida si se replica o se unifica.)
+  prorrateado; **Despido usa "Telo" Q2,700/mes → Q270**.
 - El Excel además trae mezcla: 60% renuncias / 40% despidos (la real del sheet es ~84/16).
+
+**CAMBIO PENDIENTE (Oscar, 2026-08-31):** eliminó el canal "Telo" (ya no se paga) y renombró
+"Ferias de empleo" a **"Inversión de pauta para redes"**. Los valores de control de arriba
+corresponden al Excel VIEJO; hay que re-derivarlos del Excel actualizado cuando Oscar lo guarde
+(el archivo está abierto en Excel y en disco sigue la versión vieja). No implementar el
+simulador hasta re-validar los 4 totales contra la versión guardada.
 
 ## Reglas de trabajo
 
