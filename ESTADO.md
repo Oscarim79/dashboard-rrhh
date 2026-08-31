@@ -1,33 +1,42 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ PUBLICADO Y FUNCIONANDO (2026-08-31)
+
+- **Dashboard en vivo:** https://oscarim79.github.io/dashboard-rrhh/
+- **Repo público:** https://github.com/Oscarim79/dashboard-rrhh (cuenta `Oscarim79`; la
+  "oscarimorales" de la spec no existe — Oscar confirmó usar la real)
+- **Actualización automática:** GitHub Action diaria a las 6:00 de Guatemala + botón
+  "Run workflow" en la pestaña Actions. Secret `SHEET_ID` configurado.
+- 4 páginas: Resumen CEO · Vacantes · Rotación · Simulador. Verificado en vivo (curl + navegador,
+  móvil y escritorio) y JSON publicado revisado: cero datos personales.
+
 ## Decisiones firmes
 
-- Sitio estático en GitHub Pages, repo público `dashboard-rrhh` (cuenta `oscarimorales`) — se crea al FINAL (paso 5 del plan).
-- Fuente única: Google Sheet compartido con enlace, descargado como xlsx. Nada de exportaciones manuales.
-- `SHEET_ID` solo en `.env` local y secret de GitHub Actions. Nunca en el código.
-- Privacidad innegociable: cero nombres, DPI, teléfonos o sueldos en el repo/sitio. Verificación anti-fugas obligatoria antes de publicar. Pestañas ALTAS, SALIDAS, BASE DE DATOS GENERAL, CVs FILTRADOS y CONTROL DE INTEGRACIÓN se ignoran por completo.
-- 4 páginas: Resumen CEO / Vacantes / Rotación / Simulador. Diseño móvil primero.
-- Valores de control del simulador: renuncia A Q71,831 · renuncia B Q54,581 · despido A Q76,101 · despido B Q58,851 — **ya reproducidos exactamente** (ver CLAUDE.md: semanas/mes = 4.33 y canal Internet-vs-Telo según escenario).
+- Modelo con **4 tipos de tienda** (AA/A/B/C, archivo de Oscar con marcas A2K/ABIQ/FRIOTEC).
+  Ventas por tipo = puntos medios: AA Q1.2M · A Q750k · B Q400k · C Q200k (editables en Simulador).
+- Canales de atracción sin Telo; "Internet" es gasto aparte y se queda (confirmado por Oscar).
+  Controles del modelo: renuncia A Q71,831 · B Q54,581 · despido A Q76,331 · B Q59,081 —
+  validados en cada deploy por `scripts/validar_modelo.mjs`.
+- Calibración con datos reales: mediana 10 días de vacante (no 30), mezcla 84% renuncias / 16% despidos.
+- `SHEET_ID` solo en `.env` local (gitignoreado) y secret de Actions. Pipeline con verificación
+  anti-fugas que aborta si detecta datos personales. Pestañas con nombres/DPI/sueldos ignoradas.
+- Zona 9 marcada como tienda cerrada (ya no existe).
 
-## Hecho (sesión 2026-08-31)
+## Pendientes (no bloquean nada)
 
-- Proyecto inicializado: git, npm, `xlsx`, `.env` con SHEET_ID, `.gitignore` (protege `.env`, `.data/`, xlsx).
-- Descarga automática del sheet funcionando (`scripts/diagnostico.mjs` + `diagnostico-extra.mjs`).
-- Diagnóstico completo de datos hecho (detalle en el chat de esta sesión). Resumen:
-  - CONTROL DE VACANTES: 254 filas, ago 2024 → ago 2026. 228 cerradas / 14 abiertas / 12 canceladas.
-  - Días reales de vacante (cerradas, n=228): **mediana 10, promedio 11.9** — muy por debajo del supuesto de 30.
-  - Motivos: Renuncia 149 · Cambio estratégico 40 · Despido 29 · Nueva plaza 21 · Temporal 7 · No confirmado 6. Mezcla real renuncia/despido ≈ 84/16.
-  - Empresas: Americana 228 · Abi Q 25 · Friotec 1.
-  - Rotación: `INDICADOR ROTACION` (56 filas, % ACUMULADO del año, TOTAL EMPRESA y AREA COMERCIAL) y `DATA INDICADOR ROTACION` (354 filas, mensual por área/supervisor con altas/bajas/headcount).
-  - Calidad: 154 cerradas sin fecha de cierre (solo traen DÍAS TRANSCURRIDOS), 3 con días negativos, 13 con días registrados ≠ calculados, lugares de trabajo sucios (mayúsculas, regiones mezcladas con tiendas), puestos con variantes de escritura, canales de atracción casi vacíos (solo se llenan desde ~2026).
-
-## Siguiente — BLOQUEADO esperando a Oscar
-
-1. **Oscar debe confirmar o corregir el mapeo de lugares → tipo A / tipo B / no-es-tienda** (propuesta enviada en el chat; dijo que lo está consiguiendo).
-2. **Canales de atracción actualizados:** Oscar eliminó "Telo" y renombró "Ferias" → "Inversión de pauta para redes". Falta que GUARDE el Excel (está abierto con cambios sin guardar) para re-leer los montos finales y re-derivar los 4 valores de control.
-3. Oscar decide qué pestaña manda para rotación (propuesta: DATA para % mensual + INDICADOR para acumulado).
-4. Con eso confirmado → construir pipeline (`scripts/actualizar_datos.mjs`) + dashboard (paso 4) y luego repo + Action + Pages (paso 5).
+1. **Tiendas sin tipo** (se muestran sin costo): Catocha, Petapa, Pradera Concepción (Americana),
+   Pradera 2, Central, Peque 2, CLM, Abi Q Online. Cuando Oscar las clasifique → editar
+   `config/tiendas.json` y hacer push.
+2. En el Excel de tiendas de Oscar hay una **fila tipo B sin nombre** — preguntarle cuál es.
+3. El Excel del modelo de Oscar aún tiene la fila "Telo" en la hoja Despido y fórmulas de
+   Tienda B mal referenciadas en su Resumen (suman columna B corrida una fila). No afecta al
+   dashboard; es limpieza de su archivo.
+4. Asumimos "Pradera CSV" (ABIQ) = la tienda Abi Q de Pradera Concepción — Oscar no lo ha corregido,
+   así que se da por bueno.
 
 ## Cómo retomar
 
-Abrir `D:\Proyectos\DASHBOARD RRHH`, preguntar "¿en qué nos quedamos?" y responder las 3 preguntas de arriba. El diagnóstico técnico quedó en `.data/diagnostico.json` (local, no se commitea) y se regenera con `npm run diagnostico`.
+Abrir `D:\Proyectos\DASHBOARD RRHH` y preguntar "¿en qué nos quedamos?". Comandos útiles:
+`npm run actualizar` (regenerar datos con el .env local), `node scripts/validar_modelo.mjs`
+(controles del modelo), `npx --yes http-server public -p 4173` (ver el sitio local).
+Para cambios: editar → commit → push (el push despliega solo).
