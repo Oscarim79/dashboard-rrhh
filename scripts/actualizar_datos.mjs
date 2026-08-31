@@ -154,6 +154,7 @@ const I = {
   empresa: colIdx(H, 'NOMBRE', 'EMPRESA'),
   motivo: colIdx(H, 'MOTIVO', 'ORIGINA'),
   ocupa: colIdx(H, 'VACANTE', 'OCUPA'),
+  obs: colIdx(H, 'OBSERVACIONES'),
   canalRedes: colIdx(H, 'PUBLICADO', 'REDES'),
   canalFacebook: colIdx(H, 'GRUPOS', 'FACEBOOK'),
   canalVolanteo: colIdx(H, 'VOLANTEO'),
@@ -161,6 +162,19 @@ const I = {
   canalAnuncios: colIdx(H, 'PEGAR', 'ANUNCIOS'),
   canalPerifoneo: colIdx(H, 'PERIFONEO'),
 };
+
+// La columna OBSERVACIONES es texto libre con nombres: JAMÁS se publica tal cual.
+// Solo se deriva un estado del proceso con vocabulario fijo (para las vacantes abiertas).
+function estadoProceso(obs) {
+  const t = norm(obs);
+  if (!t) return 'Sin avance registrado';
+  if (/CONTRAT/.test(t)) return 'Contratado, por confirmar';
+  if (/POLIGRAFO/.test(t)) return 'En polígrafo';
+  if (/PROPUEST/.test(t)) return 'Propuesta hecha';
+  if (/ENTREVIST|PERFIL/.test(t)) return 'En entrevistas';
+  if (/PUBLICAD/.test(t)) return 'Publicada';
+  return 'Sin avance registrado';
+}
 
 const desconocidos = new Map();
 let negativos = 0, discrepantes = 0, cerradasSinFechaCierre = 0, cerradasSinDias = 0, sinMotivo = 0;
@@ -201,6 +215,7 @@ const filasVac = vac.filas.map((f) => {
     item: f[I.item] ?? null,
     solicitud, cierre, dias, diasFuente,
     diasAbierta: estatus === 'ABIERTA' && solicitud ? diasEntre(solicitud, hoyISO) : null,
+    proceso: estatus === 'ABIERTA' ? estadoProceso(f[I.obs]) : null,
     estatus,
     puesto,
     lugar: resuelto ? resuelto.nombre : (String(f[I.lugar] ?? '').trim() || null),

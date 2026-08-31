@@ -55,9 +55,11 @@ if (!salidas.total) {
     { formato: fmtNum });
 
   // ── sub-motivos (top 10, sin "(sin submotivo)") ──
+  // Etiquetas de presentación pedidas por Oscar (el dato del sheet no cambia)
+  const ETI_SUB = { VOLUNTARIA: 'Mejor oportunidad laboral · salario · beneficios' };
   document.getElementById('submotivo').innerHTML = barrasH(
     Object.entries(T.subMotivo).filter(([k]) => !k.startsWith('(')).slice(0, 10)
-      .map(([k, v]) => ({ eti: titulo(k), valor: v, color: '#46615A' })),
+      .map(([k, v]) => ({ eti: ETI_SUB[k] ?? titulo(k), valor: v, color: '#46615A' })),
     { formato: fmtNum });
 
   // ── agencia (top 12) ──

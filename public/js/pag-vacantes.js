@@ -18,18 +18,29 @@ document.getElementById('kpis').innerHTML = `
 
 // ── abiertas hoy ───────────────────────────────────────────────────────────
 const filasAb = [...abiertas].sort((a, b) => (b.diasAbierta ?? 0) - (a.diasAbierta ?? 0));
+const COLOR_PROCESO = {
+  'Contratado, por confirmar': 'verde',
+  'En polígrafo': 'verde',
+  'Propuesta hecha': 'verde',
+  'En entrevistas': 'gris',
+  'Publicada': 'gris',
+  'Sin avance registrado': 'ambar',
+};
 document.getElementById('abiertas').innerHTML = filasAb.length ? `
   <table>
-    <thead><tr><th>Tienda / lugar</th><th>Puesto</th><th>Empresa</th><th class="n">Días abierta</th></tr></thead>
+    <thead><tr><th>Tienda / lugar</th><th>Puesto</th><th>Empresa</th><th>Avance del proceso</th><th class="n">Días abierta</th></tr></thead>
     <tbody>${filasAb.map((r) => `
       <tr>
         <td>${r.lugar ?? '—'} ${r.tipo ? `<span class="pill gris">${r.tipo}</span>` : ''}</td>
         <td>${titulo(r.puesto) ?? '—'}</td>
         <td>${r.empresa ?? '—'}</td>
+        <td>${r.proceso ? `<span class="pill ${COLOR_PROCESO[r.proceso] ?? 'gris'}">${r.proceso}</span>` : '—'}</td>
         <td class="n"><b style="${(r.diasAbierta ?? 0) > 30 ? 'color:var(--rojo)' : ''}">${r.diasAbierta ?? '—'}</b></td>
       </tr>`).join('')}
     </tbody>
-  </table>` : '<p class="sub">No hay vacantes abiertas registradas.</p>';
+  </table>
+  <p class="pie">El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado); las notas completas no se publican por privacidad.</p>`
+  : '<p class="sub">No hay vacantes abiertas registradas.</p>';
 
 // ── días por tipo ──────────────────────────────────────────────────────────
 const ORDEN = ['AA', 'A', 'B', 'C', '(sin dato)'];
