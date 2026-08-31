@@ -9,6 +9,10 @@
   "Run workflow" en la pestaña Actions. Secret `SHEET_ID` configurado.
 - 4 páginas: Resumen CEO · Vacantes · Rotación · Simulador. Verificado en vivo (curl + navegador,
   móvil y escritorio) y JSON publicado revisado: cero datos personales.
+- Afinado con retroalimentación de Oscar (2026-08-31): título "DASHBOARD RRHH · CORPORACIÓN
+  AMERICANA", menú lateral (fijo en escritorio, ☰ deslizable en móvil), tarjetas del Resumen
+  separan "cada salida cuesta" del "acumulado anual (volumen × costo)", y la leyenda distingue
+  finiquito (verde) de indemnización (naranja).
 
 ## Decisiones firmes
 
