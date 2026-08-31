@@ -1,11 +1,13 @@
 // Utilidades compartidas: carga de datos, formato es-GT y pie de página.
 export { fmtQ, fmtPct } from './modelo.js';
 
+// cache: 'no-cache' obliga al navegador a preguntar si hay versión nueva
+// (con ETag la respuesta es baratísima) — así los datos nunca se ven viejos.
 export async function cargarDatos() {
   const [vacantes, rotacion, meta] = await Promise.all([
-    fetch('data/vacantes.json').then((r) => r.json()),
-    fetch('data/rotacion.json').then((r) => r.json()),
-    fetch('data/meta.json').then((r) => r.json()),
+    fetch('data/vacantes.json', { cache: 'no-cache' }).then((r) => r.json()),
+    fetch('data/rotacion.json', { cache: 'no-cache' }).then((r) => r.json()),
+    fetch('data/meta.json', { cache: 'no-cache' }).then((r) => r.json()),
   ]);
   return { vacantes, rotacion, meta };
 }

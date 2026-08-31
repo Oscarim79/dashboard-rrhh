@@ -4,8 +4,8 @@ import { barrasH, columnas } from './graficas.js';
 
 marcarNavActiva();
 const [salidas, meta] = await Promise.all([
-  fetch('data/salidas.json').then((r) => r.json()),
-  fetch('data/meta.json').then((r) => r.json()),
+  fetch('data/salidas.json', { cache: 'no-cache' }).then((r) => r.json()),
+  fetch('data/meta.json', { cache: 'no-cache' }).then((r) => r.json()),
 ]);
 
 if (!salidas.total) {
