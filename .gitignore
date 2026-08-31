@@ -9,3 +9,6 @@ dist/
 # Datos crudos descargados del sheet (contienen datos personales)
 .data/
 *.xlsx
+
+# JSONs generados (la Action los regenera en cada despliegue)
+public/data/

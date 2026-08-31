@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Simulador de costo de rotación</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<nav>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+</nav>
+<main>
+  <h1>Simulador</h1>
+  <p class="sub">Mueve los supuestos y mira cómo cambia el costo de cada salida. El modelo replica el Excel de RRHH.</p>
+
+  <div class="tarjeta">
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+      <label for="tipo" style="font-size:14px; font-weight:600;">Tipo de tienda</label>
+      <select id="tipo"></select>
+      <div class="control" style="flex:1; min-width:220px; margin:0;">
+        <label>Ventas mensuales de la tienda <b id="v-ventas"></b></label>
+        <input type="range" id="ventas" min="50000" max="2000000" step="10000">
+      </div>
+    </div>
+  </div>
+
+  <div class="botones">
+    <button class="primario" id="btn-reales">Usar datos reales</button>
+    <button id="btn-mitad">Escenario: vacante a la mitad de días</button>
+    <button id="btn-reset">Restablecer modelo</button>
+  </div>
+  <p class="sub" id="nota-escenario"></p>
+
+  <div class="kpis" id="resultado"></div>
+  <div class="tarjeta" id="proyeccion"></div>
+
+  <h2>Supuestos</h2>
+  <div class="tarjeta" id="controles"></div>
+</main>
+<footer></footer>
+<script type="module" src="js/pag-simulador.js"></script>
+</body>
+</html>

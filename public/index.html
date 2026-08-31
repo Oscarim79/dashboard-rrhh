@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotación de personal — Resumen ejecutivo</title>
+<meta name="description" content="Costo de rotación de personal por tipo de tienda, calibrado con datos reales de RRHH.">
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<nav>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+</nav>
+<main>
+  <h1>Costo de rotación de personal</h1>
+  <p class="sub">Resumen ejecutivo · calibrado con los datos reales de vacantes de los últimos 12 meses</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Costo por salida según tipo de tienda</h2>
+  <p class="sub">Cada barra muestra en qué se va el dinero cuando alguien deja la tienda. Días de vacante según datos reales.</p>
+  <div id="tarjetas-tipo"></div>
+
+  <h2>Hallazgos</h2>
+  <div id="hallazgos"></div>
+
+  <h2>Calidad de datos</h2>
+  <div class="tarjeta calidad"><ul id="calidad"></ul></div>
+</main>
+<footer></footer>
+<script type="module" src="js/resumen.js"></script>
+</body>
+</html>

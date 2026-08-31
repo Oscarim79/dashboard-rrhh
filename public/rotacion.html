@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rotación mensual de personal</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<nav>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+</nav>
+<main>
+  <h1>Rotación de personal</h1>
+  <p class="sub">Qué tan rápido rota el equipo: acumulado del año, ritmo mensual y dónde se concentran las bajas.</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Rotación acumulada del año (comparación entre años)</h2>
+  <div class="tarjeta">
+    <div class="grafica" id="acumulado-anios"></div>
+    <div id="leyenda-anios"></div>
+    <p class="pie">Total empresa. El acumulado crece mes a mes; la referencia del mercado que usa RRHH es ~60% anual.</p>
+  </div>
+
+  <h2>Comercial vs. total empresa (año en curso)</h2>
+  <div class="tarjeta">
+    <div class="grafica" id="comercial-total"></div>
+    <div id="leyenda-ct"></div>
+  </div>
+
+  <h2>Bajas por mes y tamaño del equipo</h2>
+  <div class="tarjeta">
+    <div class="grafica" id="bajas-mes"></div>
+    <p class="pie" id="bajas-nota"></p>
+  </div>
+
+  <h2>Bajas por departamento (últimos 12 meses)</h2>
+  <div class="tarjeta">
+    <div class="grafica" id="bajas-depto"></div>
+    <p class="pie">El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.</p>
+  </div>
+</main>
+<footer></footer>
+<script type="module" src="js/pag-rotacion.js"></script>
+</body>
+</html>

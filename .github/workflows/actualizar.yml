@@ -1,0 +1,53 @@
+# Descarga los datos del Google Sheet, los sanitiza y publica el dashboard en GitHub Pages.
+# Corre todos los días a las 6:00 de Guatemala (12:00 UTC), al hacer push a main,
+# y a mano desde la pestaña Actions (workflow_dispatch).
+name: Actualizar datos y publicar
+
+on:
+  schedule:
+    - cron: '0 12 * * *' # 6:00 Guatemala (UTC-6)
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  actualizar-y-publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Descargar y sanitizar datos (aborta si detecta datos personales)
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: node scripts/actualizar_datos.mjs
+
+      - name: Validar el modelo de costo contra los valores de control
+        run: node scripts/validar_modelo.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

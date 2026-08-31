@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vacantes — control y cobertura</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<nav>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+</nav>
+<main>
+  <h1>Vacantes</h1>
+  <p class="sub">Control real de vacantes: cuánto tarda en cubrirse cada puesto y dónde está abierto hoy.</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Abiertas hoy</h2>
+  <div class="tarjeta tabla-scroll" id="abiertas"></div>
+
+  <h2>Días para cubrir una vacante (mediana, cerradas)</h2>
+  <div class="tarjeta">
+    <h3>Por tipo de tienda</h3>
+    <div class="grafica" id="dias-tipo"></div>
+  </div>
+  <div class="tarjeta">
+    <h3>Por puesto (los más frecuentes)</h3>
+    <div class="grafica" id="dias-puesto"></div>
+  </div>
+
+  <h2>Cierres por mes</h2>
+  <div class="tarjeta"><div class="grafica" id="cierres-mes"></div>
+    <p class="pie">Vacantes cerradas con fecha de cierre registrada. Muchas cerradas antiguas no la tienen (ver Calidad de datos en el Resumen).</p>
+  </div>
+
+  <h2>Cómo se cubren</h2>
+  <div class="tarjeta">
+    <h3>Interno vs. externo</h3>
+    <div class="grafica" id="ocupada-por"></div>
+    <p class="pie" id="ocupada-nota"></p>
+  </div>
+  <div class="tarjeta">
+    <h3>Canales de atracción usados</h3>
+    <div class="grafica" id="canales"></div>
+    <p class="pie" id="canales-nota"></p>
+  </div>
+</main>
+<footer></footer>
+<script type="module" src="js/pag-vacantes.js"></script>
+</body>
+</html>
