@@ -33,6 +33,18 @@ export function marcarNavActiva() {
   document.querySelectorAll('nav a').forEach((a) => {
     if (a.getAttribute('href').replace('./', '') === aqui) a.classList.add('activo');
   });
+  // menú lateral: abrir con ☰, cerrar tocando el velo o un enlace
+  const btn = document.getElementById('btn-menu');
+  const menu = document.getElementById('menu');
+  const velo = document.getElementById('velo');
+  if (!btn || !menu || !velo) return;
+  const alternar = (abrir) => {
+    menu.classList.toggle('abierto', abrir);
+    velo.classList.toggle('abierto', abrir);
+  };
+  btn.onclick = () => alternar(!menu.classList.contains('abierto'));
+  velo.onclick = () => alternar(false);
+  menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => alternar(false)));
 }
 
 // Mediana de días calibrada: usa la del tipo si tiene muestra suficiente, si no la global.

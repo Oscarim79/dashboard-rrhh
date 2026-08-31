@@ -3,16 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Simulador de costo de rotación</title>
+<title>Simulador — Dashboard RRHH Corporación Americana</title>
 <link rel="stylesheet" href="css/estilo.css">
 </head>
 <body>
-<nav>
+<header class="cabecera">
+  <button id="btn-menu" aria-label="Abrir menú">☰</button>
+  <div class="marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+</header>
+<nav id="menu">
+  <div class="marca menu-marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
   <a href="./index.html">Resumen</a>
   <a href="./vacantes.html">Vacantes</a>
   <a href="./rotacion.html">Rotación</a>
   <a href="./simulador.html">Simulador</a>
 </nav>
+<div id="velo"></div>
 <main>
   <h1>Simulador</h1>
   <p class="sub">Mueve los supuestos y mira cómo cambia el costo de cada salida. El modelo replica el Excel de RRHH.</p>
