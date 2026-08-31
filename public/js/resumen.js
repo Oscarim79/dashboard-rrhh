@@ -91,11 +91,11 @@ document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.map((d) => `
 const hallazgos = [];
 
 // 1. días reales vs supuesto del modelo
+const promedioDias = A.diasCobertura.global.promedio;
 if (medianaDias != null && medianaDias < PARAMS_DEFECTO.diasVacante) {
-  const veces = (PARAMS_DEFECTO.diasVacante / medianaDias).toFixed(1);
-  hallazgos.push(`RRHH cierra las vacantes en <b>${medianaDias} días</b> (mediana real), <b>${veces}×</b> más rápido que los 30 días que asumía el modelo. Eso reduce las ventas perdidas por tienda sin gente — este resumen ya usa los días reales.`);
+  hallazgos.push(`Una vacante típica se cubre en <b>${medianaDias} días</b> (mediana real; el promedio es ${promedioDias} porque algunos casos largos lo suben). Está por debajo de los 30 días que asumía el modelo — este resumen ya usa los días reales.`);
 } else if (medianaDias != null && medianaDias > PARAMS_DEFECTO.diasVacante) {
-  hallazgos.push(`Las vacantes tardan <b>${medianaDias} días</b> (mediana real) en cubrirse, por encima del supuesto de 30 días del modelo: el costo real es mayor que el teórico.`);
+  hallazgos.push(`Las vacantes tardan <b>${medianaDias} días</b> (mediana real; promedio ${promedioDias}) en cubrirse, por encima del supuesto de 30 días del modelo: el costo real es mayor que el teórico.`);
 }
 
 // 2. mezcla renuncia/despido

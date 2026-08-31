@@ -17,7 +17,9 @@
 - Canales de atracción sin Telo; "Internet" es gasto aparte y se queda (confirmado por Oscar).
   Controles del modelo: renuncia A Q71,831 · B Q54,581 · despido A Q76,331 · B Q59,081 —
   validados en cada deploy por `scripts/validar_modelo.mjs`.
-- Calibración con datos reales: mediana 10 días de vacante (no 30), mezcla 84% renuncias / 16% despidos.
+- Calibración con datos reales: **mediana 16 días / promedio 22** de vacante (n=151 cerradas con
+  dato; 74 cerradas sin fechas ni días quedan fuera). Corregido 2026-08-31 tras el reclamo de Oscar:
+  un bug convertía celdas vacías en 0 días. La mezcla real: 84% renuncias / 16% despidos.
 - `SHEET_ID` solo en `.env` local (gitignoreado) y secret de Actions. Pipeline con verificación
   anti-fugas que aborta si detecta datos personales. Pestañas con nombres/DPI/sueldos ignoradas.
 - Zona 9 marcada como tienda cerrada (ya no existe).

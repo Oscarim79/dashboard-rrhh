@@ -163,18 +163,21 @@ const I = {
 };
 
 const desconocidos = new Map();
-let negativos = 0, discrepantes = 0, cerradasSinFechaCierre = 0, sinMotivo = 0;
+let negativos = 0, discrepantes = 0, cerradasSinFechaCierre = 0, cerradasSinDias = 0, sinMotivo = 0;
 
 const filasVac = vac.filas.map((f) => {
   const solicitud = fechaISO(f[I.sol]);
   const cierre = fechaISO(f[I.cie]);
   const estatus = norm(f[I.estatus]) || null; // CERRADA / ABIERTA / CANCELADA
-  const diasReg = Number.isFinite(Number(f[I.dias])) && String(f[I.dias]).trim() !== '' ? Number(f[I.dias]) : null;
+  // ojo: la celda vacía (null) NO es 0 días — se excluye de las estadísticas
+  const diasReg = f[I.dias] != null && String(f[I.dias]).trim() !== '' && Number.isFinite(Number(f[I.dias]))
+    ? Number(f[I.dias]) : null;
 
   let dias = null, diasFuente = null;
   if (solicitud && cierre) { dias = diasEntre(solicitud, cierre); diasFuente = 'fechas'; }
   else if (diasReg != null) { dias = diasReg; diasFuente = 'registrado'; }
   if (estatus === 'CERRADA' && !cierre) cerradasSinFechaCierre++;
+  if (estatus === 'CERRADA' && dias == null) cerradasSinDias++;
   if (dias != null && dias < 0) negativos++;
   if (solicitud && cierre && diasReg != null && Math.abs(diasReg - diasEntre(solicitud, cierre)) > 1) discrepantes++;
 
@@ -314,7 +317,7 @@ const IR = {
   bajas: colIdx(HR, 'TOTAL', 'BAJAS'), pct: colIdx(HR, '% ROTACION'), areas: colIdx(HR, 'AREAS'),
 };
 let filasRotRaras = 0;
-const numOnull = (v) => (Number.isFinite(Number(v)) && String(v).trim() !== '' ? Number(v) : null);
+const numOnull = (v) => (v != null && String(v).trim() !== '' && Number.isFinite(Number(v)) ? Number(v) : null);
 const acumulado = rot.filas.map((f) => {
   const mes = norm(f[IR.mes]);
   if (!MESES.includes(mes)) { filasRotRaras++; return null; }
@@ -365,7 +368,8 @@ if (!data) {
 const rotacionJson = { generado: hoy.toISOString(), acumulado, mensual };
 
 // ── calidad de datos ───────────────────────────────────────────────────────
-if (cerradasSinFechaCierre) calidad.push({ tipo: 'aviso', n: cerradasSinFechaCierre, mensaje: `${cerradasSinFechaCierre} vacantes cerradas no tienen fecha de cierre; se usó su columna "días transcurridos" tal cual.` });
+if (cerradasSinFechaCierre) calidad.push({ tipo: 'aviso', n: cerradasSinFechaCierre, mensaje: `${cerradasSinFechaCierre} vacantes cerradas no tienen fecha de cierre; donde existe, se usó su columna "días transcurridos" tal cual.` });
+if (cerradasSinDias) calidad.push({ tipo: 'aviso', n: cerradasSinDias, mensaje: `${cerradasSinDias} vacantes cerradas no tienen ni fechas ni días transcurridos: quedan FUERA de las estadísticas de días de cobertura.` });
 if (negativos) calidad.push({ tipo: 'error', n: negativos, mensaje: `${negativos} vacantes tienen días negativos (fecha de cierre anterior a la solicitud); se excluyen de las estadísticas de días.` });
 if (discrepantes) calidad.push({ tipo: 'aviso', n: discrepantes, mensaje: `${discrepantes} vacantes tienen "días transcurridos" que no cuadra con sus fechas (diferencia mayor a 1 día); mandan las fechas.` });
 if (sinMotivo) calidad.push({ tipo: 'aviso', n: sinMotivo, mensaje: `${sinMotivo} vacantes no registran motivo.` });
