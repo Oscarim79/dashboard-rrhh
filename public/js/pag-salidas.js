@@ -55,11 +55,19 @@ if (!salidas.total) {
     { formato: fmtNum });
 
   // ── sub-motivos (top 10, sin "(sin submotivo)") ──
-  // Etiquetas de presentación pedidas por Oscar (el dato del sheet no cambia)
-  const ETI_SUB = { VOLUNTARIA: 'Mejor oportunidad laboral · salario · beneficios' };
+  // Agrupación de presentación pedida por Oscar: VOLUNTARIA + MEJOR OPORTUNIDAD +
+  // POR SALARIO se muestran como una sola barra (el dato del sheet no cambia).
+  const GRUPO_MEJOR = 'Mejor oportunidad laboral · salario · beneficios';
+  const ETI_SUB = { VOLUNTARIA: GRUPO_MEJOR, 'MEJOR OPORTUNIDAD': GRUPO_MEJOR, 'POR SALARIO': GRUPO_MEJOR };
+  const subAgrupado = {};
+  for (const [k, v] of Object.entries(T.subMotivo)) {
+    if (k.startsWith('(')) continue;
+    const eti = ETI_SUB[k] ?? titulo(k);
+    subAgrupado[eti] = (subAgrupado[eti] ?? 0) + v;
+  }
   document.getElementById('submotivo').innerHTML = barrasH(
-    Object.entries(T.subMotivo).filter(([k]) => !k.startsWith('(')).slice(0, 10)
-      .map(([k, v]) => ({ eti: ETI_SUB[k] ?? titulo(k), valor: v, color: '#46615A' })),
+    Object.entries(subAgrupado).sort((a, b) => b[1] - a[1]).slice(0, 10)
+      .map(([eti, v]) => ({ eti, valor: v, color: '#46615A' })),
     { formato: fmtNum });
 
   // ── agencia (top 12) ──
