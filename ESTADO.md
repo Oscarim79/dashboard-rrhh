@@ -7,8 +7,12 @@
   "oscarimorales" de la spec no existe — Oscar confirmó usar la real)
 - **Actualización automática:** GitHub Action diaria a las 6:00 de Guatemala + botón
   "Run workflow" en la pestaña Actions. Secret `SHEET_ID` configurado.
-- 4 páginas: Resumen CEO · Vacantes · Rotación · Simulador. Verificado en vivo (curl + navegador,
-  móvil y escritorio) y JSON publicado revisado: cero datos personales.
+- 5 páginas: Resumen CEO · Vacantes · **Salidas** (nueva, 2026-08-31) · Rotación · Simulador.
+  Verificado en vivo (curl + navegador, móvil y escritorio) y JSON publicado revisado: cero datos personales.
+- Página Salidas reemplaza al viejo tablero de Data Studio (que está roto — sus fuentes no conectan).
+  Usa la pestaña SALIDAS del sheet SOLO en agregado: razón, sub-motivos (n≥3), antigüedad por rangos,
+  agencia, área, marca, género. Sin supervisores ni filas individuales. Hallazgo clave: 58% de las
+  salidas ocurre antes de los 6 meses; antigüedad mediana al salir 4.7 meses.
 - Afinado con retroalimentación de Oscar (2026-08-31): título "DASHBOARD RRHH · CORPORACIÓN
   AMERICANA", menú lateral (fijo en escritorio, ☰ deslizable en móvil), tarjetas del Resumen
   separan "cada salida cuesta" del "acumulado anual (volumen × costo)", y la leyenda distingue

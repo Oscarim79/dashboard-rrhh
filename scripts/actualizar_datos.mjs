@@ -367,6 +367,80 @@ if (!data) {
 
 const rotacionJson = { generado: hoy.toISOString(), acumulado, mensual };
 
+// ── 4) SALIDAS: SOLO AGREGADOS (la pestaña tiene datos personales que jamás se publican) ──
+// Se leen únicamente columnas no personales y se emiten conteos; ninguna fila individual.
+const REQ_SAL = [['DIAS LAB'], ['RANGO MES'], ['GENERO'], ['AGENCIA'], ['BAJA']];
+const sal = detectar(wb, REQ_SAL);
+let salidasJson = null;
+if (!sal) {
+  calidad.push({ tipo: 'aviso', mensaje: 'No se encontró la pestaña de SALIDAS (busqué: DIAS LAB, RANGO MES, GENERO, AGENCIA, fecha de BAJA). La página de Salidas quedará sin datos.' });
+} else {
+  console.log(`Salidas: pestaña "${sal.nombre}" (${sal.filas.length} filas, solo agregados)`);
+  const HS = sal.headers;
+  const IS = {
+    baja: colIdx(HS, 'BAJA'), razon: colIdx(HS, 'OBSERVACIONES'), sub: colIdx(HS, 'SUB', 'MOTIVO'),
+    genero: colIdx(HS, 'GENERO'), area: colIdx(HS, 'AREA', 'LAB'), marca: colIdx(HS, 'MARCA'),
+    agencia: colIdx(HS, 'AGENCIA'), rango: colIdx(HS, 'RANGO', 'MES'), diasLab: colIdx(HS, 'DIAS', 'LAB'),
+  };
+  const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
+  let diasLabMalos = 0, sinRazon = 0;
+  const regs = [];
+  for (const f of sal.filas) {
+    const baja = fechaISO(f[IS.baja]);
+    if (!baja) continue;
+    const marcaCruda = norm(f[IS.marca]);
+    const { resuelto } = resolverLugar(f[IS.agencia], MARCA_EMPRESA[marcaCruda] ?? '');
+    const razon = norm(f[IS.razon]) || null;
+    if (!razon) sinRazon++;
+    let diasLab = numOnull(f[IS.diasLab]);
+    if (diasLab != null && (diasLab < 0 || diasLab > 20000)) { diasLabMalos++; diasLab = null; }
+    regs.push({
+      ym: baja.slice(0, 7), anio: baja.slice(0, 4),
+      razon: razon ?? '(SIN RAZON)',
+      sub: norm(f[IS.sub]) || '(SIN SUBMOTIVO)',
+      genero: norm(f[IS.genero]) || '(SIN DATO)',
+      area: norm(f[IS.area]) || '(SIN AREA)',
+      marca: MARCA_EMPRESA[marcaCruda] ?? (String(f[IS.marca] ?? '').trim() || '(SIN MARCA)'),
+      agencia: resuelto?.esTienda ? resuelto.nombre : (String(f[IS.agencia] ?? '').trim() || '(SIN AGENCIA)'),
+      tipoTienda: resuelto?.esTienda ? (resuelto.tipo ?? null) : null,
+      rango: norm(f[IS.rango]) || '(SIN RANGO)',
+      diasLab,
+    });
+  }
+  const corte12m = hace12mISO.slice(0, 7);
+  const cuenta = (arr, clave, minimo = 1) => {
+    const c = {};
+    for (const r of arr) c[clave(r)] = (c[clave(r)] ?? 0) + 1;
+    if (minimo > 1) { // agrupa valores raros (posible texto libre) en OTROS
+      let otros = 0;
+      for (const [k, n] of Object.entries(c)) if (n < minimo && !k.startsWith('(')) { otros += n; delete c[k]; }
+      if (otros) c['OTROS'] = (c['OTROS'] ?? 0) + otros;
+    }
+    return Object.fromEntries(Object.entries(c).sort((a, b) => b[1] - a[1]));
+  };
+  const ult12 = regs.filter((r) => r.ym >= corte12m);
+  const dims = (arr) => ({
+    razon: cuenta(arr, (r) => r.razon, 3),
+    subMotivo: cuenta(arr, (r) => r.sub, 3),
+    genero: cuenta(arr, (r) => r.genero),
+    area: cuenta(arr, (r) => r.area),
+    marca: cuenta(arr, (r) => r.marca),
+    agencia: cuenta(arr, (r) => `${r.agencia}${r.tipoTienda ? `·${r.tipoTienda}` : ''}`),
+    rango: cuenta(arr, (r) => r.rango),
+    diasLab: stats(arr.map((r) => r.diasLab).filter((d) => d != null)),
+    n: arr.length,
+  });
+  salidasJson = {
+    generado: hoy.toISOString(),
+    total: dims(regs),
+    ult12m: dims(ult12),
+    porMes: cuenta(regs, (r) => r.ym),
+    porAnio: cuenta(regs, (r) => r.anio),
+  };
+  if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
+  if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
+}
+
 // ── calidad de datos ───────────────────────────────────────────────────────
 if (cerradasSinFechaCierre) calidad.push({ tipo: 'aviso', n: cerradasSinFechaCierre, mensaje: `${cerradasSinFechaCierre} vacantes cerradas no tienen fecha de cierre; donde existe, se usó su columna "días transcurridos" tal cual.` });
 if (cerradasSinDias) calidad.push({ tipo: 'aviso', n: cerradasSinDias, mensaje: `${cerradasSinDias} vacantes cerradas no tienen ni fechas ni días transcurridos: quedan FUERA de las estadísticas de días de cobertura.` });
@@ -428,6 +502,7 @@ const hallazgos = [];
 buscarFugas(vacantesJson, 'vacantes', hallazgos);
 buscarFugas(rotacionJson, 'rotacion', hallazgos);
 buscarFugas(metaJson, 'meta', hallazgos);
+if (salidasJson) buscarFugas(salidasJson, 'salidas', hallazgos);
 if (hallazgos.length) {
   console.error('\n⛔ VERIFICACIÓN ANTI-FUGAS FALLÓ — NO se publicó nada. Hallazgos:');
   for (const h of hallazgos) console.error('  - ' + h);
@@ -439,5 +514,6 @@ const outDir = path.join(ROOT, 'public', 'data');
 mkdirSync(outDir, { recursive: true });
 writeFileSync(path.join(outDir, 'vacantes.json'), JSON.stringify(vacantesJson));
 writeFileSync(path.join(outDir, 'rotacion.json'), JSON.stringify(rotacionJson));
+writeFileSync(path.join(outDir, 'salidas.json'), JSON.stringify(salidasJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(metaJson, null, 2));
-console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);
+console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);

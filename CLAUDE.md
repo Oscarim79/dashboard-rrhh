@@ -25,7 +25,10 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    GitHub Actions. Jamás en código, README, commits ni logs.
 2. Ningún dato personal puede llegar a `public/`, al bundle ni al repo: nombres de candidatos,
    `¿A QUIEN REEMPLAZA?`, jefes directos, solicitantes, entrevistadores, DPI, teléfonos, sueldos.
-   Las pestañas de altas/bajas del sheet se ignoran por completo.
+   La pestaña ALTAS y la BASE DE DATOS GENERAL se ignoran por completo. Excepción acordada con
+   Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
+   (razón, sub-motivo n≥3, género, área, marca, agencia, rangos de antigüedad) — jamás filas
+   individuales, y nunca el desglose por supervisor (el sitio es público).
 3. `scripts/actualizar_datos.mjs` corre una verificación final anti-fugas (encabezados prohibidos,
    patrones de DPI de 13 dígitos y teléfonos de 8 dígitos). Si detecta algo: aborta sin publicar.
 4. Los xlsx descargados van a `.data/` (gitignoreado), nunca al repo.

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Salidas — Dashboard RRHH Corporación Americana</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<header class="cabecera">
+  <button id="btn-menu" aria-label="Abrir menú">☰</button>
+  <div class="marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+</header>
+<nav id="menu">
+  <div class="marca menu-marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./salidas.html">Salidas</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+</nav>
+<div id="velo"></div>
+<main>
+  <h1>Salidas de personal</h1>
+  <p class="sub">Quiénes se van, por qué y con cuánta antigüedad. Todo agregado — ningún dato individual.</p>
+
+  <div class="kpis" id="kpis"></div>
+
+  <h2>Bajas por mes</h2>
+  <div class="tarjeta"><div class="grafica" id="por-mes"></div></div>
+
+  <h2>Antigüedad al momento de salir</h2>
+  <div class="tarjeta">
+    <div class="grafica" id="antiguedad"></div>
+    <p class="pie" id="antiguedad-nota"></p>
+  </div>
+
+  <h2>Por qué se van</h2>
+  <div class="tarjeta">
+    <h3>Razón de salida (todo el período)</h3>
+    <div class="grafica" id="razon"></div>
+  </div>
+  <div class="tarjeta">
+    <h3>Sub-motivos más frecuentes</h3>
+    <div class="grafica" id="submotivo"></div>
+    <p class="pie">Sub-motivos con menos de 3 casos se agrupan en "Otros" para proteger la privacidad.</p>
+  </div>
+
+  <h2>Dónde se van</h2>
+  <div class="tarjeta">
+    <h3>Por agencia / tienda (todo el período)</h3>
+    <div class="grafica" id="agencia"></div>
+  </div>
+  <div class="tarjeta">
+    <h3>Por área y por marca</h3>
+    <div class="grafica" id="area"></div>
+    <div class="grafica" id="marca" style="margin-top:8px"></div>
+  </div>
+
+  <h2>Por género</h2>
+  <div class="tarjeta"><div class="grafica" id="genero"></div></div>
+
+  <p class="sub">Por diseño, este sitio público no muestra desgloses por supervisor ni ningún dato que identifique a una persona.</p>
+</main>
+<footer></footer>
+<script type="module" src="js/pag-salidas.js"></script>
+</body>
+</html>

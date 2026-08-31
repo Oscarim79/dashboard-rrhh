@@ -15,7 +15,7 @@
     { "nombre": "Chiquimula Centro", "tipo": "A", "marca": "Americana", "activa": true, "alias": ["CHIQUIMULA CENTRO", "CHIQUI CENTRO"] },
     { "nombre": "Quezaltepeque 2", "tipo": "A", "marca": "Americana", "activa": true, "alias": ["QUEZALTEPEQUE 2"] },
     { "nombre": "Pradera Escuintla", "tipo": "A", "marca": "Americana", "activa": true, "alias": ["PRADERA ESCUINTLA"] },
-    { "nombre": "Pradera Puerto Barrios", "tipo": "B", "marca": "Americana", "activa": true, "alias": ["PRADERA PUERTO BARRIOS", "BARRIOS PRADERA"] },
+    { "nombre": "Pradera Puerto Barrios", "tipo": "B", "marca": "Americana", "activa": true, "alias": ["PRADERA PUERTO BARRIOS", "BARRIOS PRADERA", "PRADERA BARRIOS"] },
     { "nombre": "San Luis Jilotepeque", "tipo": "B", "marca": "Americana", "activa": true, "alias": ["SAN LUIS JILOTEPEQUE"] },
     { "nombre": "Progreso Jutiapa", "tipo": "B", "marca": "Americana", "activa": true, "alias": ["PROGRESO JUTIAPA"] },
     { "nombre": "San Luis Petén", "tipo": "B", "marca": "Americana", "activa": true, "alias": ["SAN LUIS PETEN"] },
@@ -61,7 +61,7 @@
     { "nombre": "Oakland Mall", "tipo": "A", "marca": "Abi Q", "activa": true, "alias": ["OAKLAND", "OAKLAND MALL", "ABIQ OAKLAND"] },
     { "nombre": "Abi Q Cayalá", "tipo": "A", "marca": "Abi Q", "activa": true, "alias": ["ABIQ CAYALA", "ABIQ"] },
     { "nombre": "Abi Q Chiquimula", "tipo": "C", "marca": "Abi Q", "activa": true, "alias": ["ABIQ CHIQUIMULA"] },
-    { "nombre": "Abi Q Concepción (Pradera CSV)", "tipo": "B", "marca": "Abi Q", "activa": true, "alias": ["ABIQ CONCEPCION", "PRADERA CSV"] },
+    { "nombre": "Abi Q Concepción (Pradera CSV)", "tipo": "B", "marca": "Abi Q", "activa": true, "alias": ["ABIQ CONCEPCION", "PRADERA CSV", "ABIQ PRADERA CONCEPCION"] },
     { "nombre": "Abi Q Online", "tipo": null, "marca": "Abi Q", "activa": true, "alias": ["ABIQ ONLINE"] }
   ],
   "noTiendas": [
