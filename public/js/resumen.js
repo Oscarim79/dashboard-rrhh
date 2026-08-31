@@ -36,7 +36,8 @@ document.getElementById('kpis').innerHTML = `
   </div>
   <div class="kpi">
     <div class="kpi-valor">${medianaDias} días</div>
-    <div class="kpi-eti">lo que tarda en cubrirse una vacante (mediana real)</div>
+    <div class="kpi-eti">tarda en cubrirse la vacante típica (mediana real)</div>
+    <div class="kpi-nota">Promedio: ${A.diasCobertura.global.promedio} días — sube por unos pocos casos largos.</div>
   </div>
   <div class="kpi">
     <div class="kpi-valor"><span class="verde">${Math.round((A.mezcla.pctRenuncia ?? 0) * 100)}%</span> · <span class="ambar">${Math.round((A.mezcla.pctDespido ?? 0) * 100)}%</span></div>
