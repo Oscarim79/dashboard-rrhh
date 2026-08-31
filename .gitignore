@@ -1,0 +1,11 @@
+# Secretos y configuración local — NUNCA commitear
+.env
+.env.*
+
+# Dependencias y builds
+node_modules/
+dist/
+
+# Datos crudos descargados del sheet (contienen datos personales)
+.data/
+*.xlsx

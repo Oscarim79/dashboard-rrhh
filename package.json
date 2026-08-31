@@ -1,0 +1,15 @@
+{
+  "name": "dashboard-rrhh",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Dashboard ejecutivo de RRHH: costo de rotación, vacantes y rotación mensual (GitHub Pages)",
+  "scripts": {
+    "diagnostico": "node scripts/diagnostico.mjs",
+    "actualizar": "node scripts/actualizar_datos.mjs"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "xlsx": "^0.18.5"
+  }
+}
