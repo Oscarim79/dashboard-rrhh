@@ -110,6 +110,13 @@ function recalcular() {
       <div class="kpi-valor ambar">${fmtQ(d.total)}</div>
       <div class="kpi-eti">cuesta cada <b>despido</b> en esta tienda</div>
       ${filaComp(d, 'c-sal-d')}
+    </div>
+    <div class="leyenda" style="grid-column: 1 / -1;">
+      <span><i style="background:#46615A"></i>Productividad perdida</span>
+      <span><i style="background:#C9CFC9"></i>Cobertura interna</span>
+      <span><i style="background:#8FA69B"></i>Reclutamiento</span>
+      <span><i style="background:#0B7A55"></i>Finiquito (renuncia)</span>
+      <span><i style="background:#B5741A"></i>Indemnización (despido)</span>
     </div>`;
 
   // proyección anual con salidas reales del tipo elegido y mezcla real

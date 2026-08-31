@@ -82,7 +82,8 @@ document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.map((d) => `
       <span><i style="background:#46615A"></i>Productividad perdida</span>
       <span><i style="background:#C9CFC9"></i>Cobertura interna</span>
       <span><i style="background:#8FA69B"></i>Reclutamiento</span>
-      <span><i style="background:#0B7A55"></i>Salida</span>
+      <span><i style="background:#0B7A55"></i>Finiquito (renuncia)</span>
+      <span><i style="background:#B5741A"></i>Indemnización (despido)</span>
     </div>
     <div class="anual">
       <div class="anual-eti">Acumulado anual de este tipo (volumen × costo)</div>
