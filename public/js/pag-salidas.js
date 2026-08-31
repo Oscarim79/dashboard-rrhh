@@ -16,16 +16,29 @@ if (!salidas.total) {
   const T = salidas.total, U = salidas.ult12m;
   const titulo = (s) => s.startsWith('(') ? s.replace(/[()]/g, '').toLowerCase() : s.charAt(0) + s.slice(1).toLowerCase();
 
+  // ── períodos evaluados (calculados de los datos, nunca a mano) ──
+  const MES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  const fmtYm = (ym) => { const [y, m] = ym.split('-'); return `${MES_LARGO[+m - 1]} ${y}`; };
+  const mesesOrdenados = Object.keys(salidas.porMes).sort();
+  const rangoTotal = `${fmtYm(mesesOrdenados[0])} a ${fmtYm(mesesOrdenados.at(-1))}`;
+  const gen = new Date(salidas.generado);
+  const corte12 = new Date(gen); corte12.setFullYear(gen.getFullYear() - 1);
+  const rango12m = `${MES_LARGO[corte12.getMonth()]} ${corte12.getFullYear()} a ${MES_LARGO[gen.getMonth()]} ${gen.getFullYear()}`;
+  document.getElementById('periodo-eval').textContent =
+    `Período evaluado: ${rangoTotal} (todo el registro). Los indicadores de "últimos 12 meses" cubren de ${rango12m}.`;
+  document.getElementById('h-razon').textContent = `Razón de salida · ${rangoTotal}`;
+  document.getElementById('h-agencia').textContent = `Por agencia / tienda · ${rangoTotal}`;
+
   // ── KPIs ──
   const RANGOS_TEMPRANOS = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES'];
   const tempranas = (d) => RANGOS_TEMPRANOS.reduce((s, k) => s + (d.rango[k] ?? 0), 0);
   const pctTemprano = Math.round((tempranas(T) / T.n) * 100);
   const mesesMediana = T.diasLab.mediana != null ? (T.diasLab.mediana / 30.4).toFixed(1) : null;
   document.getElementById('kpis').innerHTML = `
-    <div class="kpi"><div class="kpi-valor">${fmtNum(U.n)}</div><div class="kpi-eti">bajas en los últimos 12 meses</div></div>
-    <div class="kpi"><div class="kpi-valor ${pctTemprano >= 50 ? 'rojo' : ''}">${pctTemprano}%</div><div class="kpi-eti">se va antes de cumplir 6 meses</div></div>
-    <div class="kpi"><div class="kpi-valor">${mesesMediana ?? '—'} meses</div><div class="kpi-eti">antigüedad mediana al salir (${T.diasLab.mediana} días)</div></div>
-    <div class="kpi"><div class="kpi-valor">${fmtNum(T.n)}</div><div class="kpi-eti">salidas registradas en total (desde 2024)</div></div>`;
+    <div class="kpi"><div class="kpi-valor">${fmtNum(U.n)}</div><div class="kpi-eti">bajas en los últimos 12 meses</div><div class="kpi-nota">${rango12m}</div></div>
+    <div class="kpi"><div class="kpi-valor ${pctTemprano >= 50 ? 'rojo' : ''}">${pctTemprano}%</div><div class="kpi-eti">se va antes de cumplir 6 meses</div><div class="kpi-nota">todo el registro</div></div>
+    <div class="kpi"><div class="kpi-valor">${mesesMediana ?? '—'} meses</div><div class="kpi-eti">antigüedad mediana al salir (${T.diasLab.mediana} días)</div><div class="kpi-nota">todo el registro</div></div>
+    <div class="kpi"><div class="kpi-valor">${fmtNum(T.n)}</div><div class="kpi-eti">salidas registradas en total</div><div class="kpi-nota">${rangoTotal}</div></div>`;
 
   // ── bajas por mes (últimos 18) ──
   const MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
@@ -35,6 +48,8 @@ if (!salidas.total) {
       const [y, m] = ym.split('-');
       return { eti: `${MES_CORTO[+m - 1]} ${y.slice(2)}`, valor: n, color: '#B5741A' };
     }), { formato: fmtNum });
+  document.getElementById('mes-nota').textContent =
+    `Se muestran los últimos 18 meses (${fmtYm(meses[0][0])} a ${fmtYm(meses.at(-1)[0])}); el registro completo abarca de ${rangoTotal}.`;
 
   // ── antigüedad (rangos en orden natural) ──
   const ORDEN_RANGO = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES', 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES', 'MAS DE UN ANO'];

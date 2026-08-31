@@ -23,11 +23,14 @@
 <main>
   <h1>Salidas de personal</h1>
   <p class="sub">Quiénes se van, por qué y con cuánta antigüedad. Todo agregado — ningún dato individual.</p>
+  <p class="sub" id="periodo-eval" style="font-weight:600"></p>
 
   <div class="kpis" id="kpis"></div>
 
   <h2>Bajas por mes</h2>
-  <div class="tarjeta"><div class="grafica" id="por-mes"></div></div>
+  <div class="tarjeta"><div class="grafica" id="por-mes"></div>
+    <p class="pie" id="mes-nota"></p>
+  </div>
 
   <h2>Antigüedad al momento de salir</h2>
   <div class="tarjeta">
@@ -37,7 +40,7 @@
 
   <h2>Por qué se van</h2>
   <div class="tarjeta">
-    <h3>Razón de salida (todo el período)</h3>
+    <h3 id="h-razon">Razón de salida</h3>
     <div class="grafica" id="razon"></div>
   </div>
   <div class="tarjeta">
@@ -48,7 +51,7 @@
 
   <h2>Dónde se van</h2>
   <div class="tarjeta">
-    <h3>Por agencia / tienda (todo el período)</h3>
+    <h3 id="h-agencia">Por agencia / tienda</h3>
     <div class="grafica" id="agencia"></div>
   </div>
   <div class="tarjeta">
