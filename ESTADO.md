@@ -41,6 +41,9 @@
 - `SHEET_ID` solo en `.env` local (gitignoreado) y secret de Actions. Pipeline con verificación
   anti-fugas que aborta si detecta datos personales. Pestañas con nombres/DPI/sueldos ignoradas.
 - Zona 9 marcada como tienda cerrada (ya no existe).
+- Dotación típica de tienda (Oscar, 2026-09-01, **afinable más adelante**): máximo 3 vendedores +
+  1 jefe de tienda + 1 asistente. Sustenta el 15% de impacto en ventas del simulador: un vendedor
+  menos = 20–33% de la capacidad de venta, así que 15% asume que el equipo cubre buena parte.
 
 ## Pendientes (no bloquean nada)
 

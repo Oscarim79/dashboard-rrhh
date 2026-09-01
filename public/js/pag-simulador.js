@@ -58,9 +58,9 @@ const FORMULAS = {
   iv: (p, v, r) =>
     `<b>Ventas que se pierden</b> = ventas del mes × impacto × (días de vacante ÷ 30)<br>` +
     `= ${fq(v)} × ${fp(p.factorImpacto)} × (${p.diasVacante} ÷ 30) = <b>${fq(r.iv)}</b><br>` +
-    `¿De dónde sale el impacto (15% inicial)? Es un supuesto del modelo de RRHH: un vendedor menos ` +
-    `en un equipo de 5 a 7 personas es el 14–20% de la fuerza de venta, y el equipo cubre una parte. ` +
-    `Muévelo para probar otros escenarios.`,
+    `¿De dónde sale el impacto (15% inicial)? La mayoría de tiendas opera con 3 vendedores, ` +
+    `1 jefe y 1 asistente: un vendedor menos es el 20–33% de la capacidad de venta. Asumir solo ` +
+    `15% ya da por hecho que el resto del equipo cubre buena parte. Muévelo para probar otros escenarios.`,
   cp: (p, v, r) =>
     `<b>Costo de la curva</b> = salario × meses × lo que el nuevo aún no produce (100% − ${fp(p.prodCurva)})<br>` +
     `= ${fq(p.salarioVendedor)} × ${p.mesesCurva} × ${fp(1 - p.prodCurva)} = <b>${fq(r.cp)}</b>`,
