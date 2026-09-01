@@ -1,13 +1,14 @@
 // Valida que el motor reproduzca los valores de control acordados con Oscar
-// (2026-08-31, tras eliminar Telo y confirmar el canal Internet).
+// (2026-09-01: sin Telo, canal Internet vigente, + jefe de RRHH Q8,000 al 100%
+// repartido entre contrataciones del mes, coordinadora a Q4,000).
 // Los controles usan las ventas del modelo original: A=275000, B=160000.
 import { costoSalida } from '../public/js/modelo.js';
 
 const CONTROLES = [
-  { nombre: 'Renuncia Tienda A (ventas 275k)', ventas: 275000, escenario: 'renuncia', esperado: 71831 },
-  { nombre: 'Renuncia Tienda B (ventas 160k)', ventas: 160000, escenario: 'renuncia', esperado: 54581 },
-  { nombre: 'Despido Tienda A (ventas 275k)', ventas: 275000, escenario: 'despido', esperado: 76331 },
-  { nombre: 'Despido Tienda B (ventas 160k)', ventas: 160000, escenario: 'despido', esperado: 59081 },
+  { nombre: 'Renuncia Tienda A (ventas 275k)', ventas: 275000, escenario: 'renuncia', esperado: 72262 },
+  { nombre: 'Renuncia Tienda B (ventas 160k)', ventas: 160000, escenario: 'renuncia', esperado: 55012 },
+  { nombre: 'Despido Tienda A (ventas 275k)', ventas: 275000, escenario: 'despido', esperado: 76762 },
+  { nombre: 'Despido Tienda B (ventas 160k)', ventas: 160000, escenario: 'despido', esperado: 59512 },
 ];
 
 let fallos = 0;

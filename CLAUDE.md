@@ -48,8 +48,13 @@ El Excel de referencia es `J:\Mi unidad\RRHH\COLABORADORES\COSTO DE ROTACIÓN PO
 
 **Acuerdo final (Oscar, 2026-08-31):** sin Telo; canales = Pauta en Redes Q5,000/mes +
 Volanteo Q5,000/bim + Radio Q2,000/bim + Internet Q5,000/mes (Internet es gasto aparte,
-confirmado). Controles vigentes (ventas 275k/160k): renuncia A Q71,831 · B Q54,581 ·
-despido A Q76,331 · B Q59,081 — `scripts/validar_modelo.mjs` los verifica en cada deploy.
+confirmado).
+
+**Ampliación (Oscar, 2026-09-01):** se suma el **jefe de RRHH** (Q8,000, 100% de su tiempo
+en reclutar, repartido entre las contrataciones del mes igual que la publicidad → Q800 por
+contratación) y la coordinadora baja a **Q4,000**. Controles vigentes (ventas 275k/160k):
+renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
+`scripts/validar_modelo.mjs` los verifica en cada deploy.
 Ojo: el Excel de Oscar aún tiene la fila Telo en su hoja "Despido" (por eso su Resumen dice
 Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
 

@@ -33,7 +33,9 @@
 - Modelo con **4 tipos de tienda** (AA/A/B/C, archivo de Oscar con marcas A2K/ABIQ/FRIOTEC).
   Ventas por tipo = puntos medios: AA Q1.2M · A Q750k · B Q400k · C Q200k (editables en Simulador).
 - Canales de atracción sin Telo; "Internet" es gasto aparte y se queda (confirmado por Oscar).
-  Controles del modelo: renuncia A Q71,831 · B Q54,581 · despido A Q76,331 · B Q59,081 —
+- Modelo ampliado (Oscar, 2026-09-01): se suma el **jefe de RRHH** (Q8,000, 100% en reclutar,
+  repartido entre las contrataciones del mes → Q800 por contratación) y la coordinadora baja a
+  Q4,000. Controles vigentes: renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
   validados en cada deploy por `scripts/validar_modelo.mjs`.
 - Calibración con datos reales: **mediana 16 días / promedio 22** de vacante (n=151 cerradas con
   dato; 74 cerradas sin fechas ni días quedan fuera). Corregido 2026-08-31 tras el reclamo de Oscar:

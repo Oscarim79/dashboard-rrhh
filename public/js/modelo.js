@@ -1,8 +1,10 @@
 // Modelo de costo de rotación por tipo de tienda.
 // Replica el Excel de referencia de Oscar (versión sin Telo, con Pauta en Redes,
-// canal Internet vigente en ambos escenarios). Valores de control con ventas del
-// modelo original (A=275000, B=160000):
-//   renuncia A Q71,831 · renuncia B Q54,581 · despido A Q76,331 · despido B Q59,081
+// canal Internet vigente en ambos escenarios) más el tiempo del jefe de RRHH
+// (acuerdo Oscar 2026-09-01: Q8,000 al 100% en reclutar, repartido entre las
+// contrataciones del mes; coordinadora a Q4,000). Valores de control con ventas
+// del modelo original (A=275000, B=160000):
+//   renuncia A Q72,262 · renuncia B Q55,012 · despido A Q76,762 · despido B Q59,512
 // El Excel usa 4.33 semanas/mes (no 4.3333) — cambiarlo rompe los controles.
 
 export const SEMANAS_MES = 4.33;
@@ -10,7 +12,9 @@ export const SEMANAS_MES = 4.33;
 export const PARAMS_DEFECTO = {
   salarioVendedor: 6500,
   salarioJefe: 6500,
-  salarioCoord: 4500,
+  salarioCoord: 4000,
+  salarioJefeRRHH: 8000,
+  pctJefeRRHH: 1,
   diasVacante: 30,
   factorImpacto: 0.15,
   mesesCurva: 3,
@@ -52,19 +56,22 @@ export function costoSalida(ventas, escenario, p = PARAMS_DEFECTO) {
     p.volanteoBimestre / 2 / p.contratacionesMes +
     p.radioBimestre / 2 / p.contratacionesMes +
     p.internetMes / p.contratacionesMes;
+  // El jefe de RRHH entrevista para TODAS las vacantes: su mes se reparte
+  // entre las contrataciones del mes (como la publicidad), no por vacante.
+  const rrhh = (p.salarioJefeRRHH * p.pctJefeRRHH) / p.contratacionesMes;
   const salida = escenario === 'despido' ? p.salarioVendedor * p.aniosServicio : p.isRenuncia;
 
   const total = iv + cp + jefe + coord + p.overtime + p.retrabajo +
-    p.kit + p.poligrafo + p.viaticos + atraccion + salida;
+    p.kit + p.poligrafo + p.viaticos + atraccion + rrhh + salida;
 
   return {
-    iv, cp, jefe, coord, atraccion, salida, total,
+    iv, cp, jefe, coord, atraccion, rrhh, salida, total,
     // Barra de composición del Resumen: 4 bloques que suman el total
     composicion: {
-      productividad: iv + cp,                                        // ventas perdidas + curva
-      cobertura: jefe + coord + p.overtime + p.retrabajo,            // el equipo tapa el hueco
-      reclutamiento: p.kit + p.poligrafo + p.viaticos + atraccion,   // atraer y contratar
-      salida,                                                        // finiquito / indemnización
+      productividad: iv + cp,                                              // ventas perdidas + curva
+      cobertura: jefe + coord + p.overtime + p.retrabajo,                  // el equipo tapa el hueco
+      reclutamiento: p.kit + p.poligrafo + p.viaticos + atraccion + rrhh,  // atraer y contratar
+      salida,                                                              // finiquito / indemnización
     },
   };
 }

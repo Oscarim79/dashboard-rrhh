@@ -45,6 +45,9 @@ const CONTROLES = [
   { k: 'internetMes', eti: 'Internet (Q/mes)', min: 0, max: 15000, step: 500, fmt: fq },
   { k: 'contratacionesMes', eti: 'Contrataciones promedio al mes', min: 1, max: 30, step: 1, fmt: (v) => `${v}` },
   { f: 'atraccion' },
+  { k: 'salarioJefeRRHH', eti: 'Salario del jefe de RRHH', min: 3000, max: 20000, step: 100, fmt: fq },
+  { k: 'pctJefeRRHH', eti: 'Tiempo del jefe de RRHH en reclutar', min: 0, max: 1, step: 0.05, fmt: fp },
+  { f: 'rrhh' },
   { grupo: 'Costo de salida' },
   { k: 'isRenuncia', eti: 'Finiquito estimado por renuncia', min: 0, max: 10000, step: 250, fmt: fq },
   { k: 'aniosServicio', eti: 'Años de servicio (indemnización por despido)', min: 0, max: 10, step: 0.5, fmt: (v) => `${v} años` },
@@ -78,6 +81,10 @@ const FORMULAS = {
     `<b>Publicidad por contratación</b> = (pauta + volanteo÷2 + radio÷2 + internet) ÷ contrataciones del mes<br>` +
     `= (${fq(p.pautaRedesMes)} + ${fq(p.volanteoBimestre / 2)} + ${fq(p.radioBimestre / 2)} + ${fq(p.internetMes)}) ÷ ${p.contratacionesMes} = <b>${fq(r.atraccion)}</b><br>` +
     `El volanteo y la radio se pagan por bimestre: se toma la mitad para un mes.`,
+  rrhh: (p, v, r) =>
+    `<b>Jefe de RRHH por contratación</b> = salario × % de su tiempo en reclutar ÷ contrataciones del mes<br>` +
+    `= (${fq(p.salarioJefeRRHH)} × ${fp(p.pctJefeRRHH)}) ÷ ${p.contratacionesMes} = <b>${fq(r.rrhh)}</b><br>` +
+    `Su costo se reparte porque entrevista para todas las vacantes del mes, no solo para una.`,
   salida: (p) =>
     `<b>Renuncia</b>: se paga el finiquito tal cual = <b>${fq(p.isRenuncia)}</b><br>` +
     `<b>Despido</b>: indemnización = salario × años de servicio = ${fq(p.salarioVendedor)} × ${p.aniosServicio} = <b>${fq(p.salarioVendedor * p.aniosServicio)}</b>`,
