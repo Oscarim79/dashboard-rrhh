@@ -24,7 +24,9 @@ const COLOR_PROCESO = {
   'Propuesta hecha': 'verde',
   'En entrevistas': 'gris',
   'Publicada': 'gris',
-  'Sin avance registrado': 'ambar',
+  'Candidatos vistos, sin elegido': 'ambar',
+  'En gestión, sin etapa anotada': 'gris',
+  'Sin notas de RRHH aún': 'ambar',
 };
 document.getElementById('abiertas').innerHTML = filasAb.length ? `
   <table>
@@ -39,7 +41,7 @@ document.getElementById('abiertas').innerHTML = filasAb.length ? `
       </tr>`).join('')}
     </tbody>
   </table>
-  <p class="pie">El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado); las notas completas no se publican por privacidad.</p>`
+  <p class="pie">El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado). "Candidatos vistos, sin elegido" significa que sí hubo gestiones pero los perfiles no cuajaron; "en gestión, sin etapa anotada" es que la nota describe la causa de la vacante, no el proceso. Las notas completas no se publican por privacidad.</p>`
   : '<p class="sub">No hay vacantes abiertas registradas.</p>';
 
 // ── días por tipo ──────────────────────────────────────────────────────────

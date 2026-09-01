@@ -167,13 +167,16 @@ const I = {
 // Solo se deriva un estado del proceso con vocabulario fijo (para las vacantes abiertas).
 function estadoProceso(obs) {
   const t = norm(obs);
-  if (!t) return 'Sin avance registrado';
+  if (!t) return 'Sin notas de RRHH aún';
   if (/CONTRAT/.test(t)) return 'Contratado, por confirmar';
   if (/POLIGRAFO/.test(t)) return 'En polígrafo';
   if (/PROPUEST/.test(t)) return 'Propuesta hecha';
-  if (/ENTREVIST|PERFIL/.test(t)) return 'En entrevistas';
+  // hubo gestiones pero los candidatos no cuajaron — es avance, aunque no positivo
+  if (/NO CUMPLE|NO LLENA|NO CONTINUAR|DESCART|RECHAZ|NO SE PRESENT|PRETENSION|PRETENCION/.test(t)) return 'Candidatos vistos, sin elegido';
+  if (/ENTREVIST|PERFIL|TERNA|CANDIDAT|PRUEBA/.test(t)) return 'En entrevistas';
   if (/PUBLICAD/.test(t)) return 'Publicada';
-  return 'Sin avance registrado';
+  // la nota describe la causa u otro contexto, no la etapa del reclutamiento
+  return 'En gestión, sin etapa anotada';
 }
 
 const desconocidos = new Map();
