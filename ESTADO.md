@@ -21,6 +21,10 @@
   2024 · 2025 · 2026" que redibujan KPIs y todas las gráficas con el año elegido. El pipeline
   ahora publica en `salidas.json → porAnio` el desglose completo de cada año (la regla de
   privacidad n≥3 → OTROS se aplica dentro de cada año). Verificado en vivo.
+- Fórmulas visibles en el Simulador (2026-09-01, pedido de Oscar): bajo cada bloque de
+  supuestos hay una cajita con la fórmula en palabras y los números actuales sustituidos
+  (ventas perdidas, curva, jefe, coordinadora, sobrecarga, gastos, publicidad, salida y suma
+  final); se recalculan en vivo al mover cualquier slider. Verificado en vivo.
 
 ## Decisiones firmes
 
