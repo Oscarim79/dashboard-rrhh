@@ -11,13 +11,15 @@ const A = vacantes.agregados;
 // salidas reales últimos 12m × costo por salida con días reales, por tipo.
 let costoAnual = 0, salidasCosteadas = 0, salidasSinTipo = 0;
 const detallePorTipo = [];
+const costoTipo = {}; // costo por salida de cada tipo (también para el supuesto de abajo)
 for (const tipo of ORDEN_TIPOS) {
-  const s = A.salidas12mPorTipo[tipo];
-  if (!s) continue;
   const cal = diasCalibrados(A.diasCobertura, tipo);
   const p = { ...PARAMS_DEFECTO, diasVacante: cal.dias };
   const cR = costoSalida(VENTAS_TIPO[tipo], 'renuncia', p);
   const cD = costoSalida(VENTAS_TIPO[tipo], 'despido', p);
+  costoTipo[tipo] = { cR, cD };
+  const s = A.salidas12mPorTipo[tipo];
+  if (!s) continue;
   const anual = s.renuncia * cR.total + s.despido * cD.total;
   costoAnual += anual;
   salidasCosteadas += s.renuncia + s.despido;
@@ -26,13 +28,27 @@ for (const tipo of ORDEN_TIPOS) {
 const st = A.salidas12mPorTipo['sin tipo'];
 if (st) salidasSinTipo = st.renuncia + st.despido;
 
+// ── SUPUESTO: reparto de las salidas sin clasificar (pedido de Oscar 2026-09-01)
+// No hay dato de tipo para estas tiendas; se estima con un reparto EDITABLE y
+// claramente rotulado como supuesto. Por defecto: 80% tipo B y el resto C.
+let supuesto = null;
+const pctRenST = st && salidasSinTipo ? st.renuncia / salidasSinTipo : 0;
+if (salidasSinTipo) {
+  const b = Math.round(salidasSinTipo * 0.8);
+  supuesto = { AA: 0, A: 0, B: b, C: salidasSinTipo - b };
+}
+const costoSupuesto = () => ORDEN_TIPOS.reduce((s, t) =>
+  s + (supuesto[t] || 0) * (pctRenST * costoTipo[t].cR.total + (1 - pctRenST) * costoTipo[t].cD.total), 0);
+
 // ── KPIs ───────────────────────────────────────────────────────────────────
 const medianaDias = A.diasCobertura.global.mediana;
-document.getElementById('kpis').innerHTML = `
+function pintarKpis() {
+  const extra = supuesto ? costoSupuesto() : 0;
+  document.getElementById('kpis').innerHTML = `
   <div class="kpi" style="grid-column: 1 / -1;">
-    <div class="kpi-valor grande">${fmtQ(costoAnual)}</div>
-    <div class="kpi-eti">costo de rotación de los últimos 12 meses (${fmtNum(salidasCosteadas)} salidas en tiendas clasificadas)</div>
-    ${salidasSinTipo ? `<div class="kpi-nota">+ ${fmtNum(salidasSinTipo)} salidas en tiendas aún sin clasificar, no costeadas para no inventar cifras.</div>` : ''}
+    <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
+    <div class="kpi-eti">costo de rotación de los últimos 12 meses (${fmtNum(salidasCosteadas)} salidas en tiendas clasificadas${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''})</div>
+    ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre las ${fmtNum(salidasSinTipo)} salidas en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
   </div>
   <div class="kpi">
     <div class="kpi-valor">${medianaDias} días</div>
@@ -47,6 +63,42 @@ document.getElementById('kpis').innerHTML = `
     <div class="kpi-valor">${fmtNum(A.totales.abiertas)}</div>
     <div class="kpi-eti">vacantes abiertas hoy</div>
   </div>`;
+}
+pintarKpis();
+
+// ── tarjeta del supuesto (solo si hay salidas sin clasificar) ──────────────
+if (supuesto) {
+  const card = document.getElementById('supuesto-sintipo');
+  card.hidden = false;
+  card.innerHTML = `
+    <h3>⚠️ Supuesto: las ${fmtNum(salidasSinTipo)} salidas en tiendas sin clasificar</h3>
+    <p style="font-size:13.5px; margin-bottom:4px">Estas salidas ocurrieron en tiendas que aún no tienen
+      tipo asignado (AA/A/B/C), así que su costo no sale de datos: <b>lo que sigue es UN SUPUESTO editable</b>.
+      Reparte las ${fmtNum(salidasSinTipo)} salidas entre los tipos; por defecto asumimos 80% tipo B y el resto C.</p>
+    <div class="sup-inputs">
+      ${ORDEN_TIPOS.map((t) => `<label>${t}
+        <input type="number" inputmode="numeric" id="sup-${t}" min="0" max="${salidasSinTipo}" step="1" value="${supuesto[t]}">
+      </label>`).join('')}
+    </div>
+    <p id="sup-aviso" style="font-size:13px; font-weight:600; color:var(--rojo); margin:4px 0"></p>
+    <p style="font-size:13.5px">Costo estimado con este supuesto: <b class="num" id="sup-total"></b>
+      <span style="color:var(--tinta-suave)">(usando la mezcla real de esas salidas: ${fmtNum(st.renuncia)} renuncias y ${fmtNum(st.despido)} despidos)</span></p>
+    <p class="pie">Este supuesto desaparece solo cuando las tiendas se clasifiquen en el archivo de tiendas — ahí el costo pasa a ser dato, no estimación.</p>`;
+  const pintarSupuesto = () => {
+    const suma = ORDEN_TIPOS.reduce((s, t) => s + (supuesto[t] || 0), 0);
+    document.getElementById('sup-aviso').textContent =
+      suma === salidasSinTipo ? '' : `Ojo: estás repartiendo ${fmtNum(suma)} salidas y son ${fmtNum(salidasSinTipo)}.`;
+    document.getElementById('sup-total').textContent = fmtQ(costoSupuesto());
+    pintarKpis();
+  };
+  for (const t of ORDEN_TIPOS) {
+    document.getElementById(`sup-${t}`).oninput = (e) => {
+      supuesto[t] = Math.max(0, Math.floor(+e.target.value || 0));
+      pintarSupuesto();
+    };
+  }
+  pintarSupuesto();
+}
 
 // ── tarjetas por tipo con barra de composición ─────────────────────────────
 const NOMBRE_TIPO = {
@@ -120,7 +172,7 @@ if (topTipo && costoAnual > 0) {
 
 // 4. (si aplica) salidas sin clasificar
 if (salidasSinTipo >= salidasCosteadas * 0.25) {
-  hallazgos.push(`Hay <b>${fmtNum(salidasSinTipo)} salidas</b> en tiendas todavía sin tipo (Cayalá, Catocha, Abi Q, etc.): el costo real anual es mayor que el mostrado. Clasificarlas en el archivo de tiendas completa la foto.`);
+  hallazgos.push(`Hay <b>${fmtNum(salidasSinTipo)} salidas</b> en tiendas todavía sin tipo (Catocha, Petapa, etc.). Su costo se estima con un <b>supuesto ajustable</b> (arriba); clasificarlas en el archivo de tiendas reemplaza el supuesto por el dato real.`);
 }
 
 document.getElementById('hallazgos').innerHTML =
