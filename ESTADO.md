@@ -17,6 +17,10 @@
   AMERICANA", menú lateral (fijo en escritorio, ☰ deslizable en móvil), tarjetas del Resumen
   separan "cada salida cuesta" del "acumulado anual (volumen × costo)", y la leyenda distingue
   finiquito (verde) de indemnización (naranja).
+- Selector de período en Salidas (2026-09-01, pedido de Oscar): botones "Todo el registro ·
+  2024 · 2025 · 2026" que redibujan KPIs y todas las gráficas con el año elegido. El pipeline
+  ahora publica en `salidas.json → porAnio` el desglose completo de cada año (la regla de
+  privacidad n≥3 → OTROS se aplica dentro de cada año). Verificado en vivo.
 
 ## Decisiones firmes
 
