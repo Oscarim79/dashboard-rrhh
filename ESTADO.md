@@ -24,7 +24,9 @@
 - Fórmulas visibles en el Simulador (2026-09-01, pedido de Oscar): bajo cada bloque de
   supuestos hay una cajita con la fórmula en palabras y los números actuales sustituidos
   (ventas perdidas, curva, jefe, coordinadora, sobrecarga, gastos, publicidad, salida y suma
-  final); se recalculan en vivo al mover cualquier slider. Verificado en vivo.
+  final); se recalculan en vivo al mover cualquier slider. Verificado en vivo. La fórmula de
+  ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
+  menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
 ## Decisiones firmes
 
