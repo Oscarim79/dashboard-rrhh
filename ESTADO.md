@@ -60,6 +60,9 @@
    dashboard; es limpieza de su archivo.
 4. Asumimos "Pradera CSV" (ABIQ) = la tienda Abi Q de Pradera Concepción — Oscar no lo ha corregido,
    así que se da por bueno.
+5. En el sheet, la vacante 219 (Jefe agencia, Abiq Chiquimula) tiene empresa "AMERICANA" siendo
+   tienda Abi Q — dedazo para que Oscar corrija en el sheet (el dashboard la muestra tal cual).
+   Nota: Abi Q Chiquimula tiene DOS vacantes abiertas (Jefe agencia y Asesor ventas), no es error.
 
 ## Cómo retomar
 
