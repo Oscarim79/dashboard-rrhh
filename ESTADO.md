@@ -49,9 +49,11 @@
 
 ## Pendientes (no bloquean nada)
 
-1. **Tiendas sin tipo** (se muestran sin costo): Catocha, Petapa, Pradera Concepción (Americana),
-   Pradera 2, Central, Peque 2, CLM, Abi Q Online. Cuando Oscar las clasifique → editar
-   `config/tiendas.json` y hacer push.
+1. **Tiendas sin tipo**: Catocha, Petapa, Pradera Concepción (Americana), Pradera 2, Central,
+   Peque 2, CLM, Abi Q Online. Desde 2026-09-01 sus salidas SÍ se costean en el Resumen con un
+   **supuesto editable** (default 80% tipo B, resto C — pedido de Oscar, rotulado como supuesto).
+   Cuando Oscar las clasifique → editar `config/tiendas.json` y hacer push; el supuesto
+   desaparece solo y el costo pasa a ser dato.
 2. En el Excel de tiendas de Oscar hay una **fila tipo B sin nombre** — preguntarle cuál es.
 3. El Excel del modelo de Oscar aún tiene la fila "Telo" en la hoja Despido y fórmulas de
    Tienda B mal referenciadas en su Resumen (suman columna B corrida una fila). No afecta al
