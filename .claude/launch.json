@@ -5,8 +5,7 @@
       "name": "dashboard",
       "runtimeExecutable": "npx",
       "runtimeArgs": ["--yes", "http-server", "public", "-p", "4173", "-c-1"],
-      "port": 4173,
-      "autoPort": true
+      "port": 4173
     }
   ]
 }

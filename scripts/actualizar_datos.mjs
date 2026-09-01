@@ -445,12 +445,16 @@ if (!sal) {
     diasLab: stats(arr.map((r) => r.diasLab).filter((d) => d != null)),
     n: arr.length,
   });
+  // porAnio lleva el desglose completo de cada año (misma forma que "total"),
+  // para que la página pueda filtrar por año; la regla de privacidad (agrupar
+  // valores con menos de 3 casos en OTROS) se aplica dentro de cada año.
+  const anios = [...new Set(regs.map((r) => r.anio))].sort();
   salidasJson = {
     generado: hoy.toISOString(),
     total: dims(regs),
     ult12m: dims(ult12),
     porMes: cuenta(regs, (r) => r.ym),
-    porAnio: cuenta(regs, (r) => r.anio),
+    porAnio: Object.fromEntries(anios.map((a) => [a, dims(regs.filter((r) => r.anio === a))])),
   };
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
