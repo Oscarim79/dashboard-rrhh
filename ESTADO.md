@@ -28,6 +28,20 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Sección interna cifrada (2026-09-02)
+
+- `public/propuesta.html` es la **propuesta interna para Gerencia** (fortalecimiento de RRHH y
+  escenarios de compensación), publicada **cifrada** — AES-256-GCM con clave derivada por
+  PBKDF2-SHA256 (600k iteraciones). Al repo y al sitio solo llega texto cifrado: sin la clave
+  no hay nada legible, por eso puede vivir en el repo público sin violar la regla de privacidad.
+- La página **no está enlazada** en el menú público a propósito; se accede por URL directa
+  (`/propuesta.html`) y Oscar comparte la clave solo con quien corresponde.
+- La fuente en claro vive fuera del repo (`.private/propuesta-fuente.html`, gitignoreado) y la
+  clave en `CLAVE_PROPUESTA` (variable de entorno o `.env` local, como SHEET_ID). Regenerar o
+  rotar la clave: `CLAVE_PROPUESTA="..." node scripts/cifrar_propuesta.mjs` y commitear el
+  `public/propuesta.html` resultante. El contenido en claro también existe como artefacto privado
+  de Claude y documentos Word en poder de Oscar.
+
 ## Decisiones firmes
 
 - Modelo con **4 tipos de tienda** (AA/A/B/C, archivo de Oscar con marcas A2K/ABIQ/FRIOTEC).

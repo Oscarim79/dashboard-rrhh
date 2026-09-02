@@ -10,5 +10,8 @@ dist/
 .data/
 *.xlsx
 
+# Fuente en claro de la sección interna cifrada (public/propuesta.html)
+.private/
+
 # JSONs generados (la Action los regenera en cada despliegue)
 public/data/
