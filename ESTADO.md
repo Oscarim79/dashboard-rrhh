@@ -28,6 +28,21 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Resumen: "Lo esencial en 6 cifras" (2026-09-03)
+
+- Bloque nuevo al inicio del Resumen con las cifras que RRHH cita al presentar a Gerencia,
+  para que el CEO vea en la tablet lo mismo que Oscar dice: % de la plantilla reemplazada en
+  12 meses (salidas con vacante ÷ colaboradores al cierre, de `rotacion.json`), % de salidas
+  antes de 6 meses y antigüedad mediana (todo el registro, de `salidas.json`), costo por
+  salida B→A (modelo con días reales), costo de las plazas abiertas hoy (renuncia por tipo;
+  sin tipo → B), días mediana/promedio y mezcla renuncias/despidos.
+- **Todo se calcula en vivo de los JSON; nada escrito a mano**, cada tarjeta indica su
+  período, y el bloque va en `try/catch` para que nunca rompa el resto de la página.
+- Ojo de consistencia: los documentos de la propuesta citan Q55–72 mil por salida (valores de
+  control de la especificación, ventas 275k/160k); el tablero, con las ventas por tipo
+  acordadas (A 750k / B 400k) y días reales, muestra más (≈ Q63–91 mil con 16 días). Los
+  documentos lo aclaran como "cálculo conservador".
+
 ## Sección interna cifrada (2026-09-02)
 
 - `public/propuesta.html` es la **propuesta interna para Gerencia** (fortalecimiento de RRHH y
