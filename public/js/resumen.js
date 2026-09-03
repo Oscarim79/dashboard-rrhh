@@ -4,7 +4,7 @@ import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './m
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados } from './comun.js';
 
 marcarNavActiva();
-const { vacantes, meta } = await cargarDatos();
+const { vacantes, rotacion, meta } = await cargarDatos();
 const A = vacantes.agregados;
 
 // ── costo anual calibrado ──────────────────────────────────────────────────
@@ -27,6 +27,75 @@ for (const tipo of ORDEN_TIPOS) {
 }
 const st = A.salidas12mPorTipo['sin tipo'];
 if (st) salidasSinTipo = st.renuncia + st.despido;
+
+// ── Lo esencial en 6 cifras (lo primero que ve Gerencia) ───────────────────
+// Las mismas cifras que RRHH cita al presentar, pero calculadas en vivo de los
+// JSON publicados — nunca escritas a mano — y cada tarjeta dice qué período cubre.
+// Va en try/catch: si algo falta, el resto del Resumen se pinta igual.
+try {
+  const MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+  const kpi = (valor, eti, nota, clase = '', tam = '') =>
+    `<div class="kpi"><div class="kpi-valor ${clase} ${tam}">${valor}</div><div class="kpi-eti">${eti}</div>${nota ? `<div class="kpi-nota">${nota}</div>` : ''}</div>`;
+  const tiles = [];
+
+  // 1. qué parte de la plantilla se reemplazó en 12 meses (salidas con vacante / colaboradores al cierre)
+  const cierre = rotacion.acumulado
+    .filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null)
+    .sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
+  const salidas12 = salidasCosteadas + salidasSinTipo;
+  if (cierre && cierre.fin > 0 && salidas12 > 0) {
+    const pct = Math.round((salidas12 / cierre.fin) * 100);
+    tiles.push(kpi(`${pct}%`, 'de la plantilla se reemplazó en 12 meses',
+      `${fmtNum(salidas12)} salidas con vacante · ${fmtNum(cierre.fin)} colaboradores al cierre de ${MES_CORTO[cierre.mesNum - 1]} ${cierre.anio}`,
+      pct >= 50 ? 'rojo' : ''));
+  }
+
+  // 2. salidas tempranas y antigüedad mediana (todo el registro, igual que la página Salidas)
+  const salidas = await fetch('data/salidas.json', { cache: 'no-cache' })
+    .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  if (salidas?.total?.n) {
+    const D = salidas.total;
+    const TEMPRANOS = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES'];
+    const temp = TEMPRANOS.reduce((s, k) => s + (D.rango[k] ?? 0), 0);
+    const pct = Math.round((temp / D.n) * 100);
+    const meses = D.diasLab.mediana != null ? (D.diasLab.mediana / 30.4).toFixed(1) : null;
+    tiles.push(kpi(`${pct}%`, 'se va antes de cumplir 6 meses',
+      `antigüedad mediana al salir: ${meses ?? '—'} meses · ${fmtNum(D.n)} salidas, todo el registro`,
+      pct >= 50 ? 'rojo' : ''));
+  }
+
+  // 3. cuánto cuesta cada salida (renuncia; rango tienda B → A, con días reales)
+  const cB = costoTipo.B.cR.total, cA = costoTipo.A.cR.total;
+  const mil = (v) => fmtNum(Math.round(v / 1000));
+  tiles.push(kpi(`Q${mil(cB)}–${mil(cA)} mil`, 'cuesta cada salida (renuncia, tienda B a tienda A)',
+    'con días de vacante reales · detalle por tipo más abajo', '', 'medio'));
+
+  // 4. lo que ya cuestan las plazas abiertas hoy (costo de renuncia por tipo; sin tipo → tipo B)
+  const abiertas = vacantes.filas.filter((r) => r.estatus === 'ABIERTA');
+  if (abiertas.length) {
+    const costoAbiertas = abiertas.reduce((s, r) => s + (costoTipo[r.tipo] ?? costoTipo.B).cR.total, 0);
+    tiles.push(kpi(fmtQ(costoAbiertas), `ya cuestan las ${fmtNum(abiertas.length)} plazas abiertas hoy`,
+      'costo de renuncia por tipo de tienda; sin tipo se asume tipo B', 'ambar', 'medio'));
+  }
+
+  // 5. días para cubrir una vacante
+  const g = A.diasCobertura.global;
+  if (g.mediana != null) {
+    tiles.push(kpi(`${g.mediana} / ${g.promedio} días`, 'mediana / promedio para cubrir una vacante',
+      `${fmtNum(g.n)} vacantes cerradas con dato`, '', 'medio'));
+  }
+
+  // 6. renuncias vs despidos
+  if (A.mezcla.pctRenuncia != null) {
+    tiles.push(kpi(`${Math.round(A.mezcla.pctRenuncia * 100)}%`, 'de las salidas son renuncias, no despidos',
+      'mezcla real de todo el registro'));
+  }
+
+  document.getElementById('cifras-clave').innerHTML = tiles.join('');
+} catch (e) {
+  console.warn('Cifras clave no disponibles:', e);
+  document.getElementById('cifras-clave').innerHTML = '';
+}
 
 // ── SUPUESTO: reparto de las salidas sin clasificar (pedido de Oscar 2026-09-01)
 // No hay dato de tipo para estas tiendas; se estima con un reparto EDITABLE y
