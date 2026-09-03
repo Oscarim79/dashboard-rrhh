@@ -539,4 +539,8 @@ writeFileSync(path.join(outDir, 'vacantes.json'), JSON.stringify(vacantesJson));
 writeFileSync(path.join(outDir, 'rotacion.json'), JSON.stringify(rotacionJson));
 writeFileSync(path.join(outDir, 'salidas.json'), JSON.stringify(salidasJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(metaJson, null, 2));
+if (calidad.length) {
+  console.log('\nAvisos de calidad (van a meta.json; no se muestran en el sitio):');
+  for (const a of calidad) console.log(`  ${a.tipo === 'error' ? '✖' : '•'} ${a.mensaje}`);
+}
 console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);
