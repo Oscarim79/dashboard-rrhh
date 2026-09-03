@@ -83,6 +83,13 @@
   (Q7–9 de cada Q100); del segundo año, 16–20 veces. Nota explícita: sin multas del IGSS ni
   capacitaciones repetidas.
 - Artefacto privado republicado y `public/propuesta.html` regenerado con la misma clave.
+- **Corrección (mismo día):** Oscar comparó con el tablero (Q6,436,480 · 84 salidas con vacante en tiendas
+  clasificadas, 12 meses) y pidió usar esa cifra. El "~150 salidas/año" venía del n=151 de la calibración
+  de días (todo el registro, no 12 meses); el conteo real de 12 meses es 95 (84 tiendas + 11 oficinas).
+  El bloque ahora dice Q6.4 millones (≈ Q76,600 por salida, piso: sin oficinas ni salidas sin vacante),
+  relación 8.8 veces el primer año y 12 veces después. **Pendiente:** la tesis ("más de 150 vacantes",
+  "más de la mitad de la empresa"), el retorno ("8–10 de las ~150 salidas") y las filas "Por qué" de los
+  puntos 3 y 4 siguen usando el 150 y hay que alinearlos al tablero (95 salidas, ~un tercio).
 
 ## Propuesta: "por qué" de cada meta en "Cinco problemas, cinco respuestas" (2026-09-03)
 
