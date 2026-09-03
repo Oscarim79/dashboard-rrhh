@@ -35,7 +35,8 @@
   el archivo de tiendas ×N", calculado de `vacantes.filas` con el mismo criterio del pipeline.
 - El pipeline separa en `salidas12mPorTipo['no tienda']` las salidas en oficinas/regiones (esTienda
   false): ya no caen en "sin tipo" ni se costean con el modelo de tienda; el Resumen las anota aparte.
-- Lo que queda en "sin tipo" solo puede ser: tiendas cerradas con tipo null (Catocha, Petapa, Zona 9) o
+- Catocha y Petapa eran tipo C (Oscar, 2026-09-03): ya se costean como dato aunque estén cerradas. Lo que
+  queda en "sin tipo" solo puede ser: Zona 9 (cerrada, tipo null) o
   nombres del sheet que no coinciden con ningún alias (arreglo: agregar el alias en config/tiendas.json).
 
 ## Sección "Calidad de datos" retirada del sitio (2026-09-03)
