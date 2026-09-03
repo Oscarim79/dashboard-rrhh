@@ -62,6 +62,16 @@
   acordadas (A 750k / B 400k) y días reales, muestra más (≈ Q63–91 mil con 16 días). Los
   documentos lo aclaran como "cálculo conservador".
 
+## Propuesta reestructurada: tres prioridades acordadas con Comercial (2026-09-03)
+
+- Oscar acordó con el área Comercial el orden: 1) analista de RRHH para entrevistas, 2) un segundo
+  comodín de tiendas (mismo perfil que la coordinadora, para que ambas cubran las plazas que quedan
+  en el aire), 3) capacitadores de área — perfiles nuevos de tiempo completo que capacitan y después
+  dan seguimiento y desarrollo a la gente de su área. Ya NO se propone que vendedores capaciten con bono.
+- Costos base: Q4,500 + Q4,500 + 5×Q4,500 = Q31,500/mes (≈ Q44,100 con prestaciones ≈ Q529,000/año);
+  opción por fases (prioridades 1 y 2) Q9,000/mes. Benchmark: 1.9 por cada 100 con 1+2; ~3.7 con las tres.
+- Se regeneraron `public/propuesta.html` (cifrada), el memo Word, la propuesta docx de Oscar y la chuleta.
+
 ## Sección interna cifrada (2026-09-02)
 
 - `public/propuesta.html` es la **propuesta interna para Gerencia** (fortalecimiento de RRHH y
