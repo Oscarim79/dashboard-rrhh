@@ -62,6 +62,17 @@
   acordadas (A 750k / B 400k) y días reales, muestra más (≈ Q63–91 mil con 16 días). Los
   documentos lo aclaran como "cálculo conservador".
 
+## Antigüedad al salir: "más de un año" partido en tramos de años (2026-09-03)
+
+- Oscar notó que la barra "Más de un año" (125 de 474) parecía la mayoría, cuando el 59% se va antes de
+  6 meses: el sheet trae un solo rango que junta de 1 a 15+ años frente a tramos naranjas de 1-2 meses.
+- El pipeline ahora parte ese rango con los días laborados: 1 a 2 años (365-729), 2 a 5 años (730-1824),
+  más de 5 años (≥1825). Si la fila no tiene días válidos (o < 365) queda como "Más de un año (sin
+  detalle de años)" y se cuenta en un aviso de calidad. Los rangos tempranos no cambian, así que el
+  % antes de 6 meses del Resumen y de Salidas sigue igual.
+- La nota bajo la gráfica avisa que los tramos no tienen el mismo ancho y da el % que se va antes de
+  cumplir un año (calculado en vivo).
+
 ## Propuesta reestructurada: tres prioridades acordadas con Comercial (2026-09-03)
 
 - Oscar acordó con el área Comercial el orden: 1) analista de RRHH para entrevistas, 2) un segundo

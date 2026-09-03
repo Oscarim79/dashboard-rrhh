@@ -402,7 +402,16 @@ if (!sal) {
     agencia: colIdx(HS, 'AGENCIA'), rango: colIdx(HS, 'RANGO', 'MES'), diasLab: colIdx(HS, 'DIAS', 'LAB'),
   };
   const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
-  let diasLabMalos = 0, sinRazon = 0;
+  let diasLabMalos = 0, sinRazon = 0, masDeUnAnoSinDias = 0;
+  // El sheet trae un solo rango "MAS DE UN ANO" que junta de 1 a 15+ años y en la
+  // gráfica parecía la mayoría (barra desproporcionada frente a tramos de 1-2 meses).
+  // Se parte con los días laborados en 1-2 / 2-5 / más de 5 años; si no hay días
+  // válidos (o son < 365, inconsistentes con el rango) queda en el rango original.
+  const partirMasDeUnAno = (rango, dias) => {
+    if (rango !== 'MAS DE UN ANO') return rango;
+    if (dias == null || dias < 365) { masDeUnAnoSinDias++; return rango; }
+    return dias < 730 ? 'DE 1 A 2 ANOS' : dias < 1825 ? 'DE 2 A 5 ANOS' : 'MAS DE 5 ANOS';
+  };
   const regs = [];
   for (const f of sal.filas) {
     const baja = fechaISO(f[IS.baja]);
@@ -422,7 +431,7 @@ if (!sal) {
       marca: MARCA_EMPRESA[marcaCruda] ?? (String(f[IS.marca] ?? '').trim() || '(SIN MARCA)'),
       agencia: resuelto?.esTienda ? resuelto.nombre : (String(f[IS.agencia] ?? '').trim() || '(SIN AGENCIA)'),
       tipoTienda: resuelto?.esTienda ? (resuelto.tipo ?? null) : null,
-      rango: norm(f[IS.rango]) || '(SIN RANGO)',
+      rango: partirMasDeUnAno(norm(f[IS.rango]) || '(SIN RANGO)', diasLab),
       diasLab,
     });
   }
@@ -462,6 +471,7 @@ if (!sal) {
   };
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
+  if (masDeUnAnoSinDias) calidad.push({ tipo: 'aviso', n: masDeUnAnoSinDias, mensaje: `${masDeUnAnoSinDias} salidas con rango "más de un año" no tienen días laborados válidos (o son menos de 365); se muestran como "Más de un año (sin detalle de años)".` });
 }
 
 // ── calidad de datos ───────────────────────────────────────────────────────

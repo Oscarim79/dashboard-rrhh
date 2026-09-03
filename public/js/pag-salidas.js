@@ -74,8 +74,13 @@ if (!salidas.total) {
       : `Meses con registro en ${periodo}: ${rango}.`;
 
     // ── antigüedad (rangos en orden natural) ──
-    const ORDEN_RANGO = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES', 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES', 'MAS DE UN ANO'];
-    const ETI_RANGO = { 'MENOS 1 MES': 'Menos de 1 mes', 'DE 1 A 2 MESES': '1 a 2 meses', 'DE 2 A 4 MESES': '2 a 4 meses', 'DE 4 A 6 MESES': '4 a 6 meses', 'DE 6 A 8 MESES': '6 a 8 meses', 'DE 8 A 10 MESES': '8 a 10 meses', 'DE 10 A 12 MESES': '10 a 12 meses', 'MAS DE UN ANO': 'Más de un año' };
+    // El pipeline parte "más de un año" en 1-2 / 2-5 / más de 5 años usando los días
+    // laborados; 'MAS DE UN ANO' solo queda para filas sin días válidos.
+    const ORDEN_RANGO = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES', 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES', 'DE 1 A 2 ANOS', 'DE 2 A 5 ANOS', 'MAS DE 5 ANOS', 'MAS DE UN ANO'];
+    const ETI_RANGO = { 'MENOS 1 MES': 'Menos de 1 mes', 'DE 1 A 2 MESES': '1 a 2 meses', 'DE 2 A 4 MESES': '2 a 4 meses', 'DE 4 A 6 MESES': '4 a 6 meses', 'DE 6 A 8 MESES': '6 a 8 meses', 'DE 8 A 10 MESES': '8 a 10 meses', 'DE 10 A 12 MESES': '10 a 12 meses', 'DE 1 A 2 ANOS': '1 a 2 años', 'DE 2 A 5 ANOS': '2 a 5 años', 'MAS DE 5 ANOS': 'Más de 5 años', 'MAS DE UN ANO': 'Más de un año (sin detalle de años)' };
+    const RANGOS_PRIMER_ANO = [...RANGOS_TEMPRANOS, 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES'];
+    const primerAno = RANGOS_PRIMER_ANO.reduce((s, k) => s + (D.rango[k] ?? 0), 0);
+    const pctPrimerAno = D.n ? Math.round((primerAno / D.n) * 100) : 0;
     document.getElementById('antiguedad').innerHTML = barrasH(
       ORDEN_RANGO.filter((k) => D.rango[k]).map((k) => ({
         eti: ETI_RANGO[k], valor: D.rango[k],
@@ -83,7 +88,9 @@ if (!salidas.total) {
       })), { formato: fmtNum });
     document.getElementById('antiguedad-nota').textContent =
       `Las barras naranjas son salidas antes de los 6 meses: ${fmtNum(tempranas(D))} de ${fmtNum(D.n)} (${pctTemprano}%) en ${notaPeriodo}. ` +
-      `Cada una de esas se va sin devolver la inversión de la curva de aprendizaje.`;
+      `Cada una de esas se va sin devolver la inversión de la curva de aprendizaje. ` +
+      `Ojo al leer: los tramos no tienen el mismo ancho — cada barra naranja cubre 1 o 2 meses, mientras que los tramos de años cubren varios años cada uno. ` +
+      `Antes de cumplir un año se va el ${pctPrimerAno}% (${fmtNum(primerAno)} de ${fmtNum(D.n)}).`;
 
     // ── razón ──
     const COLOR_RAZON = { RENUNCIA: '#0B7A55', DESPIDO: '#B5741A' };
