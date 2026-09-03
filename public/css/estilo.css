@@ -188,10 +188,6 @@ select {
   border: 1px solid var(--borde); border-radius: 8px; background: var(--tarjeta);
 }
 
-/* ── avisos de calidad ── */
-.calidad { font-size: 13.5px; }
-.calidad li { margin: 6px 0 6px 18px; }
-.calidad .error { color: var(--rojo); }
 
 footer {
   max-width: 860px; margin: 0 auto; padding: 14px;

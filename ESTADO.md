@@ -28,6 +28,14 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Sección "Calidad de datos" retirada del sitio (2026-09-03)
+
+- Pedido de Oscar: la lista de avisos de calidad en el Resumen "daña más de lo que ayuda" frente
+  a Gerencia. Se quitó del `index.html` (y la referencia en `vacantes.html`). El pipeline sigue
+  generando `meta.calidad` y lo imprime en el log de la Action — ahí se consultan los avisos.
+- Además, ahora el Resumen trae la tarjeta "De dónde salen los datos" y el pie de todas las
+  páginas lleva la línea de fuente (pedido de Oscar para la reunión con el CEO).
+
 ## Resumen: "Lo esencial en 6 cifras" (2026-09-03)
 
 - Bloque nuevo al inicio del Resumen con las cifras que RRHH cita al presentar a Gerencia,

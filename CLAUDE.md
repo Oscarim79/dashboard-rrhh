@@ -60,8 +60,9 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
 
 ## Reglas de trabajo
 
-- No inventar datos: los campos vacíos/inconsistentes se reportan en la sección
-  "Calidad de datos" del dashboard, no se rellenan.
+- No inventar datos: los campos vacíos/inconsistentes se excluyen y se reportan como avisos en
+  `meta.json` y en el log del pipeline — nunca se rellenan. Por decisión de Oscar (2026-09-03)
+  esos avisos NO se muestran en el sitio (se quitó la sección "Calidad de datos" del Resumen).
 - Detección de pestañas del sheet por encabezados, nunca por nombre ni posición.
 - Formato es-GT para quetzales (Q71,831), tabular-nums para cifras.
 - Colores: tinta #17251F, verde #0B7A55 (renuncia/positivo), ámbar #B5741A (despido).

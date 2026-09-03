@@ -248,10 +248,8 @@ document.getElementById('hallazgos').innerHTML =
   hallazgos.slice(0, 3 + (salidasSinTipo >= salidasCosteadas * 0.25 ? 1 : 0))
     .map((h) => `<div class="hallazgo">${h}</div>`).join('');
 
-// ── calidad ────────────────────────────────────────────────────────────────
-document.getElementById('calidad').innerHTML = meta.calidad
-  .map((c) => `<li class="${c.tipo === 'error' ? 'error' : ''}">${c.mensaje}</li>`).join('')
-  || '<li>Sin observaciones.</li>';
+// (Los avisos de calidad de datos siguen generándose en meta.json y en el log del
+// pipeline, pero por decisión de Oscar (2026-09-03) ya no se muestran en el sitio.)
 
 // ── De dónde salen los datos (la primera pregunta de Gerencia) ────────────
 // Conteos en vivo de meta.json y de los agregados; el texto describe el origen
