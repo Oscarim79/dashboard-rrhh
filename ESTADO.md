@@ -73,6 +73,17 @@
 - La nota bajo la gráfica avisa que los tramos no tienen el mismo ancho y da el % que se va antes de
   cumplir un año (calculado en vivo).
 
+## Propuesta: bloque "Lo que pedimos frente a lo que ya se gasta" (2026-09-03)
+
+- Pedido de Oscar: en un lugar estratégico, el total de inversión pedido contra lo que ya se gasta en
+  rotación, sin contar posibles multas del IGSS por SSO. Va justo después de "La idea en 30 segundos".
+- Cifras (todas ya estaban en la página): gasto = ~150 salidas × Q55–72 mil = Q8.3–10.8 millones/año
+  (escenario conservador; el tablero muestra más). Inversión primer año = Q529,200 (3 prioridades con
+  prestaciones) + Q202,595 (SSO, una vez) ≈ Q732 mil → la rotación cuesta 11–15 veces lo pedido
+  (Q7–9 de cada Q100); del segundo año, 16–20 veces. Nota explícita: sin multas del IGSS ni
+  capacitaciones repetidas.
+- Artefacto privado republicado y `public/propuesta.html` regenerado con la misma clave.
+
 ## Propuesta: "por qué" de cada meta en "Cinco problemas, cinco respuestas" (2026-09-03)
 
 - Pedido de Oscar: que cada uno de los cinco puntos diga por qué la meta prometida es alcanzable, no
