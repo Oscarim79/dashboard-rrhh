@@ -253,4 +253,36 @@ document.getElementById('calidad').innerHTML = meta.calidad
   .map((c) => `<li class="${c.tipo === 'error' ? 'error' : ''}">${c.mensaje}</li>`).join('')
   || '<li>Sin observaciones.</li>';
 
+// ── De dónde salen los datos (la primera pregunta de Gerencia) ────────────
+// Conteos en vivo de meta.json y de los agregados; el texto describe el origen
+// y qué se excluye. Nunca incluye el enlace ni el ID del sheet.
+try {
+  const f = new Date(meta.generado);
+  const fecha = `${f.toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })} a las ${f.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}`;
+  const g = A.diasCobertura.global;
+  document.getElementById('fuente-datos').innerHTML = `
+    <p style="font-size:13.5px; margin-bottom:8px">Todo lo que muestra este tablero sale de los <b>registros propios de RRHH</b>
+      en su archivo de Google Sheets. Se leen automáticamente, se agregan y se publican sin ningún dato personal.
+      Última lectura: <b>${fecha}</b></p>
+    <ul style="font-size:13.5px; line-height:1.55; padding-left:18px; margin:0">
+      <li><b>Control de vacantes</b> (${fmtNum(meta.filasVacantes)} registros): fecha de solicitud y de cierre → días de cobertura
+        (${fmtNum(g.n)} cerradas con dato); motivo → renuncias vs despidos; estatus → abiertas hoy; tienda y puesto → tipo de tienda.</li>
+      <li><b>Indicador de rotación mensual</b> (${fmtNum(meta.filasRotacionAcumulada)} filas): colaboradores al inicio y cierre de cada mes
+        y % de rotación acumulada — de ahí sale la plantilla con la que se compara.</li>
+      <li><b>Registro de salidas</b>: solo conteos agregados (razón, antigüedad por rangos, área, marca, agencia). Jamás filas
+        individuales ni nombres; los valores con menos de 3 casos se agrupan en "otros".</li>
+      <li><b>Tipo de tienda (AA / A / B / C)</b>: archivo de clasificación de tiendas de RRHH; las ventas por tipo son puntos medios
+        del rango de cada tipo y se pueden cambiar en el Simulador.</li>
+      <li><b>Costo por salida</b>: modelo "Costo de rotación por tipo de tienda" (ago 2025) implementado en el Simulador — ventas
+        perdidas, curva de aprendizaje, tiempo de jefatura y RRHH, publicidad y finiquito/indemnización — con los días de vacante
+        reales. Sus valores de control se verifican en cada publicación.</li>
+      <li><b>Actualización</b>: automática todos los días a las 6:00 (Guatemala) y en cada publicación. Antes de publicar corre una
+        verificación anti-fugas: si detecta un dato personal, no publica nada.</li>
+    </ul>
+    <p class="pie">No se usan las pestañas de altas ni la base de datos general (contienen datos personales). Las pestañas se
+      reconocen por sus encabezados, no por su nombre ni posición, así que mover o renombrar hojas no rompe el tablero.</p>`;
+} catch (e) {
+  console.warn('Fuente de datos no disponible:', e);
+}
+
 pintarPie(meta);

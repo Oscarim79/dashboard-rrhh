@@ -27,7 +27,11 @@ export function pintarPie(meta) {
     `Datos actualizados automáticamente desde Google Sheets el ` +
     `<b>${f.toLocaleDateString('es-GT', { day: 'numeric', month: 'long', year: 'numeric' })}` +
     ` a las ${f.toLocaleTimeString('es-GT', { hour: '2-digit', minute: '2-digit' })}</b>. ` +
-    `Sin datos personales: el sitio solo publica cifras agregadas.`;
+    `Sin datos personales: el sitio solo publica cifras agregadas.<br>` +
+    `<b>Fuente:</b> control de vacantes, indicador de rotación mensual y registro de salidas de RRHH ` +
+    `(el archivo de Google Sheets del área), leídos tal cual y agregados; el costo por salida sale del ` +
+    `modelo de rotación por tipo de tienda (ver Simulador). ` +
+    `<a href="./index.html#fuente">De dónde salen los datos →</a>`;
 }
 
 export function marcarNavActiva() {
