@@ -71,6 +71,10 @@
 - Costos base: Q4,500 + Q4,500 + 5×Q4,500 = Q31,500/mes (≈ Q44,100 con prestaciones ≈ Q529,000/año);
   opción por fases (prioridades 1 y 2) Q9,000/mes. Benchmark: 1.9 por cada 100 con 1+2; ~3.7 con las tres.
 - Se regeneraron `public/propuesta.html` (cifrada), el memo Word, la propuesta docx de Oscar y la chuleta.
+- Garantía (decisión tomada con Comercial, 2026-09-03): la garantía de Q4,500 se evalúa caso por caso a
+  los 4 meses y se extiende solo a quien valga la pena. La página ya NO pide aprobar el piso permanente ni
+  la "garantía que se gana" (se quitó la calculadora del escenario A y el piloto); la sección queda como
+  información + la propuesta sin costo de descuentos con tope. Paquete total = solo las tres prioridades.
 
 ## Sección interna cifrada (2026-09-02)
 
