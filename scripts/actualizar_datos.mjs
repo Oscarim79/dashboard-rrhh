@@ -269,7 +269,8 @@ const rd = (mezclaTotal.renuncia ?? 0) + (mezclaTotal.despido ?? 0);
 const salidas12mPorTipo = {};
 for (const r of ult12m) {
   if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
-  const tipo = r.tipo ?? 'sin tipo';
+  // oficinas/regiones no son tiendas: van aparte y no se costean con el modelo de tienda
+  const tipo = r.esTienda === false ? 'no tienda' : (r.tipo ?? 'sin tipo');
   salidas12mPorTipo[tipo] ??= { renuncia: 0, despido: 0 };
   salidas12mPorTipo[tipo][r.motivoGrupo]++;
 }

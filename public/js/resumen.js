@@ -27,6 +27,26 @@ for (const tipo of ORDEN_TIPOS) {
 }
 const st = A.salidas12mPorTipo['sin tipo'];
 if (st) salidasSinTipo = st.renuncia + st.despido;
+const noTienda = A.salidas12mPorTipo['no tienda'];
+const salidasNoTienda = noTienda ? noTienda.renuncia + noTienda.despido : 0;
+// de qué lugares vienen las salidas sin tipo (mismo criterio que el pipeline: solicitadas en 12 meses,
+// no canceladas, renuncia/despido, en tiendas sin tipo o en nombres no reconocidos)
+const origenSinTipo = (() => {
+  try {
+    const gen = new Date(vacantes.generado); const corte = new Date(gen); corte.setFullYear(gen.getFullYear() - 1);
+    const corteISO = corte.toISOString().slice(0, 10);
+    const c = new Map();
+    for (const r of vacantes.filas) {
+      if (!r.solicitud || r.solicitud < corteISO || r.estatus === 'CANCELADA') continue;
+      if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
+      if (r.esTienda === false || r.tipo != null) continue;
+      const eti = r.esTienda === null ? `${r.lugar ?? '(sin lugar)'} — nombre no reconocido en el archivo de tiendas`
+        : `${r.lugar}${r.lugarActivo === false ? ' (cerrada)' : ' (sin tipo)'}`;
+      c.set(eti, (c.get(eti) ?? 0) + 1);
+    }
+    return [...c.entries()].sort((x, y) => y[1] - x[1]).map(([k, n]) => `${k} ×${n}`).join(' · ');
+  } catch { return ''; }
+})();
 
 // ── Lo esencial en 6 cifras (lo primero que ve Gerencia) ───────────────────
 // Las mismas cifras que RRHH cita al presentar, pero calculadas en vivo de los
@@ -118,6 +138,7 @@ function pintarKpis() {
     <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
     <div class="kpi-eti">costo de rotación de los últimos 12 meses (${fmtNum(salidasCosteadas)} salidas en tiendas clasificadas${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''})</div>
     ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre las ${fmtNum(salidasSinTipo)} salidas en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
+    ${salidasNoTienda ? `<div class="kpi-nota">Otras ${fmtNum(salidasNoTienda)} salidas en 12 meses fueron en oficinas o regiones (no tiendas): quedan fuera de este costo porque el modelo es de tiendas.</div>` : ''}
   </div>
   <div class="kpi">
     <div class="kpi-valor">${medianaDias} días</div>
@@ -152,6 +173,7 @@ if (supuesto) {
     <p id="sup-aviso" style="font-size:13px; font-weight:600; color:var(--rojo); margin:4px 0"></p>
     <p style="font-size:13.5px">Costo estimado con este supuesto: <b class="num" id="sup-total"></b>
       <span style="color:var(--tinta-suave)">(usando la mezcla real de esas salidas: ${fmtNum(st.renuncia)} renuncias y ${fmtNum(st.despido)} despidos)</span></p>
+    ${origenSinTipo ? `<p style="font-size:13px; margin-top:6px"><b>De dónde vienen:</b> ${origenSinTipo}.</p>` : ''}
     <p class="pie">Este supuesto desaparece solo cuando las tiendas se clasifiquen en el archivo de tiendas — ahí el costo pasa a ser dato, no estimación.</p>`;
   const pintarSupuesto = () => {
     const suma = ORDEN_TIPOS.reduce((s, t) => s + (supuesto[t] || 0), 0);

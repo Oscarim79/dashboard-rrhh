@@ -28,6 +28,16 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Supuesto del Resumen: ahora dice de dónde vienen las salidas sin tipo (2026-09-03)
+
+- Tras clasificar las 9 tiendas, el supuesto bajó de 21 a 14 salidas. Para que no haya que adivinar,
+  la tarjeta del supuesto lista el origen: "Catocha (cerrada) ×N · <nombre> — nombre no reconocido en
+  el archivo de tiendas ×N", calculado de `vacantes.filas` con el mismo criterio del pipeline.
+- El pipeline separa en `salidas12mPorTipo['no tienda']` las salidas en oficinas/regiones (esTienda
+  false): ya no caen en "sin tipo" ni se costean con el modelo de tienda; el Resumen las anota aparte.
+- Lo que queda en "sin tipo" solo puede ser: tiendas cerradas con tipo null (Catocha, Petapa, Zona 9) o
+  nombres del sheet que no coinciden con ningún alias (arreglo: agregar el alias en config/tiendas.json).
+
 ## Sección "Calidad de datos" retirada del sitio (2026-09-03)
 
 - Pedido de Oscar: la lista de avisos de calidad en el Resumen "daña más de lo que ayuda" frente
