@@ -86,7 +86,7 @@
 
 ## Pendientes (no bloquean nada)
 
-1. **Tiendas sin tipo**: Catocha, Petapa, Pradera Concepción (Americana), Pradera 2, Central,
+1. **RESUELTO 2026-09-03** (clasificación de Oscar en config/tiendas.json: Cayalá → Abi Q AA; Pradera Concepción → Abi Q A; CLM = Concepción Las Minas A; Central = Quezaltepeque Central AA; Peque 2 = Quezaltepeque 2 A; "Pradera 2 *" A con asterisco porque no se sabe cuál Pradera; Abi Q Online A; Catocha y Petapa cerradas. Solo quedan sin tipo tiendas cerradas, así que el supuesto del Resumen solo cubre sus salidas históricas). Antes — **Tiendas sin tipo**: Catocha, Petapa, Pradera Concepción (Americana), Pradera 2, Central,
    Peque 2, CLM, Abi Q Online. Desde 2026-09-01 sus salidas SÍ se costean en el Resumen con un
    **supuesto editable** (default 80% tipo B, resto C — pedido de Oscar, rotulado como supuesto).
    Cuando Oscar las clasifique → editar `config/tiendas.json` y hacer push; el supuesto
@@ -95,7 +95,7 @@
 3. El Excel del modelo de Oscar aún tiene la fila "Telo" en la hoja Despido y fórmulas de
    Tienda B mal referenciadas en su Resumen (suman columna B corrida una fila). No afecta al
    dashboard; es limpieza de su archivo.
-4. Asumimos "Pradera CSV" (ABIQ) = la tienda Abi Q de Pradera Concepción — Oscar no lo ha corregido,
+4. **CONFIRMADO 2026-09-03** por Oscar (y además Cayalá y Pradera Concepción solo existen como Abi Q: el pipeline resuelve ambos nombres a la tienda Abi Q aunque la fila diga AMERICANA). Antes — Asumimos "Pradera CSV" (ABIQ) = la tienda Abi Q de Pradera Concepción — Oscar no lo ha corregido,
    así que se da por bueno.
 5. En el sheet, la vacante 219 (Jefe agencia, Abiq Chiquimula) tiene empresa "AMERICANA" siendo
    tienda Abi Q — dedazo para que Oscar corrija en el sheet (el dashboard la muestra tal cual).
