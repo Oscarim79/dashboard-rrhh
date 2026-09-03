@@ -73,6 +73,22 @@
 - La nota bajo la gráfica avisa que los tramos no tienen el mismo ancho y da el % que se va antes de
   cumplir un año (calculado en vivo).
 
+## Propuesta: "por qué" de cada meta en "Cinco problemas, cinco respuestas" (2026-09-03)
+
+- Pedido de Oscar: que cada uno de los cinco puntos diga por qué la meta prometida es alcanzable, no
+  solo cuál es. Se agregó una fila "Por qué" (etiqueta en ámbar, texto en gris) antes de cada "Meta":
+  1) una persona cierra ~12–13 vacantes/mes con mediana 16 días → con dos entrevistando, cola + nuevas
+  cabe en 60 días y el tiempo baja a la mitad; 2) con vacantes <10 días quedan 3–4 abiertas a la vez,
+  cubribles por dos comodines; 3) 84% renuncias y mediana 4.7 meses = ventana del plan 30/60/90; la meta
+  58%→25% es evitar ~50 de ~87 salidas tempranas; 4) Q529k ÷ Q55–72k = 7–10 salidas, 10% de ~87 = ~9;
+  5) el diagnóstico de SSO ya está cotizado, faltan horas: 43 tiendas en 90 días = 3–4 por semana.
+  Todo sale de cifras que ya están en la misma página; no se agregó ningún dato nuevo.
+- Se republicó el artefacto privado "Fortalecimiento de RRHH" (misma URL). **Pendiente de Oscar:**
+  copiar la fuente actualizada a `.private/propuesta-fuente.html` y correr
+  `CLAVE_PROPUESTA="..." node scripts/cifrar_propuesta.mjs` para regenerar `public/propuesta.html`
+  (en esta sesión no hay clave ni `.private/`, así que la página cifrada del sitio sigue sin las filas).
+  El memo Word y la chuleta no se tocaron.
+
 ## Propuesta reestructurada: tres prioridades acordadas con Comercial (2026-09-03)
 
 - Oscar acordó con el área Comercial el orden: 1) analista de RRHH para entrevistas, 2) un segundo
