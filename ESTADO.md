@@ -83,11 +83,9 @@
   58%→25% es evitar ~50 de ~87 salidas tempranas; 4) Q529k ÷ Q55–72k = 7–10 salidas, 10% de ~87 = ~9;
   5) el diagnóstico de SSO ya está cotizado, faltan horas: 43 tiendas en 90 días = 3–4 por semana.
   Todo sale de cifras que ya están en la misma página; no se agregó ningún dato nuevo.
-- Se republicó el artefacto privado "Fortalecimiento de RRHH" (misma URL). **Pendiente de Oscar:**
-  copiar la fuente actualizada a `.private/propuesta-fuente.html` y correr
-  `CLAVE_PROPUESTA="..." node scripts/cifrar_propuesta.mjs` para regenerar `public/propuesta.html`
-  (en esta sesión no hay clave ni `.private/`, así que la página cifrada del sitio sigue sin las filas).
-  El memo Word y la chuleta no se tocaron.
+- Se republicó el artefacto privado "Fortalecimiento de RRHH" (misma URL) y se regeneró
+  `public/propuesta.html` cifrado con la misma clave (verificado en navegador: abre con la clave,
+  rechaza una incorrecta, muestra las 5 filas). El memo Word y la chuleta no se tocaron.
 
 ## Propuesta reestructurada: tres prioridades acordadas con Comercial (2026-09-03)
 
