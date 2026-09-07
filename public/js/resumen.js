@@ -18,7 +18,9 @@ const NOMBRE_TIPO = {
   A: 'Tienda A · Q500k–Q1M/mes',
   B: 'Tienda B · Q300k–500k/mes',
   C: 'Tienda C · abajo de Q300k/mes',
+  NT: 'Oficinas, CEDI y regiones · sin ventas perdidas',
 };
+const NOMBRE_CORTO = { AA: 'tipo AA', A: 'tipo A', B: 'tipo B', C: 'tipo C', NT: 'de oficinas, CEDI y regiones' };
 
 function pintar(depto, periodo) {
   const vacantes = vacantesDe(datos.vacantes, depto);
@@ -62,8 +64,21 @@ function pintar(depto, periodo) {
   }
   const st = salidasPorTipo['sin tipo'];
   if (st) salidasSinTipo = st.renuncia + st.despido;
+  // Oficinas, CEDI y regiones (pedido de Oscar 2026-09-07): se costean con el mismo modelo
+  // pero SIN ventas perdidas (no hay piso de venta): curva de aprendizaje, tiempo de jefatura
+  // y RRHH, gastos de contratación y finiquito/indemnización, con la mediana global de días.
   const noTienda = salidasPorTipo['no tienda'];
   const salidasNoTienda = noTienda ? noTienda.renuncia + noTienda.despido : 0;
+  if (salidasNoTienda) {
+    const dias = A.diasCobertura.global.mediana ?? PARAMS_DEFECTO.diasVacante;
+    const p = { ...PARAMS_DEFECTO, diasVacante: dias };
+    const cR = costoSalida(0, 'renuncia', p), cD = costoSalida(0, 'despido', p);
+    costoTipo.NT = { cR, cD };
+    const anual = noTienda.renuncia * cR.total + noTienda.despido * cD.total;
+    costoAnual += anual;
+    salidasCosteadas += salidasNoTienda;
+    detallePorTipo.push({ tipo: 'NT', salidas: noTienda, cR, cD, anual, cal: { dias, fuente: A.diasCobertura.global.mediana != null ? `mediana global (n=${A.diasCobertura.global.n})` : 'supuesto del modelo' } });
+  }
   const salidasOtras = Object.values(salidasPorTipo).reduce((s, v) => s + (v.otros ?? 0), 0); // no confirmados, vacacionistas, sin razón
   // de qué lugares vienen las salidas sin tipo (registro de SALIDAS: tienda sin clasificar o
   // nombre de agencia que no está en config/tiendas.json)
@@ -154,9 +169,9 @@ function pintar(depto, periodo) {
     document.getElementById('kpis').innerHTML = `
     <div class="kpi" style="grid-column: 1 / -1;">
       <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
-      <div class="kpi-eti">costo de rotación · ${etiP} (${fmtNum(salidasCosteadas)} renuncias y despidos en tiendas clasificadas${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''}, según el registro de salidas) · ${etiquetaDepto(depto)}</div>
+      <div class="kpi-eti">costo de rotación · ${etiP} (${fmtNum(salidasCosteadas - salidasNoTienda)} renuncias y despidos en tiendas clasificadas${salidasNoTienda ? ` + ${fmtNum(salidasNoTienda)} en oficinas, CEDI y regiones` : ''}${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''}, según el registro de salidas) · ${etiquetaDepto(depto)}</div>
       ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre ${salidasSinTipo === 1 ? 'la salida' : `las ${fmtNum(salidasSinTipo)} salidas`} en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
-      ${salidasNoTienda ? `<div class="kpi-nota">Otras ${fmtNum(salidasNoTienda)} salidas del período fueron en oficinas, CEDI o regiones (no tiendas): quedan fuera de este costo porque el modelo es de tiendas.</div>` : ''}
+      ${salidasNoTienda ? `<div class="kpi-nota">Las ${fmtNum(salidasNoTienda)} salidas de oficinas, CEDI y regiones se costean <b>sin ventas perdidas</b> (no hay piso de venta): solo curva de aprendizaje, tiempo de jefatura y RRHH, gastos de contratación y finiquito o indemnización. Ver su tarjeta más abajo.</div>` : ''}
       ${salidasOtras ? `<div class="kpi-nota">${fmtNum(salidasOtras)} salidas más no se costean por no ser renuncia ni despido (no confirmados, vacacionistas o sin razón registrada).</div>` : ''}
       ${!salidasCosteadas && !salidasSinTipo ? '<div class="kpi-nota">No hay renuncias ni despidos registrados en este período y alcance.</div>' : ''}
     </div>
@@ -226,6 +241,7 @@ function pintar(depto, periodo) {
   document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.length ? detallePorTipo.map((d) => `
     <div class="tarjeta">
       <h3>${NOMBRE_TIPO[d.tipo]}</h3>
+      ${d.tipo === 'NT' ? '<p class="sub" style="margin-bottom:8px">Bajas en oficinas, CEDI y regiones. Mismo modelo, pero sin ventas perdidas porque no hay piso de venta; el resto (curva de aprendizaje, jefatura y RRHH, contratación, finiquito o indemnización) aplica igual.</p>' : ''}
       <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
         <span><span class="pill verde">Renuncia</span> <span class="una-salida">cada una cuesta</span></span>
         <b class="num" style="font-size:20px">${fmtQ(d.cR.total)}</b>
@@ -273,7 +289,7 @@ function pintar(depto, periodo) {
   // 3. dónde se concentran las salidas
   const topTipo = [...detallePorTipo].sort((a, b) => b.anual - a.anual)[0];
   if (topTipo && costoAnual > 0) {
-    hallazgos.push(`Las tiendas <b>tipo ${topTipo.tipo}</b> concentran la mayor parte del costo: <b>${fmtQ(topTipo.anual)}</b> en ${etiP} (${Math.round((topTipo.anual / costoAnual) * 100)}% del total costeado), entre volumen de salidas y ventas en riesgo.`);
+    hallazgos.push(`Las ${topTipo.tipo === 'NT' ? 'salidas <b>de oficinas, CEDI y regiones</b>' : `tiendas <b>${NOMBRE_CORTO[topTipo.tipo]}</b>`} concentran la mayor parte del costo: <b>${fmtQ(topTipo.anual)}</b> en ${etiP} (${Math.round((topTipo.anual / costoAnual) * 100)}% del total costeado), entre volumen de salidas y ventas en riesgo.`);
   }
 
   // 4. (si aplica) salidas sin clasificar
@@ -322,7 +338,8 @@ function pintar(depto, periodo) {
           del rango de cada tipo y se pueden cambiar en el Simulador.</li>
         <li><b>Costo por salida</b>: modelo "Costo de rotación por tipo de tienda" (ago 2025) implementado en el Simulador — ventas
           perdidas, curva de aprendizaje, tiempo de jefatura y RRHH, publicidad y finiquito/indemnización — con los días de vacante
-          reales. Sus valores de control se verifican en cada publicación.</li>
+          reales. Sus valores de control se verifican en cada publicación. Las salidas de oficinas, CEDI y regiones se costean con el
+          mismo modelo pero sin ventas perdidas.</li>
         <li><b>Actualización</b>: automática todos los días a las 6:00 (Guatemala) y en cada publicación. Antes de publicar corre una
           verificación anti-fugas: si detecta un dato personal, no publica nada.</li>
       </ul>

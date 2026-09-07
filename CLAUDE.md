@@ -80,6 +80,8 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
 
 - **Salidas que se costean, mezcla renuncias/despidos, antigüedad:** registro de SALIDAS
   (`salidas.json → porTipoTienda`, `razon`, `rango`). Es el registro completo.
+- **Oficinas, CEDI y regiones ('no tienda'):** se costean con el modelo con ventas = 0 (sin ventas
+  perdidas), tarjeta "NT" en el Resumen.
 - **Días de vacante y plazas abiertas:** control de VACANTES. NO usarlo para contar salidas:
   solo registra las plazas que se abrieron (171 vs 474 bajas en todo el registro).
 

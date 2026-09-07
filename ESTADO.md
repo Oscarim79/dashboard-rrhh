@@ -44,7 +44,13 @@
   Central (CONTABILIDAD, COBROS, COBRADOR, AUDITORIA, GARANTIAS, ADMINISTRATIVO...) y ABIQ OAKLAND
   MALL → Oakland Mall. Quedan sin reconocer: EL CHAL (1) y ABIQ MIRAFLORES (1) — preguntar a Oscar.
 - OJO: tras los ajustes de Oscar en el Sheet, 78 salidas de CEDI/oficinas tienen AREA LAB =
-  COMERCIAL; en Comercial aparecen como "no tienda" y no se costean (el modelo es de tiendas).
+  COMERCIAL; en Comercial aparecen como "no tienda".
+- **Oficinas, CEDI y regiones SÍ se costean** (pedido de Oscar, mismo día): mismo modelo con
+  ventas = 0 (sin ventas perdidas; curva, jefatura/RRHH, contratación, finiquito/indemnización) y
+  la mediana global de días. Tarjeta propia "Oficinas, CEDI y regiones · sin ventas perdidas"
+  (≈ Q31k renuncia / Q35.5k despido). Todo el registro: Comercial ≈ Q29.1M · General ≈ Q30.3M;
+  12 meses: Q10.9M · Q11.4M. La diferencia General–Comercial sigue siendo chica porque el Sheet
+  marca 440 de 474 bajas como Comercial.
 
 ## Propuesta: selector de período en "Por qué se van" (2026-09-07, sexta ronda)
 
