@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="css/estilo.css">
 <style>
   main { max-width: 820px; padding-bottom: 60px; }
-  .portada h1 { font-size: 24px; line-height: 1.2; margin: 18px 0 6px; }
+  .portada h1 { font-size: 24px; line-height: 1.2; margin: 2px 0 6px; }
   .portada .sub { font-size: 14px; }
   .seccion { margin-top: 34px; }
   .seccion-num { font-size: 11.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--verde); }
@@ -27,24 +27,15 @@
   .cargo ul { padding-left: 18px; margin: 0; }
   .cargo li { font-size: 14px; margin-bottom: 5px; }
   .marca-tiempo { display: inline-block; margin-top: 8px; padding: 6px 9px; border-radius: 8px; background: var(--ambar-suave); color: var(--ambar); font-size: 13px; font-weight: 600; line-height: 1.35; }
-  .deja { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--borde); font-size: 13px; color: var(--tinta-suave); line-height: 1.4; }
-  .deja b { color: var(--rojo); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
-  .bloque { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
-  .bloque h3 { margin-top: 0; font-size: 16px; }
-  .bloque p, .bloque li { font-size: 14.5px; }
-  .bloque .cifra { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
-  .cifras3 { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 8px 0 10px; }
-  @media (min-width: 640px) { .cifras3 { grid-template-columns: 1fr 1fr 1fr; } }
-  .cifras3 > div { background: #F4F3EE; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--tinta-suave); }
   .marca-nohace { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: #F4DEDA; color: var(--rojo); font-size: 12px; font-weight: 700; white-space: nowrap; }
-  .hecho { border-left: 4px solid var(--tinta); background: var(--tarjeta); padding: 12px 14px; border-radius: 0 10px 10px 0; font-size: 15.5px; }
+  .hecho { border-left: 4px solid var(--tinta); background: var(--tarjeta); padding: 12px 14px; border-radius: 0 10px 10px 0; font-size: 15px; line-height: 1.55; }
+  .hecho p:last-child { margin-bottom: 0; }
 
-  /* razones de salida (distribución manual) */
+  /* razones de salida */
   .razon { display: grid; grid-template-columns: 190px 1fr 78px; gap: 8px; align-items: center; margin-bottom: 7px; font-size: 14px; }
   @media (max-width: 480px) { .razon { grid-template-columns: 120px 1fr 70px; font-size: 12.5px; } }
   .razon-barra { height: 18px; background: #EEECE6; border-radius: 5px; overflow: hidden; position: relative; }
   .razon-barra div { height: 100%; background: var(--azul-gris); border-radius: 5px; }
-  .razon-barra .pendiente { position: absolute; left: 8px; top: 0; line-height: 18px; font-size: 11.5px; color: var(--tinta-suave); font-style: italic; }
   .razon-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
   .aviso { font-size: 13.5px; background: var(--ambar-suave); border-radius: 8px; padding: 8px 10px; margin-top: 8px; }
   .aviso:empty { display: none; }
@@ -54,20 +45,20 @@
   .propuesta h3 { margin-top: 0; font-size: 17px; }
   .objetivo { font-size: 14px; color: var(--tinta-suave); margin-bottom: 10px; }
   .objetivo b { color: var(--tinta); }
-  .costo { font-size: 14px; background: #F4F3EE; border-left: 3px solid var(--verde); border-radius: 0 6px 6px 0; padding: 8px 10px; margin-top: 10px; }
-  .variantes { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 10px 0; }
-  @media (min-width: 720px) { .variantes { grid-template-columns: 1fr 1fr 1fr; } }
-  .variante { border: 1px solid var(--borde); border-radius: 10px; padding: 12px; background: #FBFAF7; }
-  .variante h4 { font-size: 14px; margin-bottom: 6px; }
-  .variante p, .variante li { font-size: 13.5px; }
-  .variante .pro, .variante .contra { padding-left: 16px; margin: 4px 0; }
-  .variante .pro li::marker { color: var(--verde); }
-  .variante .contra li::marker { color: var(--rojo); }
-  .variante.recomendada { border-color: var(--verde); box-shadow: inset 0 0 0 1px var(--verde); }
-  .etiqueta { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 11.5px; font-weight: 700; background: var(--verde-suave); color: var(--verde); margin-left: 6px; }
+  .hoy { background: #F4F3EE; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
+  .hoy .eti { font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-suave); margin-bottom: 4px; }
+  .hoy p, .hoy li { font-size: 14px; margin-bottom: 4px; }
+  .hoy ul { margin: 0; padding-left: 18px; }
+  .prop-eti { font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--verde); margin-bottom: 4px; }
   .enfoque { font-size: 15.5px; line-height: 1.55; border-left: 4px solid var(--verde); padding: 10px 14px; background: var(--tarjeta); border-radius: 0 10px 10px 0; margin-bottom: 18px; }
   .acciones { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; }
   .acciones a { font-size: 13px; font-weight: 600; color: var(--verde); text-decoration: none; border: 1px solid var(--verde); border-radius: 8px; padding: 7px 10px; }
+  .bloque { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .bloque p, .bloque li { font-size: 14.5px; }
+  .bloque .cifra { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .cifras3 { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 8px 0 10px; }
+  @media (min-width: 640px) { .cifras3 { grid-template-columns: 1fr 1fr 1fr; } }
+  .cifras3 > div { background: #F4F3EE; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--tinta-suave); }
 
   /* modo "solo capacitador": para mostrar esa parte al gerente comercial por separado */
   body.solo-capacitador .solo-oculto { display: none !important; }
@@ -75,9 +66,8 @@
 
   @media print {
     .cabecera, nav#menu, #velo, .acciones { display: none; }
-    body { padding-left: 0; }
-    body { background: #fff; }
-    .propuesta, .cargo, .variante { break-inside: avoid; }
+    body { padding-left: 0; background: #fff; }
+    .propuesta, .cargo, .bloque { break-inside: avoid; }
   }
 </style>
 </head>
@@ -100,7 +90,7 @@
 <main>
   <div class="portada">
     <div class="seccion-num solo-oculto" style="margin-top:14px">Propuesta a Gerencia · RRHH</div>
-    <h1 class="solo-oculto" style="margin-top:2px">Capacitación y retención: el problema y tres propuestas</h1>
+    <h1 class="solo-oculto">Capacitación y retención: el problema y tres propuestas</h1>
     <h1 style="display:none" class="solo-visible">Vendedor capacitador oficial por región</h1>
     <p class="sub solo-oculto">Departamento Comercial · Recursos Humanos · septiembre de 2026. Las cifras del tablero se actualizan solas; las que RRHH carga a mano están marcadas.</p>
     <div class="acciones solo-oculto">
@@ -112,20 +102,19 @@
   <section class="seccion solo-oculto" id="problema">
     <div class="seccion-num">Sección 1</div>
     <h2>El problema</h2>
-    <p>La causa está en la capacitación. Esta sección muestra tres cosas: con qué carga trabaja hoy el equipo de RRHH, cómo se capacita hoy a un vendedor nuevo y por qué se va la gente.</p>
+    <p>La causa está en la capacitación. Esta sección muestra tres cosas: con qué carga trabaja hoy el equipo de RRHH, qué pasa hoy con la capacitación de un vendedor nuevo y por qué se va la gente.</p>
 
     <h3>1.1 Carga de trabajo actual del equipo de RRHH</h3>
     <div class="cargos">
       <div class="cargo">
         <h4>Jefe de RRHH</h4>
         <ul>
-          <li>Entrevistas a candidatos.</li>
+          <li>Entrevistas a candidatos: es lo que más tiempo le lleva. Se reparten entre el jefe de RRHH, la asistente y el gerente de RRHH.</li>
           <li>Propuestas laborales.</li>
           <li>Casos ante el Ministerio Público.</li>
           <li>Representación de la empresa ante el Ministerio de Trabajo.</li>
         </ul>
-        <p class="deja"><b>Se queda sin hacer:</b> planes de retención y clima, seguimiento a tiendas y mejora de procesos. La estrategia existe; falta quien la lleve a la operación.</p>
-        <span class="marca-tiempo">⏱ Lo que más tiempo consume: MINTRAB y MP. Implica viajar, esperar y atender lo que surja en el momento.</span>
+        <span class="marca-tiempo">⏱ MP y MINTRAB: cerca de un caso al mes (promedio de los últimos 6 meses) y cada caso le lleva casi dos días completos, entre viajar, esperar y atender lo que surja en el momento.</span>
       </div>
       <div class="cargo">
         <h4>Asistente de RRHH (campo y tiendas)</h4>
@@ -136,7 +125,6 @@
           <li>Seguimiento a empleados nuevos <span class="marca-nohace">no se está haciendo por falta de tiempo</span></li>
           <li>Gestión de todo lo relacionado con Salud y Seguridad Ocupacional.</li>
         </ul>
-        <p class="deja"><b>Se queda sin hacer:</b> programa de capacitación estructurado, cumplimiento de SSO (comités, inspecciones, expedientes) y atención de quejas del personal.</p>
       </div>
       <div class="cargo">
         <h4>Asistente administrativa de RRHH</h4>
@@ -148,17 +136,17 @@
           <li>Planilla e IGSS.</li>
           <li>Gestión de uniformes.</li>
         </ul>
-        <p class="deja"><b>Se queda sin hacer:</b> soporte a tiendas y trámites que se acumulan o se retrasan.</p>
       </div>
     </div>
 
-    <h3>Seguimiento a los nuevos, según el registro</h3>
-    <div class="tarjeta" id="integracion"></div>
-
-    <h3>1.2 No existe un sistema formal de capacitación</h3>
+    <h3>1.2 La capacitación se corta por la urgencia de cada plaza</h3>
     <div class="hecho">
-      Al vendedor nuevo se le manda a una tienda a estar a la par del jefe de tienda o de quien pueda capacitarlo.
-      No hay contenido definido, ni duración, ni una forma de saber cuándo ya está capacitado.
+      <p>Sí existe un sistema de capacitación, con documentos que dan claridad, estructura y cultura al vendedor nuevo.
+        El problema es cómo se aplica: por la urgencia de cada plaza, este año muchas veces los supervisores le indican al jefe
+        de la agencia donde se está capacitando al nuevo que lo mande de una vez a su tienda, sin haberse capacitado bien o
+        solo con la información breve que ya se le dio.</p>
+      <p>Lo que se propone es un sistema donde la capacitación tenga prioridad sobre la urgencia, usando los documentos y el
+        sistema que ya tenemos.</p>
     </div>
 
     <h3>1.3 Razones de salida</h3>
@@ -169,7 +157,6 @@
       <div id="razones"></div>
       <div class="aviso" id="razones-aviso"></div>
     </div>
-    <div class="tarjeta" id="captura"></div>
   </section>
 
   <!-- ══════════════════════ SECCIÓN 2 · PROPUESTAS ══════════════════════ -->
@@ -185,93 +172,61 @@
 
     <div class="propuesta solo-oculto" id="p1">
       <h3>1. Asistente para el jefe de RRHH (traslado interno)</h3>
-      <p class="objetivo">Responde a: la carga del jefe de RRHH. Objetivo: <b>"descargarlo de todo lo demás"</b> para que se concentre en las entrevistas, que es donde más aporta.</p>
+      <div class="hoy">
+        <div class="eti">Hoy · jefe de RRHH</div>
+        <ul>
+          <li>Entrevistas a candidatos (lo que más tiempo le lleva), propuestas laborales, casos ante el MP y representación ante el MINTRAB.</li>
+          <li>Cada caso del MP o del MINTRAB, cerca de uno al mes, le consume casi dos días completos.</li>
+        </ul>
+      </div>
+      <div class="prop-eti">Propuesta</div>
+      <p class="objetivo">Objetivo: <b>"descargarlo de todo lo demás"</b> para que se concentre en las entrevistas, que es donde más aporta.</p>
       <ul>
-        <li>Se traslada a una persona de otro departamento para asumir las propuestas laborales y la gestión de los casos ante el Ministerio Público y el Ministerio de Trabajo (preparación, seguimiento y, donde sea posible, la representación), de modo que el jefe de RRHH se dedique a entrevistar.</li>
+        <li>Se traslada a una persona de otro departamento para asumir las propuestas laborales y la gestión de los casos ante el Ministerio Público y el Ministerio de Trabajo (preparación, seguimiento y, donde sea posible, la representación).</li>
         <li><b>Ya hay una candidata identificada dentro de la empresa:</b> colaboradora del departamento de Garantías, que actualmente estudia Recursos Humanos y está interesada en la oportunidad.</li>
         <li>Al ser traslado interno, la transición es rápida: conoce la empresa y sus procesos.</li>
       </ul>
-      <div class="costo" id="p1-costo"></div>
     </div>
 
     <div class="propuesta solo-oculto" id="p2">
       <h3>2. Segundo comodín, a la par de la asistente de RRHH actual</h3>
-      <p class="objetivo">Responde a: el seguimiento a los nuevos que no se está haciendo, y la sobrecarga de la asistente de campo.</p>
+      <div class="hoy">
+        <div class="eti">Hoy · asistente de RRHH de campo</div>
+        <ul>
+          <li>Comodín en tiendas cuando alguien renuncia o es despedido, búsqueda de perfiles en campo, capacitación operativa (facturación, sistema) y toda la gestión de Salud y Seguridad Ocupacional.</li>
+          <li>El seguimiento a los empleados nuevos no se está haciendo por falta de tiempo.</li>
+        </ul>
+      </div>
+      <div class="prop-eti">Propuesta</div>
       <ul>
-        <li>Mismo perfil que la asistente de RRHH actual: cubre tiendas cuando queda una plaza en el aire, capacita en lo operativo y da seguimiento en tienda a los nuevos.</li>
+        <li>Una segunda persona con el mismo perfil: cubre tiendas cuando queda una plaza en el aire, capacita en lo operativo y da seguimiento en tienda a los nuevos.</li>
         <li>Con dos personas, una puede estar cubriendo una tienda mientras la otra acompaña a los nuevos: hoy esas dos cosas compiten por el mismo tiempo y siempre gana la tienda.</li>
       </ul>
-      <div class="costo" id="p2-costo"></div>
     </div>
 
     <!-- Esta propuesta se redacta para poder mostrarse por separado (al gerente comercial): propuesta.html?solo=capacitador -->
     <div class="propuesta" id="capacitador">
       <h3>3. Un vendedor capacitador oficial por región</h3>
-      <p class="objetivo">Responde a: no existe un sistema formal de capacitación. Hoy el nuevo aprende de quien esté a la mano; con esto aprende de alguien nombrado para eso.</p>
-      <p>En cada región se nombra un vendedor con experiencia como <b>capacitador oficial</b>. Cuando llega alguien nuevo a su región, capacitarlo es su enfoque; cuando no hay nadie que capacitar, sigue vendiendo con normalidad. No es una plaza nueva: es una función adicional para un vendedor que ya está.</p>
-
+      <div class="hoy">
+        <div class="eti">Hoy · quién capacita al vendedor nuevo</div>
+        <ul>
+          <li>El nuevo se manda a una agencia a estar a la par del jefe de agencia o de quien pueda capacitarlo, mientras esa persona sigue vendiendo y atendiendo su tienda.</li>
+          <li>Por la urgencia de cada plaza, muchas veces se le pide al jefe de esa agencia que lo mande a su tienda antes de terminar la capacitación.</li>
+        </ul>
+      </div>
+      <div class="prop-eti">Propuesta</div>
+      <p>En cada región se nombra un vendedor con experiencia como <b>capacitador oficial</b>. Cuando llega alguien nuevo a su región, capacitarlo es su enfoque, con los documentos y el sistema de capacitación que ya existen; cuando no hay nadie que capacitar, sigue vendiendo con normalidad. No es una plaza nueva: es una función adicional para un vendedor que ya está.</p>
       <h4 style="font-size:14.5px; margin:14px 0 6px">Primer paso: definir qué es un "vendedor capacitado"</h4>
       <p>El rol incluye trabajar con RRHH en definir el perfil de <b>"vendedor capacitado"</b>: qué debe saber hacer (sistema, facturación, atención, producto, cobros) y en cuánto tiempo. Esa definición es el primer paso hacia el plan de capacitación estructurado que se presentará después, y es lo que permite saber cuándo un nuevo ya puede quedarse solo.</p>
-
-      <h4 style="font-size:14.5px; margin:14px 0 6px">Remuneración</h4>
-      <p>Base acordada: <b>bono de Q500 mensuales</b> por la función de capacitador. El punto delicado es que, mientras capacita, vende menos y pierde comisión; si pierde ingreso, nadie va a querer el rol. Por eso el bono se complementa con un mecanismo para que no pierda ingreso por ventas. Tres variantes:</p>
-      <div class="variantes">
-        <div class="variante recomendada">
-          <h4>A. Comisión promedio garantizada <span class="etiqueta">recomendada</span></h4>
-          <p>Durante los días que capacita, se le garantiza como mínimo su comisión promedio de los últimos 3 meses (prorrateada por día). Si vende más, cobra lo que vendió.</p>
-          <ul class="pro"><li>No pierde ingreso: el rol es atractivo para los mejores vendedores.</li><li>Fácil de explicar y de auditar (días de capacitación registrados por RRHH).</li></ul>
-          <ul class="contra"><li>Tiene costo aunque el capacitador venda parte de lo normal.</li><li>Hay que llevar el registro de días de capacitación.</li></ul>
-          <p class="pie" id="var-a-costo"></p>
-        </div>
-        <div class="variante">
-          <h4>B. Comisión compartida con el nuevo</h4>
-          <p>Mientras capacita, se le acredita al capacitador una parte de las ventas del nuevo (además de las suyas). Sin garantía.</p>
-          <ul class="pro"><li>Sin costo fijo: sale de ventas que sin el nuevo no existirían.</li><li>Alinea al capacitador con que el nuevo venda pronto.</li></ul>
-          <ul class="contra"><li>Un nuevo vende poco al inicio: el capacitador sí puede perder ingreso.</li><li>Complica el cálculo de comisiones y puede generar roces.</li></ul>
-          <p class="pie" id="var-b-costo"></p>
-        </div>
-        <div class="variante">
-          <h4>C. Bono por resultado, sin garantía</h4>
-          <p>Bono de Q500 fijo más un bono adicional por cada nuevo que llegue a los 90 días (o a su meta de venta). Sin garantía de comisión.</p>
-          <ul class="pro"><li>Paga por lo que importa: que el nuevo se quede y venda.</li><li>Costo predecible.</li></ul>
-          <ul class="contra"><li>No compensa las ventas que deja de hacer mientras capacita.</li><li>El pago llega meses después; el sacrificio es hoy.</li></ul>
-          <p class="pie" id="var-c-costo"></p>
-        </div>
-      </div>
-      <p>Las variantes A y C se pueden combinar: garantía durante la capacitación y un bono por cada nuevo que llegue a 90 días.</p>
-      <div class="costo" id="p3-param"></div>
+      <p class="pie">La remuneración del capacitador se define con Gerencia.</p>
     </div>
 
-    <!-- ── Resumen del documento "Propuesta de estructuración de RRHH" (sep 2026) ── -->
     <div class="solo-oculto">
-      <h3>4. Compensación del vendedor: el piso, el mes 5 y los descuentos</h3>
-      <div class="bloque">
-        <p id="comp-hecho"></p>
-        <ul>
-          <li><b>Decisión ya tomada con Comercial:</b> la garantía de Q4,500 se evalúa caso por caso a los 4 meses y se extiende a quien vale la pena. Ya no se pide un piso permanente.</li>
-          <li><b>La exigencia va a la meta, no al piso:</b> quien tras la capacitación no alcanza ~70% de su meta entra a un plan de 30 días con su capacitador de región, con decisión al final. Costo: Q0, es gestión.</li>
-          <li><b>Descuentos con tope:</b> hoy se aplican todos de un solo (error de sistema, uniformes, IGSS) y una quincena floja puede quedar en unos Q700. Se propone tope de ~10% por quincena (el excedente se difiere en cuotas; el IGSS no se toca), uniformes en cuotas desde el mes 5 o gratis a los 6 meses, y corresponsabilidad en errores durante la curva de aprendizaje. Costo: Q0, es calendario de cobro. "Descuentos en salario" ya aparece como motivo de renuncia en la Sección 1.</li>
-        </ul>
-      </div>
-
-      <h3>5. Salud y seguridad ocupacional: trabajo obligatorio que hoy nadie puede hacer</h3>
+      <h3>4. Salud y seguridad ocupacional: trabajo obligatorio que hoy nadie puede hacer</h3>
       <div class="bloque" id="sso"></div>
 
-      <h3>6. Compromisos de RRHH a 90 días</h3>
-      <div class="bloque">
-        <ul>
-          <li><b>Cola de vacantes:</b> cerrar las plazas abiertas hoy en 60 días y mantener el promedio de días de vacante por debajo de 10.</li>
-          <li><b>Retención temprana:</b> perfil de "vendedor capacitado" definido y capacitadores nombrados por región; meta de bajar las salidas antes de 6 meses del nivel actual a 25% en el primer semestre.</li>
-          <li><b>Cumplimiento:</b> calendario de SSO al día en las 43 tiendas, con responsable definido y constante.</li>
-          <li><b>Seguimiento:</b> indicadores mensuales en este tablero para revisar con Gerencia.</li>
-        </ul>
-      </div>
-
-      <h3>7. No es crecer RRHH: es llegar al mínimo de la industria</h3>
+      <h3>5. No es crecer RRHH: es llegar al mínimo de la industria</h3>
       <div class="bloque" id="benchmark"></div>
-
-      <h3>8. Inversión y retorno</h3>
-      <div class="tarjeta" id="resumen-costos"></div>
     </div>
   </section>
 

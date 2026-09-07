@@ -28,6 +28,22 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Propuesta: recorte pedido por Oscar (2026-09-07, cuarta ronda)
+
+- Fuera de la página: "se queda sin hacer", el bloque de seguimiento a nuevos (control de
+  integración; el JSON se sigue generando), la tabla "qué tanto explica el registro", todos los
+  costos (Q6,300 / Q6,500), la remuneración del capacitador (bono y variantes), el punto de
+  compensación, "lo que se pide" de SSO, los compromisos a 90 días e inversión y retorno. Todo eso
+  se discute con el CEO en la reunión, no en la página. `propuesta-datos.js → supuestos` queda sin
+  uso por ahora (se conserva por si vuelve a hacer falta).
+- Ajustes de texto: al jefe de RRHH lo que más tiempo le lleva son las entrevistas (repartidas
+  entre jefe, asistente y gerente de RRHH); MP/MINTRAB ≈ un caso al mes (promedio 6 meses), casi
+  dos días cada uno. 1.2 ya no dice "no existe un sistema": sí existe (documentos y sistema); el
+  problema es que por urgencia los supervisores piden al jefe de agencia que mande al nuevo antes
+  de terminar; se propone priorizar la capacitación con lo que ya hay.
+- Sección 2: cada propuesta abre con "Hoy · carga actual" de la persona y luego "Propuesta".
+  Quedan 1–3 + 4. SSO (sin petición) + 5. benchmark de industria.
+
 ## Propuesta: resumen del documento Word en la Sección 2 (2026-09-07, tercera ronda)
 
 - **"Propuesta" es la última opción del menú izquierdo** en todas las páginas (pedido del CEO) y la
