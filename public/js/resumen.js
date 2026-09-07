@@ -25,7 +25,14 @@ function pintar(depto, periodo) {
   const salidas = salidasDe(salidasTodo, depto);
   const generado = vacantes.generado;
   const filasP = vacantesEnPeriodo(vacantes.filas, periodo, generado);
-  const A = agregarVacantes(filasP);
+  const A = agregarVacantes(filasP); // días de vacante, plazas abiertas (control de vacantes)
+  const D = dimsSalidas(salidas, periodo); // salidas del período (registro de SALIDAS)
+  // Decisión de Oscar (2026-09-07): las salidas que se costean salen del registro de SALIDAS
+  // (completo), no del control de vacantes (solo las plazas que se abrieron). Los días de
+  // vacante siguen saliendo del control de vacantes.
+  const salidasPorTipo = D.porTipoTienda ?? {};
+  const rdS = (D.razon?.RENUNCIA ?? 0) + (D.razon?.DESPIDO ?? 0);
+  const mezcla = { pctRenuncia: rdS ? (D.razon.RENUNCIA ?? 0) / rdS : null, pctDespido: rdS ? (D.razon.DESPIDO ?? 0) / rdS : null };
   const etiP = etiquetaPeriodo(periodo, generado);
   const rango = rangoPeriodo(periodo, generado);
   document.getElementById('alcance').innerHTML = notaAlcance(depto);
@@ -46,33 +53,21 @@ function pintar(depto, periodo) {
     const cR = costoSalida(VENTAS_TIPO[tipo], 'renuncia', p);
     const cD = costoSalida(VENTAS_TIPO[tipo], 'despido', p);
     costoTipo[tipo] = { cR, cD };
-    const s = A.salidas12mPorTipo[tipo];
-    if (!s) continue;
+    const s = salidasPorTipo[tipo];
+    if (!s || (!s.renuncia && !s.despido)) continue;
     const anual = s.renuncia * cR.total + s.despido * cD.total;
     costoAnual += anual;
     salidasCosteadas += s.renuncia + s.despido;
     detallePorTipo.push({ tipo, salidas: s, cR, cD, anual, cal: { dias, fuente: cal.dias == null ? 'supuesto del modelo, sin vacantes cerradas en el período' : cal.fuente } });
   }
-  const st = A.salidas12mPorTipo['sin tipo'];
+  const st = salidasPorTipo['sin tipo'];
   if (st) salidasSinTipo = st.renuncia + st.despido;
-  const noTienda = A.salidas12mPorTipo['no tienda'];
+  const noTienda = salidasPorTipo['no tienda'];
   const salidasNoTienda = noTienda ? noTienda.renuncia + noTienda.despido : 0;
-  // de qué lugares vienen las salidas sin tipo (mismo criterio: no canceladas, renuncia/despido,
-  // en tiendas sin tipo o en nombres no reconocidos)
-  const origenSinTipo = (() => {
-    try {
-      const c = new Map();
-      for (const r of filasP) {
-        if (r.estatus === 'CANCELADA') continue;
-        if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
-        if (r.esTienda === false || r.tipo != null) continue;
-        const eti = r.esTienda === null ? `${r.lugar ?? '(sin lugar)'} — nombre no reconocido en el archivo de tiendas`
-          : `${r.lugar}${r.lugarActivo === false ? ' (cerrada)' : ' (sin tipo)'}`;
-        c.set(eti, (c.get(eti) ?? 0) + 1);
-      }
-      return [...c.entries()].sort((x, y) => y[1] - x[1]).map(([k, n]) => `${k} ×${n}`).join(' · ');
-    } catch { return ''; }
-  })();
+  const salidasOtras = Object.values(salidasPorTipo).reduce((s, v) => s + (v.otros ?? 0), 0); // no confirmados, vacacionistas, sin razón
+  // de qué lugares vienen las salidas sin tipo (registro de SALIDAS: tienda sin clasificar o
+  // nombre de agencia que no está en config/tiendas.json)
+  const origenSinTipo = Object.entries(D.sinTipoOrigen ?? {}).sort((x, y) => y[1] - x[1]).map(([k, n]) => `${k} ×${n}`).join(' · ');
 
   // ── Lo esencial en 6 cifras (lo primero que ve Gerencia) ───────────────────
   // Calculadas en vivo de los JSON publicados — nunca escritas a mano — y cada
@@ -88,16 +83,15 @@ function pintar(depto, periodo) {
     const cierre = rotacion.acumulado
       .filter((r) => r.area === areaRot && r.fin != null && (!hastaYm || `${r.anio}-${String(r.mesNum).padStart(2, '0')}` <= hastaYm))
       .sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
-    const salidas12 = salidasCosteadas + salidasSinTipo;
+    const salidas12 = salidasCosteadas + salidasSinTipo + salidasNoTienda;
     if (cierre && cierre.fin > 0 && salidas12 > 0) {
       const pct = Math.round((salidas12 / cierre.fin) * 100);
       tiles.push(kpi(`${pct}%`, `de la plantilla ${depto === 'comercial' ? 'comercial ' : ''}se reemplazó · ${etiP}`,
-        `${fmtNum(salidas12)} salidas con vacante · ${fmtNum(cierre.fin)} colaboradores al cierre de ${MES_CORTO[cierre.mesNum - 1]} ${cierre.anio}`,
+        `${fmtNum(salidas12)} renuncias y despidos (registro de salidas) · ${fmtNum(cierre.fin)} colaboradores al cierre de ${MES_CORTO[cierre.mesNum - 1]} ${cierre.anio}`,
         pct >= 50 ? 'rojo' : ''));
     }
 
     // 2. salidas tempranas y antigüedad mediana (registro de salidas, mismo período)
-    const D = dimsSalidas(salidas, periodo);
     if (D.n) {
       const TEMPRANOS = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES'];
       const temp = TEMPRANOS.reduce((s, k) => s + (D.rango[k] ?? 0), 0);
@@ -129,10 +123,10 @@ function pintar(depto, periodo) {
         `${fmtNum(g.n)} vacantes cerradas con dato · ${etiP}`, '', 'medio'));
     }
 
-    // 6. renuncias vs despidos
-    if (A.mezcla.pctRenuncia != null) {
-      tiles.push(kpi(`${Math.round(A.mezcla.pctRenuncia * 100)}%`, 'de las salidas son renuncias, no despidos',
-        `mezcla real · ${etiP}`));
+    // 6. renuncias vs despidos (registro de salidas)
+    if (mezcla.pctRenuncia != null) {
+      tiles.push(kpi(`${Math.round(mezcla.pctRenuncia * 100)}%`, 'de las salidas son renuncias, no despidos',
+        `${fmtNum(rdS)} renuncias y despidos · ${etiP}`));
     }
 
     document.getElementById('cifras-clave').innerHTML = tiles.join('');
@@ -160,10 +154,11 @@ function pintar(depto, periodo) {
     document.getElementById('kpis').innerHTML = `
     <div class="kpi" style="grid-column: 1 / -1;">
       <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
-      <div class="kpi-eti">costo de rotación · ${etiP} (${fmtNum(salidasCosteadas)} salidas en tiendas clasificadas${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''}) · ${etiquetaDepto(depto)}</div>
-      ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre las ${fmtNum(salidasSinTipo)} salidas en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
-      ${salidasNoTienda ? `<div class="kpi-nota">Otras ${fmtNum(salidasNoTienda)} salidas del período fueron en oficinas o regiones (no tiendas): quedan fuera de este costo porque el modelo es de tiendas.</div>` : ''}
-      ${!salidasCosteadas && !salidasSinTipo ? '<div class="kpi-nota">No hay salidas con vacante registradas en este período y alcance.</div>' : ''}
+      <div class="kpi-eti">costo de rotación · ${etiP} (${fmtNum(salidasCosteadas)} renuncias y despidos en tiendas clasificadas${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''}, según el registro de salidas) · ${etiquetaDepto(depto)}</div>
+      ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre ${salidasSinTipo === 1 ? 'la salida' : `las ${fmtNum(salidasSinTipo)} salidas`} en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
+      ${salidasNoTienda ? `<div class="kpi-nota">Otras ${fmtNum(salidasNoTienda)} salidas del período fueron en oficinas, CEDI o regiones (no tiendas): quedan fuera de este costo porque el modelo es de tiendas.</div>` : ''}
+      ${salidasOtras ? `<div class="kpi-nota">${fmtNum(salidasOtras)} salidas más no se costean por no ser renuncia ni despido (no confirmados, vacacionistas o sin razón registrada).</div>` : ''}
+      ${!salidasCosteadas && !salidasSinTipo ? '<div class="kpi-nota">No hay renuncias ni despidos registrados en este período y alcance.</div>' : ''}
     </div>
     <div class="kpi">
       <div class="kpi-valor">${medianaDias ?? '—'} días</div>
@@ -171,8 +166,8 @@ function pintar(depto, periodo) {
       <div class="kpi-nota">${A.diasCobertura.global.promedio != null ? `Promedio: ${A.diasCobertura.global.promedio} días — sube por unos pocos casos largos.` : 'Sin vacantes cerradas con dato en el período.'}</div>
     </div>
     <div class="kpi">
-      <div class="kpi-valor"><span class="verde">${Math.round((A.mezcla.pctRenuncia ?? 0) * 100)}%</span> · <span class="ambar">${Math.round((A.mezcla.pctDespido ?? 0) * 100)}%</span></div>
-      <div class="kpi-eti"><span class="verde">renuncias</span> vs <span class="ambar">despidos</span> (mezcla real)</div>
+      <div class="kpi-valor"><span class="verde">${Math.round((mezcla.pctRenuncia ?? 0) * 100)}%</span> · <span class="ambar">${Math.round((mezcla.pctDespido ?? 0) * 100)}%</span></div>
+      <div class="kpi-eti"><span class="verde">renuncias</span> vs <span class="ambar">despidos</span> (registro de salidas, ${etiP})</div>
     </div>
     <div class="kpi">
       <div class="kpi-valor">${fmtNum(vacantes.filas.filter((r) => r.estatus === 'ABIERTA').length)}</div>
@@ -186,10 +181,10 @@ function pintar(depto, periodo) {
   card.hidden = !supuesto;
   if (supuesto) {
     card.innerHTML = `
-      <h3>⚠️ Supuesto: las ${fmtNum(salidasSinTipo)} salidas en tiendas sin clasificar</h3>
+      <h3>⚠️ Supuesto: ${salidasSinTipo === 1 ? 'la salida' : `las ${fmtNum(salidasSinTipo)} salidas`} en tiendas sin clasificar</h3>
       <p style="font-size:13.5px; margin-bottom:4px">Estas salidas ocurrieron en tiendas que aún no tienen
-        tipo asignado (AA/A/B/C), así que su costo no sale de datos: <b>lo que sigue es UN SUPUESTO editable</b>.
-        Reparte las ${fmtNum(salidasSinTipo)} salidas entre los tipos; por defecto asumimos 80% tipo B y el resto C.</p>
+        tipo asignado (AA/A/B/C) o cuyo nombre en el registro de salidas no está en el archivo de tiendas, así que su costo no sale de datos: <b>lo que sigue es UN SUPUESTO editable</b>.
+        Reparte ${salidasSinTipo === 1 ? 'esa salida' : `las ${fmtNum(salidasSinTipo)} salidas`} entre los tipos; por defecto asumimos 80% tipo B y el resto C.</p>
       <div class="sup-inputs">
         ${ORDEN_TIPOS.map((t) => `<label>${t}
           <input type="number" inputmode="numeric" id="sup-${t}" min="0" max="${salidasSinTipo}" step="1" value="${supuesto[t]}">
@@ -251,7 +246,7 @@ function pintar(depto, periodo) {
       <div class="anual">
         <div class="anual-eti">Acumulado de este tipo · ${etiP} (volumen × costo)</div>
         <div><b class="num anual-num">${fmtQ(d.anual)}</b>
-          <span class="anual-det">= ${fmtNum(d.salidas.renuncia)} ${d.salidas.renuncia === 1 ? 'renuncia' : 'renuncias'} + ${fmtNum(d.salidas.despido)} ${d.salidas.despido === 1 ? 'despido' : 'despidos'}</span></div>
+          <span class="anual-det">= ${fmtNum(d.salidas.renuncia)} ${d.salidas.renuncia === 1 ? 'renuncia' : 'renuncias'} + ${fmtNum(d.salidas.despido)} ${d.salidas.despido === 1 ? 'despido' : 'despidos'} (registro de salidas)</span></div>
         <div class="anual-det">Días de vacante usados: ${d.cal.dias} (${d.cal.fuente}).</div>
       </div>
     </div>`).join('')
@@ -268,11 +263,11 @@ function pintar(depto, periodo) {
     hallazgos.push(`Las vacantes tardan <b>${medianaDias} días</b> (mediana real, ${etiP}; promedio ${promedioDias}) en cubrirse, por encima del supuesto de 30 días del modelo: el costo real es mayor que el teórico.`);
   }
 
-  // 2. mezcla renuncia/despido
-  if (A.mezcla.pctRenuncia != null) {
+  // 2. mezcla renuncia/despido (registro de salidas)
+  if (mezcla.pctRenuncia != null) {
     const extraDespido = detallePorTipo.length
       ? detallePorTipo[0].cD.total - detallePorTipo[0].cR.total : null;
-    hallazgos.push(`De cada 100 salidas que generan vacante, <b>${Math.round(A.mezcla.pctRenuncia * 100)} son renuncias</b> y <b>${Math.round(A.mezcla.pctDespido * 100)} despidos</b> (${etiP}).${extraDespido ? ` Cada despido cuesta <b>${fmtQ(extraDespido)}</b> más que una renuncia (indemnización), pero el grueso del costo viene del volumen de renuncias.` : ''}`);
+    hallazgos.push(`De cada 100 salidas, <b>${Math.round(mezcla.pctRenuncia * 100)} son renuncias</b> y <b>${Math.round(mezcla.pctDespido * 100)} despidos</b> (${etiP}).${extraDespido ? ` Cada despido cuesta <b>${fmtQ(extraDespido)}</b> más que una renuncia (indemnización), pero el grueso del costo viene del volumen de renuncias.` : ''}`);
   }
 
   // 3. dónde se concentran las salidas
@@ -307,8 +302,11 @@ function pintar(depto, periodo) {
         en su archivo de Google Sheets. Se leen automáticamente, se agregan y se publican sin ningún dato personal.
         Última lectura: <b>${fecha}</b></p>
       <ul style="font-size:13.5px; line-height:1.55; padding-left:18px; margin:0">
-        <li><b>Control de vacantes</b> (${fmtNum(meta.filasVacantes)} registros): fecha de solicitud y de cierre → días de cobertura
-          (${fmtNum(g.n)} cerradas con dato en todo el registro); motivo → renuncias vs despidos; estatus → abiertas hoy; tienda y puesto → tipo de tienda.</li>
+        <li><b>Registro de salidas</b> (${fmtNum(salidasTodo?.total?.n ?? 0)} bajas): es la base para <b>contar</b> las salidas que se costean
+          (renuncias y despidos por tipo de tienda, según la agencia de cada baja), la mezcla renuncias/despidos y la antigüedad al salir. Solo conteos agregados.</li>
+        <li><b>Control de vacantes</b> (${fmtNum(meta.filasVacantes)} registros): fecha de solicitud y de cierre → <b>días de cobertura</b>
+          (${fmtNum(g.n)} cerradas con dato en todo el registro), con los que se calibra el costo por salida; estatus → abiertas hoy.
+          No se usa para contar salidas porque solo registra las plazas que se abrieron.</li>
         <li><b>Selector General / Comercial</b>: el registro de salidas y el indicador de rotación traen el área de cada fila y se
           filtran directo. El control de vacantes <b>no trae departamento</b>: se deduce del puesto (asesores, jefes de agencia,
           asistentes y servicios varios de tienda = Comercial; cobros, auditoría, contabilidad, logística y mercadeo = otros),
@@ -318,8 +316,8 @@ function pintar(depto, periodo) {
           no dependen del período.</li>
         <li><b>Indicador de rotación mensual</b> (${fmtNum(meta.filasRotacionAcumulada)} filas): colaboradores al inicio y cierre de cada mes
           y % de rotación acumulada — de ahí sale la plantilla con la que se compara (total empresa o área comercial, según el selector).</li>
-        <li><b>Registro de salidas</b>: solo conteos agregados (razón, antigüedad por rangos, área, marca, agencia). Jamás filas
-          individuales ni nombres; los valores con menos de 3 casos se agrupan en "otros" dentro de cada período.</li>
+        <li><b>Privacidad</b>: del registro de salidas jamás se publican filas individuales ni nombres; los valores con menos de 3 casos
+          se agrupan en "otros" dentro de cada período.</li>
         <li><b>Tipo de tienda (AA / A / B / C)</b>: archivo de clasificación de tiendas de RRHH; las ventas por tipo son puntos medios
           del rango de cada tipo y se pueden cambiar en el Simulador.</li>
         <li><b>Costo por salida</b>: modelo "Costo de rotación por tipo de tienda" (ago 2025) implementado en el Simulador — ventas

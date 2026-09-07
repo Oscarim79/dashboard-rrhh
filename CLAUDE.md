@@ -76,6 +76,13 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   menú como última opción "Propuesta" (pedido del CEO, 2026-09-07). Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
   viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.
 
+## Qué registro cuenta qué (decisión de Oscar, 2026-09-07)
+
+- **Salidas que se costean, mezcla renuncias/despidos, antigüedad:** registro de SALIDAS
+  (`salidas.json → porTipoTienda`, `razon`, `rango`). Es el registro completo.
+- **Días de vacante y plazas abiertas:** control de VACANTES. NO usarlo para contar salidas:
+  solo registra las plazas que se abrieron (171 vs 474 bajas en todo el registro).
+
 ## Reglas de trabajo
 
 - No inventar datos: los campos vacíos/inconsistentes se excluyen y se reportan como avisos en

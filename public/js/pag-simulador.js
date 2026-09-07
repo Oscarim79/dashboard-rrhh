@@ -2,11 +2,13 @@
 // botón "usar datos reales" (calibración) y escenario "vacante a la mitad de días".
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, vacantesDe, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses, salidasDe, dimsSalidas } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
 const { meta } = datos;
+const salidasTodo = await fetch('data/salidas.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+let salidasPorTipo = {}; // salidas del período por tipo de tienda (registro de SALIDAS)
 // El modelo de costo es el mismo con cualquier alcance (es por tipo de tienda); el selector
 // solo cambia los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).
 let A = datos.vacantes.agregados;
@@ -14,6 +16,7 @@ let deptoSel = 'comercial', periodoSel = '12m';
 function aplicarFiltros() {
   const v = vacantesDe(datos.vacantes, deptoSel);
   A = agregarVacantes(vacantesEnPeriodo(v.filas, periodoSel, v.generado));
+  salidasPorTipo = dimsSalidas(salidasDe(salidasTodo, deptoSel), periodoSel).porTipoTienda ?? {};
   document.getElementById('alcance').innerHTML = notaAlcance(deptoSel) +
     ` El modelo de costo no cambia con los selectores; solo cambian los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo · ${etiquetaPeriodo(periodoSel, v.generado)}).`;
 }
@@ -189,13 +192,13 @@ function recalcular() {
     </div>`;
 
   // proyección anual con salidas reales del tipo elegido y mezcla real
-  const s = A.salidas12mPorTipo[tipoSel];
+  const s = salidasPorTipo[tipoSel];
   const el = document.getElementById('proyeccion');
   const etiP = etiquetaPeriodo(periodoSel, datos.vacantes.generado);
   if (s) {
     const anual = s.renuncia * r.total + s.despido * d.total;
     el.innerHTML = `<h3>Proyección · tiendas tipo ${tipoSel} · ${etiP}</h3>
-      <p style="font-size:15px">Con las salidas reales del período (${fmtNum(s.renuncia)} renuncias, ${fmtNum(s.despido)} despidos) y estos supuestos:
+      <p style="font-size:15px">Con las salidas reales del período según el registro de salidas (${fmtNum(s.renuncia)} renuncias, ${fmtNum(s.despido)} despidos) y estos supuestos:
       <b class="num" style="font-size:20px"> ${fmtQ(anual)}</b>.</p>`;
   } else {
     el.innerHTML = `<h3>Proyección · tiendas tipo ${tipoSel} · ${etiP}</h3>

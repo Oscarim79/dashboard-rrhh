@@ -28,6 +28,24 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## El costo de rotación cuenta salidas con el registro de SALIDAS (2026-09-07, séptima ronda)
+
+- Oscar detectó que General y Comercial daban casi lo mismo: el costo contaba salidas con el
+  **control de vacantes** (171 renuncias/despidos en todo el registro) y no con el registro de
+  **SALIDAS** (474 bajas). Decisión: **contar con SALIDAS** y seguir tomando los días de vacante
+  del control de vacantes. El pipeline publica en cada desglose de salidas `porTipoTienda`
+  ({AA,A,B,C,'sin tipo','no tienda'} × {renuncia,despido,otros}) y `sinTipoOrigen`.
+- Resumen: costo, "plantilla reemplazada", mezcla renuncias/despidos, hallazgos y el supuesto de
+  "sin tipo" usan ahora esas cifras; el Simulador proyecta con ellas. "De dónde salen los datos"
+  explica el cambio. Todo el registro Comercial pasó de Q11.4M a **≈ Q26.6M** (339 salidas en
+  tiendas clasificadas); últimos 12 meses ≈ Q9.9M.
+- Para que el registro de SALIDAS resolviera bien las agencias se agregaron alias en
+  `config/tiendas.json`: nueva noTienda **CEDI Capital** (CEDI, ATANASIO, ATANASIO TZUL), Oficina
+  Central (CONTABILIDAD, COBROS, COBRADOR, AUDITORIA, GARANTIAS, ADMINISTRATIVO...) y ABIQ OAKLAND
+  MALL → Oakland Mall. Quedan sin reconocer: EL CHAL (1) y ABIQ MIRAFLORES (1) — preguntar a Oscar.
+- OJO: tras los ajustes de Oscar en el Sheet, 78 salidas de CEDI/oficinas tienen AREA LAB =
+  COMERCIAL; en Comercial aparecen como "no tienda" y no se costean (el modelo es de tiendas).
+
 ## Propuesta: selector de período en "Por qué se van" (2026-09-07, sexta ronda)
 
 - La gráfica de motivos de la propuesta tiene su propia barra de período (Todo · 12 meses · año ·

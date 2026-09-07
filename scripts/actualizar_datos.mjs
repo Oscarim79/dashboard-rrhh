@@ -477,6 +477,7 @@ if (!sal) {
       marca: MARCA_EMPRESA[marcaCruda] ?? (String(f[IS.marca] ?? '').trim() || '(SIN MARCA)'),
       agencia: resuelto?.esTienda ? resuelto.nombre : (String(f[IS.agencia] ?? '').trim() || '(SIN AGENCIA)'),
       tipoTienda: resuelto?.esTienda ? (resuelto.tipo ?? null) : null,
+      esTienda: resuelto ? !!resuelto.esTienda : null, // null = nombre no reconocido en config/tiendas.json
       rango: partirMasDeUnAno(norm(f[IS.rango]) || '(SIN RANGO)', diasLab),
       diasLab,
       tieneRazonLibre: IS.razonLibre >= 0 && !!norm(f[IS.razonLibre]),
@@ -494,8 +495,24 @@ if (!sal) {
     return Object.fromEntries(Object.entries(c).sort((a, b) => b[1] - a[1]));
   };
   const ult12 = regs.filter((r) => r.ym >= corte12m);
+  // Salidas por tipo de tienda y razón: es lo que el Resumen multiplica por el costo por
+  // salida (decisión de Oscar 2026-09-07: contar con el registro de SALIDAS, no con el de
+  // vacantes, que solo tiene las plazas abiertas). 'no tienda' = oficinas/regiones/CEDI;
+  // 'sin tipo' = tienda sin clasificar o nombre no reconocido.
+  const porTipoTienda = (arr) => {
+    const c = {};
+    for (const r of arr) {
+      const tipo = r.esTienda === false ? 'no tienda' : (r.tipoTienda ?? 'sin tipo');
+      const raz = r.razon === 'RENUNCIA' ? 'renuncia' : r.razon === 'DESPIDO' ? 'despido' : 'otros';
+      c[tipo] ??= { renuncia: 0, despido: 0, otros: 0 };
+      c[tipo][raz]++;
+    }
+    return c;
+  };
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
+    porTipoTienda: porTipoTienda(arr),
+    sinTipoOrigen: cuenta(arr.filter((r) => r.esTienda !== false && !r.tipoTienda && ['RENUNCIA', 'DESPIDO'].includes(r.razon)), (r) => `${r.agencia}${r.esTienda === null ? ' — nombre no reconocido en el archivo de tiendas' : ' (sin tipo)'}`),
     subMotivo: cuenta(arr, (r) => r.sub, 3),
     // solo renuncias: para hablar de "por qué se va la gente" sin mezclar despidos
     subMotivoRenuncias: cuenta(arr.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub, 3),
