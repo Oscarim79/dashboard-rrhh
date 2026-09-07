@@ -44,10 +44,14 @@
   formal de capacitación, razones de salida) y 2) tres propuestas (asistente para el jefe de RRHH por
   traslado interno, segundo comodín, vendedor capacitador por región con bono Q500 + 3 variantes de
   garantía de comisión). `?solo=capacitador` muestra solo la propuesta 3 para el gerente comercial.
-- **Razones de salida NO se calculan del sheet**: solo 47% de las renuncias tiene motivo real (53%
-  dice "voluntaria") y "descuentos aplicados" no existe como categoría. La página muestra las
-  categorías con espacio para la distribución que Oscar carga en `public/js/propuesta-datos.js`
-  (`razonesSalida.categorias[].pct`) y una tabla con el % capturado.
+- **Razones de salida = registro + reparto de RRHH.** El sheet solo tiene motivo real en 47% de las
+  renuncias (el resto dice "voluntaria"). Oscar cargó el reparto de las 110 "voluntarias" de Comercial
+  (todo el registro) en `public/js/propuesta-datos.js` → `desgloseVoluntaria.casos`: Salario 45, Mejor
+  oportunidad 22, Clima laboral 18, Descuentos en salario 9 (suman 94; Oscar confirmó que las 16
+  restantes coinciden con casos ya registrados como mejor oportunidad 9 y mal trato 7, por eso
+  `cubreTodas: true`). `aplicarDesglose` en comun.js suma los motivos repetidos ("mal trato" cuenta
+  como clima laboral) y lo usan la página Salidas (solo en Comercial · todo el registro) y la
+  propuesta (renuncias comerciales: `subMotivoRenuncias`, nuevo en salidas.json).
 - **Control de integración** (nuevo, `integracion.json`): solo conteos de llamadas de seguimiento
   (1ª, 20, 40, 60 días) por año y departamento. OJO: el registro muestra que las llamadas SÍ se
   marcan en ~70% de los 194 ingresos comerciales; la propuesta lo dice tal cual y distingue la

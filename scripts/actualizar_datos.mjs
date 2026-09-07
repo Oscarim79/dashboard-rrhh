@@ -497,6 +497,8 @@ if (!sal) {
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
     subMotivo: cuenta(arr, (r) => r.sub, 3),
+    // solo renuncias: para hablar de "por qué se va la gente" sin mezclar despidos
+    subMotivoRenuncias: cuenta(arr.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub, 3),
     genero: cuenta(arr, (r) => r.genero),
     area: cuenta(arr, (r) => r.area),
     marca: cuenta(arr, (r) => r.marca),

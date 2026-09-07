@@ -3,7 +3,8 @@
 // gráficas se redibujan con el desglose de ese período (salidas.porAnio).
 // Selector General / Comercial: usa el bloque porDepartamento.comercial del JSON
 // (columna AREA LAB del sheet).
-import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance } from './comun.js';
+import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE } from './comun.js';
+import { DATOS } from './propuesta-datos.js';
 import { barrasH, columnas } from './graficas.js';
 
 marcarNavActiva();
@@ -106,16 +107,18 @@ if (!salidasTodo.total) {
         Object.entries(D.razon).map(([k, v]) => ({ eti: titulo(k), valor: v, color: COLOR_RAZON[k] ?? '#8FA69B' })),
         { formato: fmtNum });
 
-      // ── sub-motivos (top 10, sin "(sin submotivo)") ──
-      // Cada motivo por separado (pedido del CEO, 2026-09-07): salario y mejor
-      // oportunidad son motivos distintos, no una sola categoría de "dinero".
-      // "Voluntaria" es la renuncia sin detalle registrado, y se rotula así.
-      const ETI_SUB = { VOLUNTARIA: 'Renuncia sin detalle registrado ("voluntaria")' };
-      const sub = Object.entries(D.subMotivo)
-        .filter(([k]) => !k.startsWith('('))
-        .sort((a, b) => b[1] - a[1]).slice(0, 10)
-        .map(([k, v]) => ({ eti: ETI_SUB[k] ?? titulo(k), valor: v, color: k === 'VOLUNTARIA' ? '#C9CFC9' : '#46615A' }));
-      document.getElementById('submotivo').innerHTML = barrasH(sub, { formato: fmtNum });
+      // ── motivos (top 12) — cada uno por separado (pedido del CEO, 2026-09-07) ──
+      // En Comercial · todo el registro, las renuncias "voluntarias" se reparten con el
+      // desglose que RRHH cargó en propuesta-datos.js (salario, mejor oportunidad, clima
+      // laboral, descuentos). En los demás cortes no hay reparto: se muestra la barra gris.
+      const conReparto = depto === 'comercial' && esTodo;
+      const des = aplicarDesglose(D.subMotivo, conReparto ? DATOS.desgloseVoluntaria : null);
+      document.getElementById('submotivo').innerHTML = barrasH(
+        des.items.slice(0, 12).map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A' })),
+        { formato: fmtNum });
+      document.getElementById('submotivo-nota').innerHTML = conReparto
+        ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
+        : `La barra gris son renuncias que el registro solo marca como "voluntaria". El reparto por motivo que hizo RRHH aplica al corte Comercial · todo el registro. Motivos con menos de 3 casos van en "Otros".`;
 
       // ── agencia (top 12) ──
       document.getElementById('agencia').innerHTML = barrasH(

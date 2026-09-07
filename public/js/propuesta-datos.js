@@ -7,28 +7,24 @@
 
 export const DATOS = {
 
-  // ── 1. Razones de salida (distribución cargada por RRHH) ───────────────────
-  // El registro de salidas del sheet NO trae la razón completa (ver % capturado en
-  // la página), así que la distribución se carga aquí a mano. Escribe en `pct` el
-  // porcentaje de cada motivo (números que sumen 100). Mientras esté en null, la
-  // página muestra la categoría con el espacio vacío y el aviso "pendiente".
-  razonesSalida: {
-    universo: 'renuncias del departamento Comercial',   // sobre qué salidas es la distribución
-    periodo: 'últimos 12 meses',                         // qué período cubre
-    fuente: 'estimación de RRHH a partir de entrevistas de salida y conocimiento de los casos',
-    categorias: [
-      { nombre: 'Salario', pct: null },
-      { nombre: 'Mejor oportunidad laboral', pct: null },
-      { nombre: 'Descuentos aplicados', pct: null },
-      { nombre: 'Mal ambiente o trato del jefe', pct: null },
-      { nombre: 'Motivos familiares', pct: null },
-      { nombre: 'Salud', pct: null },
-      { nombre: 'Estudios', pct: null },
-      { nombre: 'Horarios', pct: null },
-      { nombre: 'Distancia o cambio de domicilio', pct: null },
-      { nombre: 'Abandono o no se presentó', pct: null },
-      { nombre: 'Otros', pct: null },
-    ],
+  // ── 1. Reparto de las renuncias "voluntarias" (cargado por RRHH) ───────────
+  // En el registro de salidas, la mayoría de las renuncias del área Comercial solo
+  // dicen "voluntaria" (110 en todo el registro). RRHH sí conoce el motivo: se
+  // reparte aquí. Cada número son CASOS (personas), no porcentajes. Si un motivo ya
+  // existe en el registro (Salario, Mejor oportunidad, Clima laboral) se suma; los
+  // casos que no alcancen el total quedan como "sin detalle registrado".
+  // Aplica a: departamento Comercial, todo el registro (Salidas y Propuesta).
+  desgloseVoluntaria: {
+    fuente: 'RRHH, a partir de entrevistas de salida y conocimiento de los casos (2026-09-07)',
+    // true = RRHH confirma que este reparto cubre TODAS las "voluntarias" (no se muestra
+    // barra de "sin detalle" aunque los casos sumen menos que el conteo del registro).
+    cubreTodas: true,
+    casos: {
+      'Salario': 45,
+      'Mejor oportunidad': 22,
+      'Clima laboral': 18,
+      'Descuentos en salario': 9,
+    },
   },
 
   // ── 2. Supuestos para costear las propuestas ───────────────────────────────

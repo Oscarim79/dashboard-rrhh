@@ -125,6 +125,36 @@ export function notaAlcance(depto) {
     : 'Viendo <b>toda la empresa</b>. Cambia a "Comercial" arriba para ver solo el departamento comercial.';
 }
 
+// ── Reparto manual de las renuncias "voluntarias" (RRHH, ver propuesta-datos.js) ──
+// Recibe los sub-motivos del sheet ({VOLUNTARIA: 110, 'POR SALARIO': 6, ...}) y el reparto
+// de RRHH ({Salario: 45, ...}). Devuelve la lista de motivos con nombres legibles, sumando
+// los que se repiten, y deja como "sin detalle" lo que el reparto no cubre.
+const NOMBRE_SUB = {
+  'POR SALARIO': 'Salario', 'MEJOR OPORTUNIDAD': 'Mejor oportunidad', 'MAL AMBIENTE': 'Clima laboral',
+  'MAL TRATO': 'Clima laboral', 'POR FAMILIA': 'Motivos familiares', 'POR ESTUDIOS': 'Estudios',
+  'HORARIOS EXTENDIDOS': 'Horarios', 'CAMBIO DE DOMICILIO': 'Cambio de domicilio', 'SALUD': 'Salud',
+  'ABANDONO': 'Abandono', 'MALA ACTITUD': 'Mala actitud', 'BAJO RENDIMIENTO': 'Bajo rendimiento',
+  'ROBO': 'Robo', 'RESTRUCTURACION': 'Reestructuración', 'CIERRE DE AGENCIA': 'Cierre de agencia',
+  'TEMPORAL': 'Temporal', 'NO CONFIRMADO': 'No confirmado', 'VACACIONISTA': 'Vacacionista', 'OTROS': 'Otros',
+};
+export const SIN_DETALLE = 'Sin detalle registrado ("voluntaria")';
+export function aplicarDesglose(subMotivos, desglose) {
+  const acc = new Map();
+  const suma = (k, v) => acc.set(k, (acc.get(k) ?? 0) + v);
+  let voluntarias = 0;
+  for (const [k, v] of Object.entries(subMotivos ?? {})) {
+    if (k.startsWith('(')) continue;
+    if (k === 'VOLUNTARIA') { voluntarias += v; continue; }
+    suma(NOMBRE_SUB[k] ?? (k.charAt(0) + k.slice(1).toLowerCase()), v);
+  }
+  let repartidas = 0;
+  if (desglose?.casos) for (const [k, v] of Object.entries(desglose.casos)) { suma(k, v); repartidas += v; }
+  const resto = voluntarias - repartidas;
+  if (resto > 0 && !desglose?.cubreTodas) suma(SIN_DETALLE, resto);
+  const items = [...acc.entries()].sort((a, b) => b[1] - a[1]).map(([eti, valor]) => ({ eti, valor }));
+  return { items, voluntarias, repartidas, resto };
+}
+
 // Mediana de días calibrada: usa la del tipo si tiene muestra suficiente, si no la global.
 export function diasCalibrados(diasCobertura, tipo, minimo = 8) {
   const t = diasCobertura.porTipo[tipo];

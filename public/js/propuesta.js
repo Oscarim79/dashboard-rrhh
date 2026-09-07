@@ -4,7 +4,7 @@
 // las que RRHH carga a mano viven en propuesta-datos.js.
 import { DATOS } from './propuesta-datos.js';
 import { fmtQ } from './modelo.js';
-import { fmtNum, salidasDe, vacantesDe } from './comun.js';
+import { fmtNum, salidasDe, vacantesDe, aplicarDesglose, SIN_DETALLE } from './comun.js';
 
 const q = (id) => document.getElementById(id);
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -75,28 +75,29 @@ try {
             <tr><td>Solo en despidos: motivo real</td><td class="n">${pct(t.despidos.conSubMotivoReal, t.despidos.n)}%</td><td class="n">${pct(u.despidos.conSubMotivoReal, u.despidos.n)}%</td></tr>
           </tbody>
         </table></div>
-        <p class="pie">Por eso la distribución de motivos de arriba no se calcula del registro: se carga con el conocimiento de RRHH sobre los casos. La categoría "descuentos aplicados" no existe en el registro.</p>`;
+        <p class="pie">Por eso los motivos de arriba combinan el registro con el reparto de RRHH: las renuncias marcadas solo como "voluntaria" se asignan a salario, mejor oportunidad, clima laboral y descuentos con el conocimiento de los casos. La categoría "descuentos en salario" no existe en el registro.</p>`;
     }
   }
 } catch (e) { console.warn('razones', e); }
 
-// distribución manual (propuesta-datos.js)
+// motivos de las renuncias: registro (solo renuncias, Comercial, todo el registro)
+// + reparto de RRHH de las "voluntarias" (propuesta-datos.js)
 try {
-  const R = DATOS.razonesSalida;
-  const cargadas = R.categorias.filter((c) => c.pct != null);
-  const suma = cargadas.reduce((s, c) => s + c.pct, 0);
-  const max = Math.max(...cargadas.map((c) => c.pct), 1);
-  q('razones-meta').textContent = `Distribución sobre ${R.universo}, ${R.periodo}. Fuente: ${R.fuente}.`;
-  q('razones').innerHTML = R.categorias.map((c) => `
+  const subR = salidas?.total?.subMotivoRenuncias;
+  const des = aplicarDesglose(subR ?? {}, DATOS.desgloseVoluntaria);
+  const total = des.items.reduce((s, i) => s + i.valor, 0);
+  const max = Math.max(...des.items.map((i) => i.valor), 1);
+  q('razones-meta').textContent = `Renuncias del departamento Comercial, todo el registro (${fmtNum(total)} con motivo). Motivos del registro de salidas más el reparto de RRHH de las renuncias marcadas solo como "voluntaria" ("mal trato" se cuenta como clima laboral). Fuente del reparto: ${DATOS.desgloseVoluntaria.fuente}.`;
+  q('razones').innerHTML = des.items.map((i) => `
     <div class="razon">
-      <div class="razon-eti">${c.nombre}</div>
-      <div class="razon-barra">${c.pct != null ? `<div style="width:${(c.pct / max) * 100}%"></div>` : '<span class="pendiente">pendiente de cargar</span>'}</div>
-      <div class="razon-val">${c.pct != null ? `${c.pct}%` : '—'}</div>
+      <div class="razon-eti">${i.eti}</div>
+      <div class="razon-barra"><div style="width:${(i.valor / max) * 100}%; ${i.eti === SIN_DETALLE ? 'background:#C9CFC9' : ''}"></div></div>
+      <div class="razon-val">${fmtNum(i.valor)} · ${pct(i.valor, total)}%</div>
     </div>`).join('');
-  q('razones-aviso').innerHTML = cargadas.length === 0
-    ? '<b>Pendiente:</b> RRHH carga los porcentajes en el archivo de datos de la propuesta; mientras tanto se muestran solo las categorías acordadas.'
-    : (Math.abs(suma - 100) > 1 ? `<b>Ojo:</b> los porcentajes cargados suman ${suma}%, no 100%.` : '');
-} catch (e) { console.warn('distribución manual', e); }
+  q('razones-aviso').innerHTML = des.resto > 0 && !DATOS.desgloseVoluntaria.cubreTodas
+    ? `<b>Pendiente:</b> el reparto de RRHH cubre ${fmtNum(des.repartidas)} de las ${fmtNum(des.voluntarias)} renuncias "voluntarias"; ${fmtNum(des.resto)} siguen sin detalle. Se completa en el archivo de datos de la propuesta.`
+    : (des.resto < 0 ? `<b>Ojo:</b> el reparto suma ${fmtNum(des.repartidas)} casos y solo hay ${fmtNum(des.voluntarias)} renuncias "voluntarias".` : '');
+} catch (e) { console.warn('motivos', e); }
 
 // ── 2. costos de las propuestas ───────────────────────────────────────────────
 try {
