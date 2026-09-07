@@ -309,7 +309,8 @@ export function dimsSalidas(salidas, p) {
 // de RRHH ({Salario: 45, ...}). Devuelve la lista de motivos con nombres legibles, sumando
 // los que se repiten, y deja como "sin detalle" lo que el reparto no cubre.
 const NOMBRE_SUB = {
-  'POR SALARIO': 'Salario', 'MEJOR OPORTUNIDAD': 'Mejor oportunidad', 'MAL AMBIENTE': 'Clima laboral',
+  'SALARIO': 'Salario', 'POR SALARIO': 'Salario', 'MEJOR OPORTUNIDAD': 'Mejor oportunidad',
+  'CLIMA LABORAL': 'Clima laboral', 'MAL AMBIENTE': 'Clima laboral', 'DESCUENTOS': 'Descuentos en salario', 'DESCUENTOS EN SALARIO': 'Descuentos en salario',
   'MAL TRATO': 'Clima laboral', 'POR FAMILIA': 'Motivos familiares', 'POR ESTUDIOS': 'Estudios',
   'HORARIOS EXTENDIDOS': 'Horarios', 'CAMBIO DE DOMICILIO': 'Cambio de domicilio', 'SALUD': 'Salud',
   'ABANDONO': 'Abandono', 'MALA ACTITUD': 'Mala actitud', 'BAJO RENDIMIENTO': 'Bajo rendimiento',

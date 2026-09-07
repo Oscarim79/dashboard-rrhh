@@ -14,17 +14,14 @@ export const DATOS = {
   // existe en el registro (Salario, Mejor oportunidad, Clima laboral) se suma; los
   // casos que no alcancen el total quedan como "sin detalle registrado".
   // Aplica a: departamento Comercial, todo el registro (Salidas y Propuesta).
+  // ACTUALIZACIÓN 2026-09-07 (tarde): Oscar cargó los motivos directamente en la pestaña
+  // SALIDAS del Sheet (Salario, Clima laboral, etc.), así que este reparto ya NO se usa:
+  // `casos` queda vacío y las páginas muestran lo que trae el registro. Si algún día hace
+  // falta volver a repartir "voluntarias" a mano, se llena `casos` otra vez.
   desgloseVoluntaria: {
-    fuente: 'RRHH, a partir de entrevistas de salida y conocimiento de los casos (2026-09-07)',
-    // true = RRHH confirma que este reparto cubre TODAS las "voluntarias" (no se muestra
-    // barra de "sin detalle" aunque los casos sumen menos que el conteo del registro).
-    cubreTodas: true,
-    casos: {
-      'Salario': 45,
-      'Mejor oportunidad': 22,
-      'Clima laboral': 18,
-      'Descuentos en salario': 9,
-    },
+    fuente: 'registro de salidas de RRHH (motivos cargados en el Sheet)',
+    cubreTodas: false,
+    casos: {},
   },
 
   // ── 1b. Cifras del documento "Propuesta de estructuración de RRHH" (sep 2026) ──

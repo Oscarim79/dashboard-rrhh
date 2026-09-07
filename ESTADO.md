@@ -28,6 +28,21 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Motivos de salida ahora vienen del Sheet; propuesta 1 ajustada (2026-09-07, quinta ronda)
+
+- Oscar cargó los motivos directamente en la pestaña SALIDAS (Comercial pasó a 422 salidas; razón
+  capturada 474/474; sub-motivos SALARIO 120, CLIMA LABORAL 117, VOLUNTARIA 58, ...). Por eso el
+  reparto manual de `propuesta-datos.js → desgloseVoluntaria.casos` quedó VACÍO (se conserva la
+  estructura por si vuelve a hacer falta). `NOMBRE_SUB` en comun.js reconoce SALARIO, CLIMA LABORAL
+  y DESCUENTOS; "mal trato" y "mal ambiente" se suman a clima laboral. Las 58 "voluntarias" se
+  muestran en gris como "sin detalle".
+- La propuesta usa TODAS las salidas comerciales (renuncias y despidos, `subMotivo`), no solo
+  renuncias, y ya no muestra ningún aviso de cuadre.
+- Propuesta 1: la asistente NO ayuda en entrevistas ni toca MP/MINTRAB (confiados al jefe); hace
+  todo lo demás que hace el jefe y lo que podría hacer con más tiempo (planes de seguimiento,
+  escalonamiento de salarios); coordina entrevistas con la gerencia cuando el jefe no está.
+- Título "Anexos importantes" antes del punto 4 (SSO) y 5 (benchmark).
+
 ## Propuesta: recorte pedido por Oscar (2026-09-07, cuarta ronda)
 
 - Fuera de la página: "se queda sin hacer", el bloque de seguimiento a nuevos (control de

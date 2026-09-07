@@ -37,23 +37,20 @@ try {
   }
 } catch (e) { console.warn('permanencia', e); }
 
-// ── 1.3 motivos de las renuncias: registro (solo renuncias, Comercial, todo el
-// registro) + reparto de RRHH de las "voluntarias" (propuesta-datos.js) ────────
+// ── 1.3 motivos de salida: TODAS las salidas del departamento Comercial (renuncias
+// y despidos), tal como las registra RRHH en el Sheet; cada motivo por separado ───
 try {
-  const subR = salidas?.total?.subMotivoRenuncias;
-  const des = aplicarDesglose(subR ?? {}, DATOS.desgloseVoluntaria);
+  const sub = salidas?.total?.subMotivo;
+  const des = aplicarDesglose(sub ?? {}, DATOS.desgloseVoluntaria);
   const total = des.items.reduce((s, i) => s + i.valor, 0);
   const max = Math.max(...des.items.map((i) => i.valor), 1);
-  q('razones-meta').textContent = `Renuncias del departamento Comercial, todo el registro (${fmtNum(total)} con motivo). Motivos del registro de salidas más el reparto de RRHH de las renuncias marcadas solo como "voluntaria" ("mal trato" se cuenta como clima laboral). Fuente del reparto: ${DATOS.desgloseVoluntaria.fuente}.`;
+  q('razones-meta').textContent = `Salidas del departamento Comercial, todo el registro (${fmtNum(total)} con motivo, renuncias y despidos), según el registro de salidas de RRHH. "Mal trato" y "mal ambiente" se cuentan como clima laboral.`;
   q('razones').innerHTML = des.items.map((i) => `
     <div class="razon">
       <div class="razon-eti">${i.eti}</div>
       <div class="razon-barra"><div style="width:${(i.valor / max) * 100}%; ${i.eti === SIN_DETALLE ? 'background:#C9CFC9' : ''}"></div></div>
       <div class="razon-val">${fmtNum(i.valor)} · ${pct(i.valor, total)}%</div>
     </div>`).join('');
-  q('razones-aviso').innerHTML = des.resto > 0 && !DATOS.desgloseVoluntaria.cubreTodas
-    ? `<b>Pendiente:</b> el reparto de RRHH cubre ${fmtNum(des.repartidas)} de las ${fmtNum(des.voluntarias)} renuncias "voluntarias"; ${fmtNum(des.resto)} siguen sin detalle. Se completa en el archivo de datos de la propuesta.`
-    : (des.resto < 0 ? `<b>Ojo:</b> el reparto suma ${fmtNum(des.repartidas)} casos y solo hay ${fmtNum(des.voluntarias)} renuncias "voluntarias".` : '');
 } catch (e) { console.warn('motivos', e); }
 
 // ── 4. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────

@@ -100,14 +100,14 @@ if (!salidasTodo.total) {
     // En Comercial · todo el registro, las renuncias "voluntarias" se reparten con el
     // desglose que RRHH cargó en propuesta-datos.js (salario, mejor oportunidad, clima
     // laboral, descuentos). En los demás cortes no hay reparto: se muestra la barra gris.
-    const conReparto = depto === 'comercial' && periodo === 'todo';
+    const conReparto = depto === 'comercial' && periodo === 'todo' && Object.keys(DATOS.desgloseVoluntaria?.casos ?? {}).length > 0;
     const des = aplicarDesglose(D.subMotivo, conReparto ? DATOS.desgloseVoluntaria : null);
     document.getElementById('submotivo').innerHTML = des.items.length ? barrasH(
       des.items.slice(0, 12).map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A' })),
       { formato: fmtNum }) : '<p class="sub">Sin motivos registrados.</p>';
     document.getElementById('submotivo-nota').innerHTML = conReparto
       ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
-      : `La barra gris son renuncias que el registro solo marca como "voluntaria". El reparto por motivo que hizo RRHH aplica al corte Comercial · todo el registro. Motivos con menos de 3 casos en el período van en "Otros".`;
+      : `Cada motivo por separado, tal como lo registra RRHH (salario, clima laboral, mejor oportunidad, familia, etc.); "mal trato" y "mal ambiente" se cuentan como clima laboral. La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
 
     // ── agencia (top 12) ──
     document.getElementById('agencia').innerHTML = barrasH(
