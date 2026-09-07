@@ -179,6 +179,28 @@ function estadoProceso(obs) {
   return 'En gestión, sin etapa anotada';
 }
 
+// Departamento de la vacante. La pestaña NO trae esa columna, así que se deduce del
+// puesto con la misma correspondencia puesto→área que muestra la pestaña SALIDAS
+// (ahí es casi 1 a 1: los puestos de tienda son COMERCIAL; cobros, auditoría,
+// contabilidad, logística y mercadeo no). Si algún día la pestaña trae una columna
+// DEPARTAMENTO, se usa esa y la regla queda como respaldo.
+const REGLAS_DEPTO = [
+  [/VENDEDOR|ASESOR|JEFE AGENCIA|ASISTENTE ADMON|SERVICIOS VARIOS|VACACIONISTA/, 'COMERCIAL'],
+  [/COBRO|CREDITO/, 'CREDITOS Y COBROS'],
+  [/AUDITOR/, 'AUDITORIA'],
+  [/CONTAB/, 'CONTABILIDAD'],
+  [/PILOTO|BODEG|RUTA|REPARTO|VERIFICADOR|LOGIST|CHOFER/, 'LOGISTICA'],
+  [/PROMOTOR|MERCADEO/, 'MERCADEO'],
+  [/GARANT/, 'GARANTIAS'],
+  [/RRHH|RECURSOS HUMANOS/, 'RRHH'],
+  [/SISTEMA|SOPORTE|INFORMATICA/, 'SOPORTE IT'],
+];
+function departamentoDe(puestoN, esTienda) {
+  for (const [re, d] of REGLAS_DEPTO) if (puestoN && re.test(puestoN)) return d;
+  return esTienda ? 'COMERCIAL' : '(SIN DEPARTAMENTO)';
+}
+I.depto = colIdx(H, 'DEPARTAMENTO');
+
 const desconocidos = new Map();
 let negativos = 0, discrepantes = 0, cerradasSinFechaCierre = 0, cerradasSinDias = 0, sinMotivo = 0;
 
@@ -214,9 +236,14 @@ const filasVac = vac.filas.map((f) => {
   const puesto = puestoCrudo
     ? norm(puestoCrudo).replace(/\bDE\b/g, '').replace(/\s+/g, ' ').trim() : null;
 
+  const esTiendaFila = resuelto ? !!resuelto.esTienda : null;
+  const deptoCol = I.depto >= 0 ? norm(f[I.depto]) : '';
+  const departamento = deptoCol || departamentoDe(puesto, esTiendaFila);
+
   return {
     item: f[I.item] ?? null,
     solicitud, cierre, dias, diasFuente,
+    departamento, departamentoFuente: deptoCol ? 'columna' : 'deducido del puesto',
     diasAbierta: estatus === 'ABIERTA' && solicitud ? diasEntre(solicitud, hoyISO) : null,
     proceso: estatus === 'ABIERTA' ? estadoProceso(f[I.obs]) : null,
     estatus,
@@ -242,7 +269,8 @@ const filasVac = vac.filas.map((f) => {
 });
 
 // ── agregados de vacantes ──────────────────────────────────────────────────
-const cerradas = filasVac.filter((r) => r.estatus === 'CERRADA');
+// Se calculan con una función para poder publicarlos dos veces: toda la empresa
+// (agregados) y solo el departamento Comercial (porDepartamento.comercial).
 const diasValidos = (arr) => arr.filter((r) => r.dias != null && r.dias >= 0).map((r) => r.dias);
 
 const porGrupo = (arr, clave) => {
@@ -255,7 +283,6 @@ const statsPorGrupo = (arr, clave) =>
 
 const hace12m = new Date(hoy); hace12m.setFullYear(hoy.getFullYear() - 1);
 const hace12mISO = hace12m.toISOString().slice(0, 10);
-const ult12m = filasVac.filter((r) => r.solicitud && r.solicitud >= hace12mISO && r.estatus !== 'CANCELADA');
 
 const contarPor = (arr, clave) => {
   const c = {};
@@ -263,43 +290,44 @@ const contarPor = (arr, clave) => {
   return c;
 };
 
-const mezclaTotal = contarPor(filasVac.filter((r) => r.estatus !== 'CANCELADA'), (r) => r.motivoGrupo);
-const rd = (mezclaTotal.renuncia ?? 0) + (mezclaTotal.despido ?? 0);
-
-const salidas12mPorTipo = {};
-for (const r of ult12m) {
-  if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
-  // oficinas/regiones no son tiendas: van aparte y no se costean con el modelo de tienda
-  const tipo = r.esTienda === false ? 'no tienda' : (r.tipo ?? 'sin tipo');
-  salidas12mPorTipo[tipo] ??= { renuncia: 0, despido: 0 };
-  salidas12mPorTipo[tipo][r.motivoGrupo]++;
-}
-
 const porMes = (arr, campo) => {
   const c = {};
   for (const r of arr) if (r[campo]) { const k = r[campo].slice(0, 7); c[k] = (c[k] ?? 0) + 1; }
   return Object.fromEntries(Object.entries(c).sort());
 };
 
-// canales: uso y relación con días de cierre (solo filas donde el canal está registrado)
-const canales = {};
-for (const canal of ['redes', 'facebook', 'volanteo', 'referidos', 'anuncios', 'perifoneo']) {
-  const conDato = cerradas.filter((r) => r.canales[canal] != null);
-  canales[canal] = {
-    registrado: filasVac.filter((r) => r.canales[canal] != null).length,
-    si: filasVac.filter((r) => r.canales[canal] === true).length,
-    diasConCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === true))),
-    diasSinCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === false))),
-  };
-}
+function agregarVacantes(filas) {
+  const cerradas = filas.filter((r) => r.estatus === 'CERRADA');
+  const ult12m = filas.filter((r) => r.solicitud && r.solicitud >= hace12mISO && r.estatus !== 'CANCELADA');
 
-const vacantesJson = {
-  generado: hoy.toISOString(),
-  filas: filasVac,
-  agregados: {
-    totales: { filas: filasVac.length, cerradas: cerradas.length,
-      abiertas: filasVac.filter((r) => r.estatus === 'ABIERTA').length,
-      canceladas: filasVac.filter((r) => r.estatus === 'CANCELADA').length },
+  const mezclaTotal = contarPor(filas.filter((r) => r.estatus !== 'CANCELADA'), (r) => r.motivoGrupo);
+  const rd = (mezclaTotal.renuncia ?? 0) + (mezclaTotal.despido ?? 0);
+
+  const salidas12mPorTipo = {};
+  for (const r of ult12m) {
+    if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
+    // oficinas/regiones no son tiendas: van aparte y no se costean con el modelo de tienda
+    const tipo = r.esTienda === false ? 'no tienda' : (r.tipo ?? 'sin tipo');
+    salidas12mPorTipo[tipo] ??= { renuncia: 0, despido: 0 };
+    salidas12mPorTipo[tipo][r.motivoGrupo]++;
+  }
+
+  // canales: uso y relación con días de cierre (solo filas donde el canal está registrado)
+  const canales = {};
+  for (const canal of ['redes', 'facebook', 'volanteo', 'referidos', 'anuncios', 'perifoneo']) {
+    const conDato = cerradas.filter((r) => r.canales[canal] != null);
+    canales[canal] = {
+      registrado: filas.filter((r) => r.canales[canal] != null).length,
+      si: filas.filter((r) => r.canales[canal] === true).length,
+      diasConCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === true))),
+      diasSinCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === false))),
+    };
+  }
+
+  return {
+    totales: { filas: filas.length, cerradas: cerradas.length,
+      abiertas: filas.filter((r) => r.estatus === 'ABIERTA').length,
+      canceladas: filas.filter((r) => r.estatus === 'CANCELADA').length },
     diasCobertura: {
       global: stats(diasValidos(cerradas)),
       porTipo: statsPorGrupo(cerradas, (r) => r.tipo),
@@ -313,13 +341,29 @@ const vacantesJson = {
       pctDespido: rd ? +((mezclaTotal.despido ?? 0) / rd).toFixed(4) : null,
     },
     salidas12mPorTipo,
-    salidasPorTienda: contarPor(filasVac.filter((r) => ['renuncia', 'despido'].includes(r.motivoGrupo)), (r) => r.lugar),
-    salidasPorEmpresa: contarPor(filasVac.filter((r) => ['renuncia', 'despido'].includes(r.motivoGrupo)), (r) => r.empresa),
-    aperturasPorMes: porMes(filasVac, 'solicitud'),
-    cierresPorMes: porMes(filasVac, 'cierre'),
-    ocupadaPor: contarPor(filasVac.filter((r) => r.ocupadaPor), (r) => r.ocupadaPor),
+    salidasPorTienda: contarPor(filas.filter((r) => ['renuncia', 'despido'].includes(r.motivoGrupo)), (r) => r.lugar),
+    salidasPorEmpresa: contarPor(filas.filter((r) => ['renuncia', 'despido'].includes(r.motivoGrupo)), (r) => r.empresa),
+    aperturasPorMes: porMes(filas, 'solicitud'),
+    cierresPorMes: porMes(filas, 'cierre'),
+    ocupadaPor: contarPor(filas.filter((r) => r.ocupadaPor), (r) => r.ocupadaPor),
     canales,
-  },
+  };
+}
+
+const agregadosVac = agregarVacantes(filasVac);
+const canales = agregadosVac.canales;
+const filasComercial = filasVac.filter((r) => r.departamento === 'COMERCIAL');
+console.log(`Vacantes por departamento (deducido del puesto): ${Object.entries(contarPor(filasVac, (r) => r.departamento)).map(([k, n]) => `${k} ${n}`).join(' · ')}`);
+
+const vacantesJson = {
+  generado: hoy.toISOString(),
+  filas: filasVac,
+  agregados: agregadosVac,
+  // Selector General / Comercial del sitio. El departamento de cada vacante se
+  // deduce del puesto (la pestaña no trae la columna), ver departamentoFuente.
+  porDepartamento: { comercial: agregarVacantes(filasComercial) },
+  departamentos: contarPor(filasVac, (r) => r.departamento),
+  departamentoFuente: I.depto >= 0 ? 'columna DEPARTAMENTO del sheet' : 'deducido del puesto (la pestaña no trae departamento)',
 };
 
 // ── 2) ROTACIÓN acumulada (INDICADOR: AÑO, MES, % ROTACION, inicio/fin) ────
@@ -400,6 +444,8 @@ if (!sal) {
     baja: colIdx(HS, 'BAJA'), razon: colIdx(HS, 'OBSERVACIONES'), sub: colIdx(HS, 'SUB', 'MOTIVO'),
     genero: colIdx(HS, 'GENERO'), area: colIdx(HS, 'AREA', 'LAB'), marca: colIdx(HS, 'MARCA'),
     agencia: colIdx(HS, 'AGENCIA'), rango: colIdx(HS, 'RANGO', 'MES'), diasLab: colIdx(HS, 'DIAS', 'LAB'),
+    // texto libre con la razón detallada: SOLO se registra si está escrito o no (nunca el texto)
+    razonLibre: colIdx(HS, 'RAZON', 'SALIDA'),
   };
   const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
   let diasLabMalos = 0, sinRazon = 0, masDeUnAnoSinDias = 0;
@@ -433,6 +479,7 @@ if (!sal) {
       tipoTienda: resuelto?.esTienda ? (resuelto.tipo ?? null) : null,
       rango: partirMasDeUnAno(norm(f[IS.rango]) || '(SIN RANGO)', diasLab),
       diasLab,
+      tieneRazonLibre: IS.razonLibre >= 0 && !!norm(f[IS.razonLibre]),
     });
   }
   const corte12m = hace12mISO.slice(0, 7);
@@ -461,17 +508,98 @@ if (!sal) {
   // porAnio lleva el desglose completo de cada año (misma forma que "total"),
   // para que la página pueda filtrar por año; la regla de privacidad (agrupar
   // valores con menos de 3 casos en OTROS) se aplica dentro de cada año.
-  const anios = [...new Set(regs.map((r) => r.anio))].sort();
+  // Qué tan capturada está la razón de salida (solo conteos; sirve para decir con
+  // honestidad qué porcentaje del registro sí explica por qué se fue la persona).
+  const SUB_SIN_CONTENIDO = new Set(['VOLUNTARIA', 'NO CONFIRMADO', '(SIN SUBMOTIVO)']);
+  const captura = (arr) => {
+    const ren = arr.filter((r) => r.razon === 'RENUNCIA'), des = arr.filter((r) => r.razon === 'DESPIDO');
+    const conSub = (a) => a.filter((r) => !SUB_SIN_CONTENIDO.has(r.sub)).length;
+    return {
+      n: arr.length,
+      conTipo: arr.filter((r) => r.razon !== '(SIN RAZON)').length,
+      conSubMotivoReal: conSub(arr),
+      conRazonLibre: arr.filter((r) => r.tieneRazonLibre).length,
+      renuncias: { n: ren.length, conSubMotivoReal: conSub(ren), soloVoluntaria: ren.filter((r) => r.sub === 'VOLUNTARIA').length, conRazonLibre: ren.filter((r) => r.tieneRazonLibre).length },
+      despidos: { n: des.length, conSubMotivoReal: conSub(des) },
+    };
+  };
+  const bloqueSalidas = (arr) => {
+    const u12 = arr.filter((r) => r.ym >= corte12m);
+    const anios = [...new Set(arr.map((r) => r.anio))].sort();
+    return {
+      total: dims(arr),
+      ult12m: dims(u12),
+      porMes: cuenta(arr, (r) => r.ym),
+      porAnio: Object.fromEntries(anios.map((a) => [a, dims(arr.filter((r) => r.anio === a))])),
+      captura: { total: captura(arr), ult12m: captura(u12) },
+    };
+  };
+  const regsComercial = regs.filter((r) => r.area === 'COMERCIAL');
   salidasJson = {
     generado: hoy.toISOString(),
-    total: dims(regs),
-    ult12m: dims(ult12),
-    porMes: cuenta(regs, (r) => r.ym),
-    porAnio: Object.fromEntries(anios.map((a) => [a, dims(regs.filter((r) => r.anio === a))])),
+    ...bloqueSalidas(regs),
+    // Selector General / Comercial del sitio: mismo desglose, solo el área COMERCIAL
+    // (columna AREA LAB de la pestaña).
+    porDepartamento: { comercial: bloqueSalidas(regsComercial) },
   };
+  console.log(`Salidas: ${regs.length} en total, ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
   if (masDeUnAnoSinDias) calidad.push({ tipo: 'aviso', n: masDeUnAnoSinDias, mensaje: `${masDeUnAnoSinDias} salidas con rango "más de un año" no tienen días laborados válidos (o son menos de 365); se muestran como "Más de un año (sin detalle de años)".` });
+}
+
+// ── 5) CONTROL DE INTEGRACIÓN: SOLO conteos (acuerdo Oscar 2026-09-07) ─────
+// La pestaña lleva las llamadas de seguimiento a cada nuevo (1ª, 20, 40 y 60 días).
+// Tiene nombres y respuestas en texto libre: de eso NO se lee nada. Solo se cuenta,
+// por año de ingreso y departamento, cuántos nuevos tienen cada llamada marcada.
+const REQ_INT = [['FECHA', 'INTEGRACION'], ['LLAMADA', '20 DIAS'], ['LLAMADA', '40 DIAS'], ['LLAMADA', '60 DIAS']];
+const integ = detectar(wb, REQ_INT);
+let integracionJson = null;
+if (!integ) {
+  calidad.push({ tipo: 'aviso', mensaje: 'No se encontró la pestaña de CONTROL DE INTEGRACIÓN (busqué: FECHA DE INTEGRACION y las columnas LLAMADA 20/40/60 DIAS). La propuesta no mostrará el seguimiento a nuevos.' });
+} else {
+  console.log(`Integración: pestaña "${integ.nombre}" (${integ.filas.length} filas, solo conteos)`);
+  const HI = integ.headers;
+  // la columna de la llamada, no la de su fecha (ambas contienen "LLAMADA")
+  const colLlamada = (...tokens) => HI.findIndex((h) => !h.includes('FECHA') && tokens.every((t) => h.includes(norm(t))));
+  const II = {
+    dep: colIdx(HI, 'DEPARTAMENTO'), fecha: colIdx(HI, 'FECHA', 'INTEGRACION'),
+    l1: colLlamada('1A LLAMADA'), l20: colLlamada('LLAMADA', '20 DIAS'), l40: colLlamada('LLAMADA', '40 DIAS'), l60: colLlamada('LLAMADA', '60 DIAS'),
+  };
+  const marca = (v) => { const n = norm(v); return n === 'YES' || n === 'SI' ? true : n === 'NO' ? false : null; };
+  const regsInt = integ.filas.map((f) => ({
+    fecha: fechaISO(f[II.fecha]),
+    depto: norm(f[II.dep]) || '(SIN DEPARTAMENTO)',
+    l1: II.l1 >= 0 ? marca(f[II.l1]) : null, l20: marca(f[II.l20]), l40: marca(f[II.l40]), l60: marca(f[II.l60]),
+  }));
+  const LLAMADAS = ['l1', 'l20', 'l40', 'l60'];
+  const resumenInt = (arr) => ({
+    n: arr.length,
+    ...Object.fromEntries(LLAMADAS.map((k) => [k, {
+      si: arr.filter((r) => r[k] === true).length,
+      no: arr.filter((r) => r[k] === false).length,
+      sinMarcar: arr.filter((r) => r[k] == null).length,
+    }])),
+  });
+  const bloqueInt = (arr) => {
+    const conFecha = arr.filter((r) => r.fecha).sort((a, b) => a.fecha.localeCompare(b.fecha));
+    const anios = [...new Set(conFecha.map((r) => r.fecha.slice(0, 4)))].sort();
+    const desde = conFecha[0]?.fecha ?? null, hasta = conFecha.at(-1)?.fecha ?? null;
+    return {
+      total: resumenInt(arr),
+      desde, hasta,
+      porAnio: Object.fromEntries(anios.map((a) => [a, resumenInt(conFecha.filter((r) => r.fecha.startsWith(a)))])),
+      ult12m: resumenInt(conFecha.filter((r) => r.fecha >= hace12mISO)),
+    };
+  };
+  integracionJson = {
+    generado: hoy.toISOString(),
+    ...bloqueInt(regsInt),
+    porDepartamento: { comercial: bloqueInt(regsInt.filter((r) => r.depto === 'COMERCIAL')) },
+    departamentos: contarPor(regsInt, (r) => r.depto),
+  };
+  const sinFechaInt = regsInt.filter((r) => !r.fecha).length;
+  if (sinFechaInt) calidad.push({ tipo: 'aviso', n: sinFechaInt, mensaje: `${sinFechaInt} filas del control de integración no tienen fecha de ingreso; cuentan en el total pero no por año.` });
 }
 
 // ── calidad de datos ───────────────────────────────────────────────────────
@@ -492,6 +620,7 @@ const metaJson = {
   filasVacantes: filasVac.length,
   filasRotacionAcumulada: acumulado.length,
   filasRotacionMensual: mensual.length,
+  filasIntegracion: integracionJson ? integracionJson.total.n : 0,
   calidad,
 };
 
@@ -536,6 +665,7 @@ buscarFugas(vacantesJson, 'vacantes', hallazgos);
 buscarFugas(rotacionJson, 'rotacion', hallazgos);
 buscarFugas(metaJson, 'meta', hallazgos);
 if (salidasJson) buscarFugas(salidasJson, 'salidas', hallazgos);
+if (integracionJson) buscarFugas(integracionJson, 'integracion', hallazgos);
 if (hallazgos.length) {
   console.error('\n⛔ VERIFICACIÓN ANTI-FUGAS FALLÓ — NO se publicó nada. Hallazgos:');
   for (const h of hallazgos) console.error('  - ' + h);
@@ -548,9 +678,10 @@ mkdirSync(outDir, { recursive: true });
 writeFileSync(path.join(outDir, 'vacantes.json'), JSON.stringify(vacantesJson));
 writeFileSync(path.join(outDir, 'rotacion.json'), JSON.stringify(rotacionJson));
 writeFileSync(path.join(outDir, 'salidas.json'), JSON.stringify(salidasJson ?? { generado: hoy.toISOString(), total: null }));
+writeFileSync(path.join(outDir, 'integracion.json'), JSON.stringify(integracionJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(metaJson, null, 2));
 if (calidad.length) {
   console.log('\nAvisos de calidad (van a meta.json; no se muestran en el sitio):');
   for (const a of calidad) console.log(`  ${a.tipo === 'error' ? '✖' : '•'} ${a.mensaje}`);
 }
-console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);
+console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), integracion.json (${integracionJson ? integracionJson.total.n + ' nuevos, solo conteos' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);

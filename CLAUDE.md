@@ -29,6 +29,9 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
    (razón, sub-motivo n≥3, género, área, marca, agencia, rangos de antigüedad) — jamás filas
    individuales, y nunca el desglose por supervisor (el sitio es público).
+   Segunda excepción (Oscar, 2026-09-07): la pestaña CONTROL DE INTEGRACIÓN (llamadas de
+   seguimiento a nuevos) se lee SOLO para contar, por año y departamento, cuántos tienen cada
+   llamada marcada (`public/data/integracion.json`). Nombres y respuestas jamás se leen.
 3. `scripts/actualizar_datos.mjs` corre una verificación final anti-fugas (encabezados prohibidos,
    patrones de DPI de 13 dígitos y teléfonos de 8 dígitos). Si detecta algo: aborta sin publicar.
 4. Los xlsx descargados van a `.data/` (gitignoreado), nunca al repo.
@@ -57,6 +60,17 @@ renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
 `scripts/validar_modelo.mjs` los verifica en cada deploy.
 Ojo: el Excel de Oscar aún tiene la fila Telo en su hoja "Despido" (por eso su Resumen dice
 Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
+
+## Selector General / Comercial (CEO, 2026-09-07)
+
+- Todas las páginas del tablero llevan el selector (por defecto **Comercial**; se recuerda en
+  localStorage y admite `?depto=general|comercial`). Salidas y rotación se filtran directo por la
+  columna de área del sheet. **La pestaña de vacantes NO trae departamento**: el pipeline lo deduce
+  del puesto (`REGLAS_DEPTO` en `scripts/actualizar_datos.mjs`; si aparece una columna
+  DEPARTAMENTO, manda ella). El Simulador no cambia de modelo, solo de calibración.
+- `public/propuesta.html` es de **acceso abierto** (sin contraseña, decisión del CEO) y no está en
+  el menú. Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
+  viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.
 
 ## Reglas de trabajo
 

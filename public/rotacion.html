@@ -23,6 +23,7 @@
 <main>
   <h1>Rotación de personal</h1>
   <p class="sub">Qué tan rápido rota el equipo: acumulado del año, ritmo mensual y dónde se concentran las bajas.</p>
+  <p class="alcance" id="alcance"></p>
 
   <div class="kpis" id="kpis"></div>
 
@@ -30,7 +31,7 @@
   <div class="tarjeta">
     <div class="grafica" id="acumulado-anios"></div>
     <div id="leyenda-anios"></div>
-    <p class="pie">Total empresa. El acumulado crece mes a mes; la referencia del mercado que usa RRHH es ~60% anual.</p>
+    <p class="pie" id="acumulado-nota"></p>
   </div>
 
   <h2>Comercial vs. total empresa (año en curso)</h2>
@@ -45,10 +46,12 @@
     <p class="pie" id="bajas-nota"></p>
   </div>
 
-  <h2>Bajas por departamento (últimos 12 meses)</h2>
-  <div class="tarjeta">
-    <div class="grafica" id="bajas-depto"></div>
-    <p class="pie">El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.</p>
+  <div id="sec-depto">
+    <h2>Bajas por departamento (últimos 12 meses)</h2>
+    <div class="tarjeta">
+      <div class="grafica" id="bajas-depto"></div>
+      <p class="pie">El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.</p>
+    </div>
   </div>
 </main>
 <footer></footer>

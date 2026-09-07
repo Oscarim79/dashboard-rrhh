@@ -28,6 +28,35 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Cambios pedidos por el CEO tras la revisión (2026-09-07)
+
+- **Selector General / Comercial** en todas las páginas del tablero (cabecera en móvil, menú en
+  escritorio). Abre en Comercial; se recuerda en el navegador y admite `?depto=general`. Salidas
+  (AREA LAB) y rotación (AREAS / DEPARTAMENTO) se filtran con la columna del sheet. Vacantes no trae
+  departamento: se deduce del puesto (224 de 254 son comerciales) y el Resumen lo explica en "De
+  dónde salen los datos". El pipeline publica `porDepartamento.comercial` en vacantes.json y
+  salidas.json. El Simulador solo cambia su calibración.
+- **Salidas: motivos por separado.** El CEO quiere salario y mejor oportunidad como motivos
+  distintos, así que se deshizo la agrupación "mejor oportunidad · salario · beneficios" de la
+  página Salidas; "voluntaria" se rotula como "renuncia sin detalle registrado".
+- **Propuesta reescrita y sin contraseña** (`public/propuesta.html`, script de cifrado eliminado).
+  Dos secciones: 1) el problema (carga del equipo de RRHH en tres bloques por cargo, sin sistema
+  formal de capacitación, razones de salida) y 2) tres propuestas (asistente para el jefe de RRHH por
+  traslado interno, segundo comodín, vendedor capacitador por región con bono Q500 + 3 variantes de
+  garantía de comisión). `?solo=capacitador` muestra solo la propuesta 3 para el gerente comercial.
+- **Razones de salida NO se calculan del sheet**: solo 47% de las renuncias tiene motivo real (53%
+  dice "voluntaria") y "descuentos aplicados" no existe como categoría. La página muestra las
+  categorías con espacio para la distribución que Oscar carga en `public/js/propuesta-datos.js`
+  (`razonesSalida.categorias[].pct`) y una tabla con el % capturado.
+- **Control de integración** (nuevo, `integracion.json`): solo conteos de llamadas de seguimiento
+  (1ª, 20, 40, 60 días) por año y departamento. OJO: el registro muestra que las llamadas SÍ se
+  marcan en ~70% de los 194 ingresos comerciales; la propuesta lo dice tal cual y distingue la
+  llamada (se hace) del acompañamiento en tienda (no se hace).
+- **Supuestos editables pendientes de confirmar por Oscar** (en `propuesta-datos.js`): sueldo
+  del comodín Q4,500, reemplazo en Garantías Q4,500, 5 regiones (pestaña DISTRIBUCIONCAP),
+  comisión promedio Q2,000/mes, 10 días de capacitación, 50% de venta mientras capacita. Los
+  nuevos por mes salen del indicador de rotación (altas COMERCIAL, 12 meses).
+
 ## Supuesto del Resumen: ahora dice de dónde vienen las salidas sin tipo (2026-09-03)
 
 - Tras clasificar las 9 tiendas, el supuesto bajó de 21 a 14 salidas. Para que no haya que adivinar,
@@ -119,7 +148,7 @@
   la "garantía que se gana" (se quitó la calculadora del escenario A y el piloto); la sección queda como
   información + la propuesta sin costo de descuentos con tope. Paquete total = solo las tres prioridades.
 
-## Sección interna cifrada (2026-09-02)
+## Sección interna cifrada (2026-09-02) — SUPERADA el 2026-09-07: la propuesta ahora es abierta
 
 - `public/propuesta.html` es la **propuesta interna para Gerencia** (fortalecimiento de RRHH y
   escenarios de compensación), publicada **cifrada** — AES-256-GCM con clave derivada por

@@ -1,11 +1,20 @@
 // Página Simulador: todos los supuestos del modelo con sliders,
 // botón "usar datos reales" (calibración) y escenario "vacante a la mitad de días".
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
-import { cargarDatos, pintarPie, marcarNavActiva, fmtNum } from './comun.js';
+import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, vacantesDe, notaAlcance } from './comun.js';
 
 marcarNavActiva();
-const { vacantes, meta } = await cargarDatos();
-const A = vacantes.agregados;
+const datos = await cargarDatos();
+const { meta } = datos;
+// El modelo de costo es el mismo con cualquier alcance (es por tipo de tienda); el selector
+// solo cambia los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).
+let A = datos.vacantes.agregados;
+function aplicarDepto(depto) {
+  A = vacantesDe(datos.vacantes, depto).agregados;
+  document.getElementById('alcance').innerHTML = notaAlcance(depto) +
+    ' El modelo de costo no cambia con el selector; solo cambian los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).';
+}
+aplicarDepto(pintarSelectorDepto((d) => { aplicarDepto(d); sincronizar(); }));
 
 // ── definición de controles ────────────────────────────────────────────────
 const fq = (v) => fmtQ(v);

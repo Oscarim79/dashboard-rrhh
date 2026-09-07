@@ -8,7 +8,7 @@ estático en GitHub Pages y se actualiza solo, todos los días, desde un Google 
 
 1. `scripts/actualizar_datos.mjs` descarga el Google Sheet (como xlsx), detecta las pestañas
    **por sus encabezados** (no por nombre ni posición), limpia los datos y genera
-   `public/data/vacantes.json`, `rotacion.json` y `meta.json` — solo cifras agregadas.
+   `public/data/vacantes.json`, `rotacion.json`, `salidas.json`, `integracion.json` y `meta.json` — solo cifras agregadas.
 2. Antes de escribir nada corre una **verificación anti-fugas**: si detecta encabezados
    prohibidos, posibles DPI (13 dígitos) o teléfonos (8 dígitos), aborta sin publicar.
 3. Una GitHub Action corre ese script todos los días a las 6:00 (hora de Guatemala),
