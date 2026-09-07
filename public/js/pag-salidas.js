@@ -107,7 +107,7 @@ if (!salidasTodo.total) {
       { formato: fmtNum }) : '<p class="sub">Sin motivos registrados.</p>';
     document.getElementById('submotivo-nota').innerHTML = conReparto
       ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
-      : `Cada motivo por separado, tal como lo registra RRHH (salario, clima laboral, mejor oportunidad, familia, etc.); "mal trato" y "mal ambiente" se cuentan como clima laboral. La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
+      : `Cada motivo por separado, tal como lo registra RRHH. ${des.notaAgrupaciones} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
 
     // ── agencia (top 12) ──
     document.getElementById('agencia').innerHTML = barrasH(

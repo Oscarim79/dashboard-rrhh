@@ -51,8 +51,9 @@ try {
     const max = Math.max(...des.items.map((i) => i.valor), 1);
     q('razones-titulo').textContent = `Por qué se van (cada motivo por separado) · ${etiP}`;
     q('razones-meta').textContent = total
-      ? `Salidas del departamento Comercial, ${etiP} (${fmtNum(total)} con motivo, renuncias y despidos), según el registro de salidas de RRHH. "Mal trato" y "mal ambiente" se cuentan como clima laboral; motivos con menos de 3 casos en el período van en "Otros".`
+      ? `Salidas del departamento Comercial, ${etiP} (${fmtNum(total)} con motivo, renuncias y despidos), según el registro de salidas de RRHH. Motivos con menos de 3 casos en el período van en "Otros".`
       : `Sin salidas comerciales con motivo registrado en ${etiP}.`;
+    q('razones-nota').textContent = des.notaAgrupaciones;
     q('razones').innerHTML = des.items.map((i) => `
       <div class="razon">
         <div class="razon-eti">${i.eti}</div>

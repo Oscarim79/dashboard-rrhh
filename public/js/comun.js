@@ -330,18 +330,25 @@ export const SIN_DETALLE = 'Sin detalle registrado ("voluntaria")';
 export function aplicarDesglose(subMotivos, desglose) {
   const acc = new Map();
   const suma = (k, v) => acc.set(k, (acc.get(k) ?? 0) + v);
+  const fuentes = new Map(); // etiqueta mostrada → categorías del registro que se sumaron en ella
   let voluntarias = 0;
   for (const [k, v] of Object.entries(subMotivos ?? {})) {
     if (k.startsWith('(')) continue;
     if (k === 'VOLUNTARIA') { voluntarias += v; continue; }
-    suma(NOMBRE_SUB[k] ?? (k.charAt(0) + k.slice(1).toLowerCase()), v);
+    const eti = NOMBRE_SUB[k] ?? (k.charAt(0) + k.slice(1).toLowerCase());
+    suma(eti, v);
+    fuentes.set(eti, [...(fuentes.get(eti) ?? []), `${k.toLowerCase()} (${v})`]);
   }
   let repartidas = 0;
   if (desglose?.casos) for (const [k, v] of Object.entries(desglose.casos)) { suma(k, v); repartidas += v; }
   const resto = voluntarias - repartidas;
   if (resto > 0 && !desglose?.cubreTodas) suma(SIN_DETALLE, resto);
   const items = [...acc.entries()].sort((a, b) => b[1] - a[1]).map(([eti, valor]) => ({ eti, valor }));
-  return { items, voluntarias, repartidas, resto };
+  // texto para el pie de la gráfica: TODAS las agrupaciones que se hicieron con este dato
+  const agrupaciones = [...fuentes.entries()].filter(([, f]) => f.length > 1)
+    .map(([eti, f]) => `${eti} suma ${f.slice(0, -1).map((x) => `"${x}"`).join(', ')} y "${f.at(-1)}"`);
+  return { items, voluntarias, repartidas, resto, agrupaciones,
+    notaAgrupaciones: agrupaciones.length ? `Agrupaciones hechas sobre el registro: ${agrupaciones.join('; ')}.` : '' };
 }
 
 // Mediana de días calibrada: usa la del tipo si tiene muestra suficiente, si no la global.
