@@ -7,12 +7,7 @@
 <title>Propuesta: capacitación y retención — RRHH Corporación Americana</title>
 <link rel="stylesheet" href="css/estilo.css">
 <style>
-  /* La propuesta no lleva el menú del tablero: es un documento para leer de corrido. */
-  body { padding-left: 0 !important; }
   main { max-width: 820px; padding-bottom: 60px; }
-  .cabecera-doc { background: var(--tinta); color: #fff; padding: 14px 16px; }
-  .cabecera-doc .marca { max-width: 820px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
-  .cabecera-doc a { color: #9FB5AB; font-size: 12.5px; text-decoration: none; white-space: nowrap; }
   .portada h1 { font-size: 24px; line-height: 1.2; margin: 18px 0 6px; }
   .portada .sub { font-size: 14px; }
   .seccion { margin-top: 34px; }
@@ -79,23 +74,33 @@
   body.solo-capacitador .portada h1 { font-size: 21px; }
 
   @media print {
-    .cabecera-doc, .acciones { display: none; }
+    .cabecera, nav#menu, #velo, .acciones { display: none; }
+    body { padding-left: 0; }
     body { background: #fff; }
     .propuesta, .cargo, .variante { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
-<header class="cabecera-doc">
-  <div class="marca">
-    <div>PROPUESTA A GERENCIA<span>RRHH · CORPORACIÓN AMERICANA</span></div>
-    <a href="./index.html">Ver el tablero →</a>
-  </div>
+<header class="cabecera">
+  <button id="btn-menu" aria-label="Abrir menú">☰</button>
+  <div class="marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
 </header>
+<nav id="menu">
+  <div class="marca menu-marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./salidas.html">Salidas</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+  <a href="./propuesta.html">Propuesta</a>
+</nav>
+<div id="velo"></div>
 
 <main>
   <div class="portada">
-    <h1 class="solo-oculto">Capacitación y retención: el problema y tres propuestas</h1>
+    <div class="seccion-num solo-oculto" style="margin-top:14px">Propuesta a Gerencia · RRHH</div>
+    <h1 class="solo-oculto" style="margin-top:2px">Capacitación y retención: el problema y tres propuestas</h1>
     <h1 style="display:none" class="solo-visible">Vendedor capacitador oficial por región</h1>
     <p class="sub solo-oculto">Departamento Comercial · Recursos Humanos · septiembre de 2026. Las cifras del tablero se actualizan solas; las que RRHH carga a mano están marcadas.</p>
     <div class="acciones solo-oculto">

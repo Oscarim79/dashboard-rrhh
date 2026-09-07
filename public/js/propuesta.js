@@ -4,7 +4,9 @@
 // las que RRHH carga a mano viven en propuesta-datos.js.
 import { DATOS } from './propuesta-datos.js';
 import { fmtQ, costoSalida, PARAMS_DEFECTO, VENTAS_TIPO } from './modelo.js';
-import { fmtNum, salidasDe, vacantesDe, aplicarDesglose, SIN_DETALLE, diasCalibrados } from './comun.js';
+import { fmtNum, salidasDe, vacantesDe, aplicarDesglose, SIN_DETALLE, diasCalibrados, marcarNavActiva } from './comun.js';
+
+marcarNavActiva();
 
 const q = (id) => document.getElementById(id);
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);

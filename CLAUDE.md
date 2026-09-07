@@ -72,8 +72,8 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   Vacantes se filtran por fecha de solicitud y se re-agregan en el navegador (`agregarVacantes` en
   comun.js debe seguir espejando `agregarVacantes` del pipeline); salidas usan `porMesDetalle`
   para meses sueltos; rotación por mes del indicador.
-- `public/propuesta.html` es de **acceso abierto** (sin contraseña, decisión del CEO) y no está en
-  el menú. Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
+- `public/propuesta.html` es de **acceso abierto** (sin contraseña, decisión del CEO) y está en el
+  menú como última opción "Propuesta" (pedido del CEO, 2026-09-07). Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
   viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.
 
 ## Reglas de trabajo

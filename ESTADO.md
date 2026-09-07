@@ -30,6 +30,10 @@
 
 ## Propuesta: resumen del documento Word en la Sección 2 (2026-09-07, tercera ronda)
 
+- **"Propuesta" es la última opción del menú izquierdo** en todas las páginas (pedido del CEO) y la
+  página lleva el mismo menú del tablero. Se mantiene la versión del CEO (capacitadores con bono, no
+  tiempo completo) y las cifras vivas del tablero, no las del documento.
+
 - Fuente: `J:\Mi unidad\RRHH\COLABORADORES\PROPUESTA DE ESTRUCTURACION DEPARTAMENTO DE RRHH con escenarios.docx`
   (tiene nombres; en la página solo van cargos). La Sección 2 ahora es un súper resumen: las tres
   propuestas del CEO (1–3) + 4. compensación (piso Q4,500→Q3,000 en el mes 5 vs permanencia mediana
