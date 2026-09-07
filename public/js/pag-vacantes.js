@@ -1,15 +1,15 @@
 // Página Vacantes: cobertura, abiertas hoy, cierres por mes, interno/externo, canales.
-// Se redibuja con el selector General / Comercial (el departamento de cada vacante
-// se deduce del puesto en el pipeline porque la pestaña no trae esa columna).
+// Se redibuja con los selectores General / Comercial y de período. Una vacante
+// pertenece al período por su fecha de solicitud; "abiertas hoy" no depende del período.
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum,
-  pintarSelectorDepto, vacantesDe, notaAlcance } from './comun.js';
+  pintarSelectorDepto, vacantesDe, notaAlcance,
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses, fmtYmCorto } from './comun.js';
 import { barrasH, columnas } from './graficas.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
 const { meta } = datos;
 const titulo = (s) => s ? s.charAt(0) + s.slice(1).toLowerCase() : s;
-const MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
 const COLOR_PROCESO = {
   'Contratado, por confirmar': 'verde',
   'En polígrafo': 'verde',
@@ -21,19 +21,24 @@ const COLOR_PROCESO = {
   'Sin notas de RRHH aún': 'ambar',
 };
 
-function pintar(depto) {
+function pintar(depto, periodo) {
   const vacantes = vacantesDe(datos.vacantes, depto);
-  const A = vacantes.agregados;
+  const filasP = vacantesEnPeriodo(vacantes.filas, periodo, vacantes.generado);
+  const A = agregarVacantes(filasP);
+  const etiP = etiquetaPeriodo(periodo, vacantes.generado);
   document.getElementById('alcance').innerHTML = notaAlcance(depto) + (depto === 'comercial'
     ? ' El departamento de cada vacante se deduce del puesto: la pestaña del sheet no lo trae.' : '');
+  document.getElementById('h-dias').textContent = `Días para cubrir una vacante (mediana, cerradas · ${etiP})`;
+  document.getElementById('h-cierres').textContent = `Cierres por mes · vacantes solicitadas en ${etiP}`;
+  document.getElementById('h-como').textContent = `Cómo se cubren · ${etiP}`;
 
-  // ── KPIs ───────────────────────────────────────────────────────────────────
+  // ── KPIs (abiertas hoy: siempre todas, sin importar el período) ───────────
   const abiertas = vacantes.filas.filter((r) => r.estatus === 'ABIERTA');
   const masVieja = abiertas.reduce((m, r) => Math.max(m, r.diasAbierta ?? 0), 0);
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><div class="kpi-valor">${fmtNum(abiertas.length)}</div><div class="kpi-eti">abiertas hoy</div></div>
-    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div></div>
-    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.promedio ?? '—'} días</div><div class="kpi-eti">promedio para cerrar</div></div>
+    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div><div class="kpi-nota">${fmtNum(A.diasCobertura.global.n)} cerradas con dato · ${etiP}</div></div>
+    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.promedio ?? '—'} días</div><div class="kpi-eti">promedio para cerrar</div><div class="kpi-nota">${etiP}</div></div>
     <div class="kpi"><div class="kpi-valor ${masVieja > 30 ? 'rojo' : ''}">${fmtNum(masVieja)} días</div><div class="kpi-eti">la vacante abierta más antigua</div></div>`;
 
   // ── abiertas hoy ───────────────────────────────────────────────────────────
@@ -52,7 +57,7 @@ function pintar(depto) {
         </tr>`).join('')}
       </tbody>
     </table>
-    <p class="pie">El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado). "Candidatos vistos, sin elegido" significa que sí hubo gestiones pero los perfiles no cuajaron; "en gestión, sin etapa anotada" es que la nota describe la causa de la vacante, no el proceso. Las notas completas no se publican por privacidad.</p>`
+    <p class="pie">Las abiertas son las de hoy, sin importar el período elegido. El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado). "Candidatos vistos, sin elegido" significa que sí hubo gestiones pero los perfiles no cuajaron; "en gestión, sin etapa anotada" es que la nota describe la causa de la vacante, no el proceso. Las notas completas no se publican por privacidad.</p>`
     : '<p class="sub">No hay vacantes abiertas registradas con este alcance.</p>';
 
   // ── días por tipo ──────────────────────────────────────────────────────────
@@ -64,40 +69,39 @@ function pintar(depto) {
       valor: A.diasCobertura.porTipo[t].mediana,
       extra: `(n=${A.diasCobertura.porTipo[t].n})`,
     }));
-  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días` }) : '<p class="sub">Sin datos.</p>';
+  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días` }) : `<p class="sub">Sin vacantes cerradas con dato en ${etiP}.</p>`;
 
   // ── días por puesto (top 8 por frecuencia) ─────────────────────────────────
   const puestos = Object.entries(A.diasCobertura.porPuesto)
     .filter(([k, v]) => k !== '(sin dato)' && v.n >= 3)
     .sort((a, b) => b[1].n - a[1].n).slice(0, 8)
     .map(([k, v]) => ({ eti: titulo(k), valor: v.mediana, extra: `(n=${v.n})` }));
-  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días` }) : '<p class="sub">Sin datos.</p>';
+  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días` }) : `<p class="sub">Ningún puesto con 3 o más vacantes cerradas en ${etiP}.</p>`;
 
-  // ── cierres por mes (últimos 18 meses) ─────────────────────────────────────
-  const cierres = Object.entries(A.cierresPorMes).slice(-18).map(([ym, n]) => {
-    const [y, m] = ym.split('-');
-    return { eti: `${MES_CORTO[+m - 1]} ${y.slice(2)}`, valor: n };
-  });
+  // ── cierres por mes (de las vacantes del período; hasta 18 meses) ──────────
+  const cierres = Object.entries(A.cierresPorMes).slice(-18).map(([ym, n]) => ({ eti: fmtYmCorto(ym), valor: n }));
   document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum });
 
   // ── interno vs externo ─────────────────────────────────────────────────────
   const ocupada = Object.entries(A.ocupadaPor).sort((a, b) => b[1] - a[1])
     .map(([k, v]) => ({ eti: k, valor: v, color: k.startsWith('Interno') ? '#0B7A55' : k === 'Referido' ? '#8FA69B' : '#46615A' }));
-  document.getElementById('ocupada-por').innerHTML = ocupada.length ? barrasH(ocupada, { formato: fmtNum }) : '<p class="sub">Sin datos.</p>';
+  document.getElementById('ocupada-por').innerHTML = ocupada.length ? barrasH(ocupada, { formato: fmtNum }) : '<p class="sub">Sin datos en este período.</p>';
   const totalOcupada = ocupada.reduce((s, o) => s + o.valor, 0);
   document.getElementById('ocupada-nota').textContent =
-    `Registrado en ${fmtNum(totalOcupada)} de ${fmtNum(vacantes.filas.length)} vacantes; el resto no indica cómo se cubrió.`;
+    `Registrado en ${fmtNum(totalOcupada)} de ${fmtNum(filasP.length)} vacantes de ${etiP}; el resto no indica cómo se cubrió.`;
 
   // ── canales ────────────────────────────────────────────────────────────────
   const NOMBRE_CANAL = { redes: 'Redes de la empresa', facebook: 'Grupos de Facebook', volanteo: 'Volanteo', referidos: 'Programa de referidos', anuncios: 'Anuncios pagados', perifoneo: 'Perifoneo' };
   const canales = Object.entries(A.canales)
     .map(([k, c]) => ({ eti: NOMBRE_CANAL[k], valor: c.si, extra: c.diasConCanal.n >= 3 ? `— con canal: ${c.diasConCanal.mediana} días (n=${c.diasConCanal.n})` : '' }))
     .sort((a, b) => b.valor - a.valor);
-  document.getElementById('canales').innerHTML = barrasH(canales, { formato: (v) => `${fmtNum(v)} usos` });
+  document.getElementById('canales').innerHTML = canales.some((c) => c.valor) ? barrasH(canales, { formato: (v) => `${fmtNum(v)} usos` }) : `<p class="sub">Sin canales registrados en ${etiP}.</p>`;
   document.getElementById('canales-nota').textContent =
     'Los canales se registran en pocas vacantes (empezó a llenarse en 2026), así que esta lectura es parcial: dice cuáles se usan, no todavía cuál cierra más rápido.';
 }
 
-const deptoInicial = pintarSelectorDepto((d) => pintar(d));
-pintar(deptoInicial);
+let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });
+let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ vacantes: datos.vacantes }), generado: datos.vacantes.generado },
+  (p) => { periodo = p; pintar(depto, periodo); });
+pintar(depto, periodo);
 pintarPie(meta);

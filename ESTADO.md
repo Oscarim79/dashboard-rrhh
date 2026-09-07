@@ -28,6 +28,24 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Selector de período (CEO, 2026-09-07, segunda ronda)
+
+- Barra "Período" en todas las páginas del tablero, global como el de General/Comercial (se
+  recuerda en el navegador; admite `?periodo=todo|12m|a:2026|m:2026-08`). Opciones: Todo el
+  registro · Últimos 12 meses (por defecto) · año en curso "a la fecha" · años anteriores · un mes
+  concreto (desplegable). Los años y meses se arman con los datos que existen.
+- Cómo se filtra: una vacante pertenece al período por su **fecha de solicitud** (las agregadas se
+  recalculan en el navegador con `agregarVacantes` en comun.js, misma lógica que el pipeline); una
+  salida por su fecha de baja (`salidas.json` trae `total`, `ult12m`, `porAnio` y ahora
+  `porMesDetalle` con el desglose completo de cada mes, regla n≥3 dentro de cada mes); la rotación
+  por el mes del indicador (KPI al último mes del período). "Abiertas hoy" y el costo de las plazas
+  abiertas no dependen del período. El Simulador solo cambia su calibración.
+- Consecuencia visible: en "últimos 12 meses" los días de cobertura ahora se calculan con las
+  vacantes solicitadas en esos 12 meses (mediana 17, n=85 en Comercial), no con todas las cerradas
+  del registro (16, n=132) como antes. En vistas de un mes, muchos motivos caen en "Otros" por la
+  regla de privacidad.
+- Ojo: el reparto de RRHH de las renuncias "voluntarias" solo aplica a Comercial · todo el registro.
+
 ## Cambios pedidos por el CEO tras la revisión (2026-09-07)
 
 - **Selector General / Comercial** en todas las páginas del tablero (cabecera en móvil, menú en

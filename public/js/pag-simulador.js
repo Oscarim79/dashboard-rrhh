@@ -1,7 +1,8 @@
 // Página Simulador: todos los supuestos del modelo con sliders,
 // botón "usar datos reales" (calibración) y escenario "vacante a la mitad de días".
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
-import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, vacantesDe, notaAlcance } from './comun.js';
+import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, vacantesDe, notaAlcance,
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -9,12 +10,17 @@ const { meta } = datos;
 // El modelo de costo es el mismo con cualquier alcance (es por tipo de tienda); el selector
 // solo cambia los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).
 let A = datos.vacantes.agregados;
-function aplicarDepto(depto) {
-  A = vacantesDe(datos.vacantes, depto).agregados;
-  document.getElementById('alcance').innerHTML = notaAlcance(depto) +
-    ' El modelo de costo no cambia con el selector; solo cambian los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).';
+let deptoSel = 'comercial', periodoSel = '12m';
+function aplicarFiltros() {
+  const v = vacantesDe(datos.vacantes, deptoSel);
+  A = agregarVacantes(vacantesEnPeriodo(v.filas, periodoSel, v.generado));
+  document.getElementById('alcance').innerHTML = notaAlcance(deptoSel) +
+    ` El modelo de costo no cambia con los selectores; solo cambian los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo · ${etiquetaPeriodo(periodoSel, v.generado)}).`;
 }
-aplicarDepto(pintarSelectorDepto((d) => { aplicarDepto(d); sincronizar(); }));
+deptoSel = pintarSelectorDepto((d) => { deptoSel = d; aplicarFiltros(); sincronizar(); });
+periodoSel = pintarSelectorPeriodo({ ...aniosYMeses({ vacantes: datos.vacantes }), generado: datos.vacantes.generado },
+  (p) => { periodoSel = p; aplicarFiltros(); sincronizar(); });
+aplicarFiltros();
 
 // ── definición de controles ────────────────────────────────────────────────
 const fq = (v) => fmtQ(v);
@@ -185,14 +191,15 @@ function recalcular() {
   // proyección anual con salidas reales del tipo elegido y mezcla real
   const s = A.salidas12mPorTipo[tipoSel];
   const el = document.getElementById('proyeccion');
+  const etiP = etiquetaPeriodo(periodoSel, datos.vacantes.generado);
   if (s) {
     const anual = s.renuncia * r.total + s.despido * d.total;
-    el.innerHTML = `<h3>Proyección anual · tiendas tipo ${tipoSel}</h3>
-      <p style="font-size:15px">Con las salidas reales de los últimos 12 meses (${fmtNum(s.renuncia)} renuncias, ${fmtNum(s.despido)} despidos) y estos supuestos:
-      <b class="num" style="font-size:20px"> ${fmtQ(anual)}</b> al año.</p>`;
+    el.innerHTML = `<h3>Proyección · tiendas tipo ${tipoSel} · ${etiP}</h3>
+      <p style="font-size:15px">Con las salidas reales del período (${fmtNum(s.renuncia)} renuncias, ${fmtNum(s.despido)} despidos) y estos supuestos:
+      <b class="num" style="font-size:20px"> ${fmtQ(anual)}</b>.</p>`;
   } else {
-    el.innerHTML = `<h3>Proyección anual · tiendas tipo ${tipoSel}</h3>
-      <p class="sub">No hubo salidas registradas en tiendas de este tipo en los últimos 12 meses.</p>`;
+    el.innerHTML = `<h3>Proyección · tiendas tipo ${tipoSel} · ${etiP}</h3>
+      <p class="sub">No hubo salidas registradas en tiendas de este tipo en ${etiP}.</p>`;
   }
   document.getElementById('nota-escenario').textContent = escenarioNota;
 }
@@ -200,8 +207,9 @@ function recalcular() {
 // ── botones ────────────────────────────────────────────────────────────────
 document.getElementById('btn-reales').onclick = () => {
   const g = A.diasCobertura.global;
+  if (g.mediana == null) { escenarioNota = 'No hay vacantes cerradas con dato en el período elegido: no se puede calibrar. Cambia el período arriba.'; sincronizar(); return; }
   params = { ...params, diasVacante: g.mediana };
-  escenarioNota = `Calibrado con datos reales: la vacante dura ${g.mediana} días (mediana de ${g.n} vacantes cerradas). La mezcla real es ${Math.round(A.mezcla.pctRenuncia * 100)}% renuncias / ${Math.round(A.mezcla.pctDespido * 100)}% despidos.`;
+  escenarioNota = `Calibrado con datos reales (${etiquetaPeriodo(periodoSel, datos.vacantes.generado)}): la vacante dura ${g.mediana} días (mediana de ${g.n} vacantes cerradas). La mezcla real es ${Math.round((A.mezcla.pctRenuncia ?? 0) * 100)}% renuncias / ${Math.round((A.mezcla.pctDespido ?? 0) * 100)}% despidos.`;
   sincronizar();
 };
 document.getElementById('btn-mitad').onclick = () => {

@@ -125,6 +125,185 @@ export function notaAlcance(depto) {
     : 'Viendo <b>toda la empresa</b>. Cambia a "Comercial" arriba para ver solo el departamento comercial.';
 }
 
+// ── Selector global de período (pedido del CEO, 2026-09-07) ───────────────────
+// Valores: 'todo' · '12m' · 'a:2026' (año; si es el año en curso se rotula "a la fecha")
+// · 'm:2026-08' (un mes). Se recuerda en el navegador y admite ?periodo=… en la URL.
+export const MES_LARGO = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+export const MES_CORTO = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const CLAVE_PERIODO = 'dashboard-rrhh:periodo';
+const periodoValido = (p) => p === 'todo' || p === '12m' || /^a:\d{4}$/.test(p) || /^m:\d{4}-\d{2}$/.test(p);
+
+export function periodoActual() {
+  try {
+    const url = new URLSearchParams(location.search).get('periodo');
+    if (url && periodoValido(url)) { localStorage.setItem(CLAVE_PERIODO, url); return url; }
+    const v = localStorage.getItem(CLAVE_PERIODO);
+    if (v && periodoValido(v)) return v;
+  } catch { /* sin almacenamiento */ }
+  return '12m';
+}
+
+const anioDe = (generado) => String(new Date(generado).getUTCFullYear());
+
+// Rango de fechas ISO (inclusive) que cubre el período; null = sin límite.
+export function rangoPeriodo(p, generado) {
+  const hoy = new Date(generado);
+  const hoyISO = hoy.toISOString().slice(0, 10);
+  if (p === '12m') { const d = new Date(hoy); d.setUTCFullYear(d.getUTCFullYear() - 1); return { desde: d.toISOString().slice(0, 10), hasta: hoyISO }; }
+  if (p.startsWith('a:')) { const a = p.slice(2); return { desde: `${a}-01-01`, hasta: `${a}-12-31` }; }
+  if (p.startsWith('m:')) { const ym = p.slice(2); return { desde: `${ym}-01`, hasta: `${ym}-31` }; }
+  return { desde: null, hasta: null };
+}
+export const enPeriodo = (iso, rango) => (!rango.desde ? true : !!iso && iso >= rango.desde && iso <= rango.hasta);
+
+export function etiquetaPeriodo(p, generado) {
+  if (p === '12m') return 'últimos 12 meses';
+  if (p.startsWith('a:')) { const a = p.slice(2); return a === anioDe(generado) ? `${a} a la fecha` : `año ${a}`; }
+  if (p.startsWith('m:')) { const [y, m] = p.slice(2).split('-'); return `${MES_LARGO[+m - 1]} ${y}`; }
+  return 'todo el registro';
+}
+export const fmtYm = (ym) => { const [y, m] = ym.split('-'); return `${MES_LARGO[+m - 1]} ${y}`; };
+export const fmtYmCorto = (ym) => { const [y, m] = ym.split('-'); return `${MES_CORTO[+m - 1]} ${y.slice(2)}`; };
+
+// Meses que se grafican para un período, a partir de los meses con dato (ordenados 'YYYY-MM'):
+// todo → últimos 18 · 12m → los del rango · año → los del año · mes → los 12 que terminan ahí.
+export function mesesDelPeriodo(p, mesesDisponibles, generado) {
+  if (p === 'todo') return mesesDisponibles.slice(-18);
+  if (p.startsWith('m:')) { const ym = p.slice(2); return mesesDisponibles.filter((x) => x <= ym).slice(-12); }
+  const r = rangoPeriodo(p, generado);
+  return mesesDisponibles.filter((ym) => ym >= r.desde.slice(0, 7) && ym <= r.hasta.slice(0, 7));
+}
+
+// Pinta la barra de período debajo de la nota de alcance. `anios` y `meses` salen de los datos
+// de la página (años con registro, meses 'YYYY-MM' con registro). Devuelve el período actual.
+export function pintarSelectorPeriodo({ anios, meses, generado }, onCambio) {
+  let actual = periodoActual();
+  const anioActual = anioDe(generado);
+  const botones = [['todo', 'Todo el registro'], ['12m', 'Últimos 12 meses'],
+    ...[...new Set(anios.map(String))].sort().reverse().map((a) => [`a:${a}`, a === anioActual ? `${a} a la fecha` : a])];
+  const mesesOrd = [...new Set(meses)].sort().reverse();
+  // si el período guardado no existe en estos datos, se vuelve a 12 meses
+  if (!botones.some(([v]) => v === actual) && !mesesOrd.some((ym) => `m:${ym}` === actual)) actual = '12m';
+  const html = `<div class="barra-periodo" id="barra-periodo" role="group" aria-label="Período">
+    <span class="barra-periodo-eti">Período</span>
+    ${botones.map(([v, eti]) => `<button type="button" data-periodo="${v}" class="${v === actual ? 'primario' : ''}">${eti}</button>`).join('')}
+    <select id="sel-mes" aria-label="Un mes concreto">
+      <option value="">Un mes…</option>
+      ${mesesOrd.map((ym) => `<option value="m:${ym}" ${`m:${ym}` === actual ? 'selected' : ''}>${fmtYm(ym)}</option>`).join('')}
+    </select>
+  </div>`;
+  const ancla = document.getElementById('alcance') ?? document.querySelector('main h1');
+  if (!document.getElementById('barra-periodo')) ancla.insertAdjacentHTML('afterend', html);
+  const barra = document.getElementById('barra-periodo');
+  const marcar = (p) => {
+    barra.querySelectorAll('button').forEach((b) => b.classList.toggle('primario', b.dataset.periodo === p));
+    const sel = barra.querySelector('#sel-mes');
+    sel.value = p.startsWith('m:') ? p : '';
+    sel.classList.toggle('primario', p.startsWith('m:'));
+  };
+  const elegir = (p) => {
+    try { localStorage.setItem(CLAVE_PERIODO, p); } catch { /* sin almacenamiento */ }
+    marcar(p);
+    onCambio?.(p);
+  };
+  barra.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.periodo)));
+  barra.querySelector('#sel-mes').addEventListener('change', (e) => { if (e.target.value) elegir(e.target.value); });
+  marcar(actual);
+  return actual;
+}
+
+// Vacantes que pertenecen al período: por su fecha de solicitud (las que no tienen fecha
+// solo entran en "todo el registro").
+export function vacantesEnPeriodo(filas, p, generado) {
+  const r = rangoPeriodo(p, generado);
+  return r.desde ? filas.filter((f) => enPeriodo(f.solicitud, r)) : filas;
+}
+
+// Agregados de vacantes calculados en el navegador (misma lógica que el pipeline), para
+// que respondan al período elegido. `salidas12mPorTipo` conserva su nombre por compatibilidad:
+// son las salidas (renuncia/despido) con vacante solicitada dentro del período.
+export function agregarVacantes(filas) {
+  const stats = (nums) => {
+    const a = [...nums].sort((x, y) => x - y);
+    if (!a.length) return { n: 0, mediana: null, promedio: null };
+    const mediana = a.length % 2 ? a[(a.length - 1) / 2] : (a[a.length / 2 - 1] + a[a.length / 2]) / 2;
+    return { n: a.length, mediana, promedio: +(a.reduce((s, x) => s + x, 0) / a.length).toFixed(1), min: a[0], max: a.at(-1) };
+  };
+  const diasValidos = (arr) => arr.filter((r) => r.dias != null && r.dias >= 0).map((r) => r.dias);
+  const porGrupo = (arr, clave) => { const g = {}; for (const r of arr) { const k = clave(r) ?? '(sin dato)'; (g[k] ??= []).push(r); } return g; };
+  const statsPorGrupo = (arr, clave) => Object.fromEntries(Object.entries(porGrupo(arr, clave)).map(([k, v]) => [k, stats(diasValidos(v))]));
+  const contarPor = (arr, clave) => { const c = {}; for (const r of arr) { const k = clave(r) ?? '(sin dato)'; c[k] = (c[k] ?? 0) + 1; } return c; };
+  const porMes = (arr, campo) => { const c = {}; for (const r of arr) if (r[campo]) { const k = r[campo].slice(0, 7); c[k] = (c[k] ?? 0) + 1; } return Object.fromEntries(Object.entries(c).sort()); };
+
+  const cerradas = filas.filter((r) => r.estatus === 'CERRADA');
+  const noCanceladas = filas.filter((r) => r.estatus !== 'CANCELADA');
+  const mezclaTotal = contarPor(noCanceladas, (r) => r.motivoGrupo);
+  const rd = (mezclaTotal.renuncia ?? 0) + (mezclaTotal.despido ?? 0);
+  const salidasPorTipo = {};
+  for (const r of noCanceladas) {
+    if (r.motivoGrupo !== 'renuncia' && r.motivoGrupo !== 'despido') continue;
+    const tipo = r.esTienda === false ? 'no tienda' : (r.tipo ?? 'sin tipo');
+    salidasPorTipo[tipo] ??= { renuncia: 0, despido: 0 };
+    salidasPorTipo[tipo][r.motivoGrupo]++;
+  }
+  const canales = {};
+  for (const canal of ['redes', 'facebook', 'volanteo', 'referidos', 'anuncios', 'perifoneo']) {
+    const conDato = cerradas.filter((r) => r.canales?.[canal] != null);
+    canales[canal] = {
+      registrado: filas.filter((r) => r.canales?.[canal] != null).length,
+      si: filas.filter((r) => r.canales?.[canal] === true).length,
+      diasConCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === true))),
+      diasSinCanal: stats(diasValidos(conDato.filter((r) => r.canales[canal] === false))),
+    };
+  }
+  const conSalida = filas.filter((r) => ['renuncia', 'despido'].includes(r.motivoGrupo));
+  return {
+    totales: { filas: filas.length, cerradas: cerradas.length,
+      abiertas: filas.filter((r) => r.estatus === 'ABIERTA').length,
+      canceladas: filas.filter((r) => r.estatus === 'CANCELADA').length },
+    diasCobertura: {
+      global: stats(diasValidos(cerradas)),
+      porTipo: statsPorGrupo(cerradas, (r) => r.tipo),
+      porPuesto: statsPorGrupo(cerradas, (r) => r.puesto),
+      porEmpresa: statsPorGrupo(cerradas, (r) => r.empresa),
+      porLugar: statsPorGrupo(cerradas, (r) => r.lugar),
+    },
+    mezcla: {
+      conteos: mezclaTotal,
+      pctRenuncia: rd ? +((mezclaTotal.renuncia ?? 0) / rd).toFixed(4) : null,
+      pctDespido: rd ? +((mezclaTotal.despido ?? 0) / rd).toFixed(4) : null,
+    },
+    salidas12mPorTipo: salidasPorTipo,
+    salidasPorTienda: contarPor(conSalida, (r) => r.lugar),
+    salidasPorEmpresa: contarPor(conSalida, (r) => r.empresa),
+    aperturasPorMes: porMes(filas, 'solicitud'),
+    cierresPorMes: porMes(filas, 'cierre'),
+    ocupadaPor: contarPor(filas.filter((r) => r.ocupadaPor), (r) => r.ocupadaPor),
+    canales,
+  };
+}
+
+// Años y meses con registro, para armar la barra de período con lo que de verdad hay.
+export function aniosYMeses({ vacantes, salidas, rotacion } = {}) {
+  const anios = new Set(), meses = new Set();
+  for (const f of vacantes?.filas ?? []) if (f.solicitud) { anios.add(f.solicitud.slice(0, 4)); meses.add(f.solicitud.slice(0, 7)); }
+  for (const a of Object.keys(salidas?.porAnio ?? {})) anios.add(a);
+  for (const ym of Object.keys(salidas?.porMes ?? {})) meses.add(ym);
+  for (const r of rotacion?.acumulado ?? []) if (r.anio) { anios.add(String(r.anio)); meses.add(`${r.anio}-${String(r.mesNum).padStart(2, '0')}`); }
+  return { anios: [...anios].sort(), meses: [...meses].sort() };
+}
+
+// Desglose de salidas.json para un período (ya con el alcance General/Comercial aplicado).
+const DIMS_VACIAS = () => ({ n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, genero: {}, area: {}, marca: {}, agencia: {}, rango: {}, diasLab: { n: 0, mediana: null, promedio: null } });
+export function dimsSalidas(salidas, p) {
+  if (!salidas?.total) return DIMS_VACIAS();
+  if (p === 'todo') return salidas.total;
+  if (p === '12m') return salidas.ult12m ?? DIMS_VACIAS();
+  if (p.startsWith('a:')) return salidas.porAnio?.[p.slice(2)] ?? DIMS_VACIAS();
+  if (p.startsWith('m:')) return salidas.porMesDetalle?.[p.slice(2)] ?? DIMS_VACIAS();
+  return DIMS_VACIAS();
+}
+
 // ── Reparto manual de las renuncias "voluntarias" (RRHH, ver propuesta-datos.js) ──
 // Recibe los sub-motivos del sheet ({VOLUNTARIA: 110, 'POR SALARIO': 6, ...}) y el reparto
 // de RRHH ({Salario: 45, ...}). Devuelve la lista de motivos con nombres legibles, sumando

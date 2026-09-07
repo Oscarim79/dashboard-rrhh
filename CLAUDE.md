@@ -68,6 +68,10 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   columna de área del sheet. **La pestaña de vacantes NO trae departamento**: el pipeline lo deduce
   del puesto (`REGLAS_DEPTO` en `scripts/actualizar_datos.mjs`; si aparece una columna
   DEPARTAMENTO, manda ella). El Simulador no cambia de modelo, solo de calibración.
+- **Selector de período** (también global): `todo` · `12m` (por defecto) · `a:AAAA` · `m:AAAA-MM`.
+  Vacantes se filtran por fecha de solicitud y se re-agregan en el navegador (`agregarVacantes` en
+  comun.js debe seguir espejando `agregarVacantes` del pipeline); salidas usan `porMesDetalle`
+  para meses sueltos; rotación por mes del indicador.
 - `public/propuesta.html` es de **acceso abierto** (sin contraseña, decisión del CEO) y no está en
   el menú. Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
   viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.

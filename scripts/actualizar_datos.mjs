@@ -533,6 +533,9 @@ if (!sal) {
       ult12m: dims(u12),
       porMes: cuenta(arr, (r) => r.ym),
       porAnio: Object.fromEntries(anios.map((a) => [a, dims(arr.filter((r) => r.anio === a))])),
+      // desglose completo de cada mes (selector de período del sitio); la regla de
+      // privacidad n≥3 → OTROS se aplica dentro de cada mes
+      porMesDetalle: Object.fromEntries([...new Set(arr.map((r) => r.ym))].sort().map((ym) => [ym, dims(arr.filter((r) => r.ym === ym))])),
       captura: { total: captura(arr), ult12m: captura(u12) },
     };
   };

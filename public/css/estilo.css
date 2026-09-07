@@ -62,6 +62,17 @@ body {
 }
 .alcance b { color: var(--verde); }
 
+/* ── barra de período (Todo · 12 meses · año · mes) ── */
+.barra-periodo {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 0 0 16px;
+}
+.barra-periodo-eti {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--tinta-suave); margin-right: 4px;
+}
+.barra-periodo button, .barra-periodo select { font-size: 13px; padding: 7px 11px; }
+.barra-periodo select.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
+
 /* ── menú lateral ── */
 nav#menu {
   position: fixed; top: 0; left: 0; bottom: 0; width: 232px;
