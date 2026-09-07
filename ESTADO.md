@@ -28,6 +28,12 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Propuesta: selector de período en "Por qué se van" (2026-09-07, sexta ronda)
+
+- La gráfica de motivos de la propuesta tiene su propia barra de período (Todo · 12 meses · año ·
+  mes). Es local: no lee ni escribe la memoria global del tablero (`pintarSelectorPeriodo` acepta
+  ahora `contenedor`, `guardar:false` e `inicial`). Arranca en "todo el registro".
+
 ## Motivos de salida ahora vienen del Sheet; propuesta 1 ajustada (2026-09-07, quinta ronda)
 
 - Oscar cargó los motivos directamente en la pestaña SALIDAS (Comercial pasó a 422 salidas; razón

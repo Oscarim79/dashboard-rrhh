@@ -71,7 +71,7 @@ body {
   color: var(--tinta-suave); margin-right: 4px;
 }
 .barra-periodo button, .barra-periodo select { font-size: 13px; padding: 7px 11px; }
-.barra-periodo select.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
+.barra-periodo select.primario, .barra-periodo .sel-mes.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
 
 /* ── menú lateral ── */
 nav#menu {

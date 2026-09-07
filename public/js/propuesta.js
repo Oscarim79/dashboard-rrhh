@@ -4,7 +4,8 @@
 // el reparto de motivos que RRHH carga a mano vive en propuesta-datos.js.
 // Costos, remuneración e inversión NO van en la página: se discuten con el CEO.
 import { DATOS } from './propuesta-datos.js';
-import { fmtNum, salidasDe, aplicarDesglose, SIN_DETALLE, marcarNavActiva, MES_LARGO } from './comun.js';
+import { fmtNum, salidasDe, aplicarDesglose, SIN_DETALLE, marcarNavActiva, MES_LARGO,
+  pintarSelectorPeriodo, dimsSalidas, etiquetaPeriodo, aniosYMeses } from './comun.js';
 
 marcarNavActiva();
 
@@ -38,19 +39,33 @@ try {
 } catch (e) { console.warn('permanencia', e); }
 
 // ── 1.3 motivos de salida: TODAS las salidas del departamento Comercial (renuncias
-// y despidos), tal como las registra RRHH en el Sheet; cada motivo por separado ───
+// y despidos), tal como las registra RRHH en el Sheet; cada motivo por separado.
+// Selector de período propio (pedido del CEO): todo · 12 meses · año · mes ────────
 try {
-  const sub = salidas?.total?.subMotivo;
-  const des = aplicarDesglose(sub ?? {}, DATOS.desgloseVoluntaria);
-  const total = des.items.reduce((s, i) => s + i.valor, 0);
-  const max = Math.max(...des.items.map((i) => i.valor), 1);
-  q('razones-meta').textContent = `Salidas del departamento Comercial, todo el registro (${fmtNum(total)} con motivo, renuncias y despidos), según el registro de salidas de RRHH. "Mal trato" y "mal ambiente" se cuentan como clima laboral.`;
-  q('razones').innerHTML = des.items.map((i) => `
-    <div class="razon">
-      <div class="razon-eti">${i.eti}</div>
-      <div class="razon-barra"><div style="width:${(i.valor / max) * 100}%; ${i.eti === SIN_DETALLE ? 'background:#C9CFC9' : ''}"></div></div>
-      <div class="razon-val">${fmtNum(i.valor)} · ${pct(i.valor, total)}%</div>
-    </div>`).join('');
+  const pintarRazones = (p) => {
+    const D = dimsSalidas(salidas, p);
+    const etiP = etiquetaPeriodo(p, salidas.generado);
+    // el reparto manual de "voluntarias" (si lo hubiera) solo aplica a todo el registro
+    const des = aplicarDesglose(D.subMotivo ?? {}, p === 'todo' ? DATOS.desgloseVoluntaria : null);
+    const total = des.items.reduce((s, i) => s + i.valor, 0);
+    const max = Math.max(...des.items.map((i) => i.valor), 1);
+    q('razones-titulo').textContent = `Por qué se van (cada motivo por separado) · ${etiP}`;
+    q('razones-meta').textContent = total
+      ? `Salidas del departamento Comercial, ${etiP} (${fmtNum(total)} con motivo, renuncias y despidos), según el registro de salidas de RRHH. "Mal trato" y "mal ambiente" se cuentan como clima laboral; motivos con menos de 3 casos en el período van en "Otros".`
+      : `Sin salidas comerciales con motivo registrado en ${etiP}.`;
+    q('razones').innerHTML = des.items.map((i) => `
+      <div class="razon">
+        <div class="razon-eti">${i.eti}</div>
+        <div class="razon-barra"><div style="width:${(i.valor / max) * 100}%; ${i.eti === SIN_DETALLE ? 'background:#C9CFC9' : ''}"></div></div>
+        <div class="razon-val">${fmtNum(i.valor)} · ${pct(i.valor, total)}%</div>
+      </div>`).join('');
+  };
+  if (salidas?.total) {
+    const inicial = pintarSelectorPeriodo(
+      { ...aniosYMeses({ salidas }), generado: salidas.generado, contenedor: q('razones-periodo'), guardar: false, inicial: 'todo' },
+      pintarRazones);
+    pintarRazones(inicial);
+  }
 } catch (e) { console.warn('motivos', e); }
 
 // ── 4. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────

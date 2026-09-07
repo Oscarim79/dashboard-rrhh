@@ -176,38 +176,47 @@ export function mesesDelPeriodo(p, mesesDisponibles, generado) {
 
 // Pinta la barra de período debajo de la nota de alcance. `anios` y `meses` salen de los datos
 // de la página (años con registro, meses 'YYYY-MM' con registro). Devuelve el período actual.
-export function pintarSelectorPeriodo({ anios, meses, generado }, onCambio) {
-  let actual = periodoActual();
+// Opciones extra: `contenedor` (elemento donde pintar la barra, en vez de bajo la nota de
+// alcance) y `guardar: false` (barra local: no lee ni escribe la memoria global; arranca en
+// `inicial`, por defecto 'todo').
+export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = null, guardar = true, inicial = 'todo' }, onCambio) {
+  let actual = guardar ? periodoActual() : inicial;
   const anioActual = anioDe(generado);
   const botones = [['todo', 'Todo el registro'], ['12m', 'Últimos 12 meses'],
     ...[...new Set(anios.map(String))].sort().reverse().map((a) => [`a:${a}`, a === anioActual ? `${a} a la fecha` : a])];
   const mesesOrd = [...new Set(meses)].sort().reverse();
   // si el período guardado no existe en estos datos, se vuelve a 12 meses
   if (!botones.some(([v]) => v === actual) && !mesesOrd.some((ym) => `m:${ym}` === actual)) actual = '12m';
-  const html = `<div class="barra-periodo" id="barra-periodo" role="group" aria-label="Período">
+  const html = `<div class="barra-periodo" role="group" aria-label="Período">
     <span class="barra-periodo-eti">Período</span>
     ${botones.map(([v, eti]) => `<button type="button" data-periodo="${v}" class="${v === actual ? 'primario' : ''}">${eti}</button>`).join('')}
-    <select id="sel-mes" aria-label="Un mes concreto">
+    <select class="sel-mes" aria-label="Un mes concreto">
       <option value="">Un mes…</option>
       ${mesesOrd.map((ym) => `<option value="m:${ym}" ${`m:${ym}` === actual ? 'selected' : ''}>${fmtYm(ym)}</option>`).join('')}
     </select>
   </div>`;
-  const ancla = document.getElementById('alcance') ?? document.querySelector('main h1');
-  if (!document.getElementById('barra-periodo')) ancla.insertAdjacentHTML('afterend', html);
-  const barra = document.getElementById('barra-periodo');
+  let barra;
+  if (contenedor) {
+    contenedor.innerHTML = html;
+    barra = contenedor.querySelector('.barra-periodo');
+  } else {
+    const ancla = document.getElementById('alcance') ?? document.querySelector('main h1');
+    if (!document.getElementById('barra-periodo')) ancla.insertAdjacentHTML('afterend', html.replace('class="barra-periodo"', 'class="barra-periodo" id="barra-periodo"'));
+    barra = document.getElementById('barra-periodo');
+  }
   const marcar = (p) => {
     barra.querySelectorAll('button').forEach((b) => b.classList.toggle('primario', b.dataset.periodo === p));
-    const sel = barra.querySelector('#sel-mes');
+    const sel = barra.querySelector('.sel-mes');
     sel.value = p.startsWith('m:') ? p : '';
     sel.classList.toggle('primario', p.startsWith('m:'));
   };
   const elegir = (p) => {
-    try { localStorage.setItem(CLAVE_PERIODO, p); } catch { /* sin almacenamiento */ }
+    if (guardar) { try { localStorage.setItem(CLAVE_PERIODO, p); } catch { /* sin almacenamiento */ } }
     marcar(p);
     onCambio?.(p);
   };
   barra.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.periodo)));
-  barra.querySelector('#sel-mes').addEventListener('change', (e) => { if (e.target.value) elegir(e.target.value); });
+  barra.querySelector('.sel-mes').addEventListener('change', (e) => { if (e.target.value) elegir(e.target.value); });
   marcar(actual);
   return actual;
 }
