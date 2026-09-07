@@ -27,6 +27,20 @@ export const DATOS = {
     },
   },
 
+  // ── 1b. Cifras del documento "Propuesta de estructuración de RRHH" (sep 2026) ──
+  documento: {
+    personasRRHH: 3,                  // jefe + dos asistentes
+    personasNuevasRRHH: 2,            // asistente del jefe (traslado) + segundo comodín
+    tiendas: 43,
+    ssoPresupuesto: 202595,           // cerrar TODOS los hallazgos de SSO, una sola vez (cotizado jun 2025)
+    ssoTiendasCumplen: 0,
+    ssoSinVIH: 41,                    // tiendas sin la capacitación anual de VIH (informe)
+    pisoInicial: 4500,                // garantía del vendedor los primeros 4 meses
+    pisoMes5: 3000,                   // garantía del mes 5 en adelante
+    salarioMinimo: 4100,
+    benchmarkRango: [1.5, 4.5],       // personas de RRHH por cada 100 colaboradores (SHRM, ADP, Indeed)
+  },
+
   // ── 2. Supuestos para costear las propuestas ───────────────────────────────
   // Todo lo que está aquí es SUPUESTO editable y la página lo rotula como tal.
   supuestos: {

@@ -28,6 +28,20 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Propuesta: resumen del documento Word en la Sección 2 (2026-09-07, tercera ronda)
+
+- Fuente: `J:\Mi unidad\RRHH\COLABORADORES\PROPUESTA DE ESTRUCTURACION DEPARTAMENTO DE RRHH con escenarios.docx`
+  (tiene nombres; en la página solo van cargos). La Sección 2 ahora es un súper resumen: las tres
+  propuestas del CEO (1–3) + 4. compensación (piso Q4,500→Q3,000 en el mes 5 vs permanencia mediana
+  viva; decisión ya tomada de garantía caso por caso a los 4 meses; plan de 30 días; descuentos con
+  tope, Q0) + 5. SSO (0/43 cumplen, 41 sin VIH, Q202,595 una vez, lo ejecuta la asistente de campo)
+  + 6. compromisos a 90 días + 7. benchmark de industria (1.1 → 1.9 por cada 100, calculado con la
+  plantilla viva) + 8. inversión y retorno (tabla con SSO y salidas evitadas que pagan la inversión,
+  con el costo por salida B–A calculado como en el Resumen).
+- Sección 1: cada bloque de cargo lleva ahora "Se queda sin hacer" (del documento).
+- Las cifras fijas del documento están en `propuesta-datos.js → documento` (personas de RRHH,
+  tiendas, SSO, pisos, salario mínimo, rango de benchmark).
+
 ## Selector de período (CEO, 2026-09-07, segunda ronda)
 
 - Barra "Período" en todas las páginas del tablero, global como el de General/Comercial (se

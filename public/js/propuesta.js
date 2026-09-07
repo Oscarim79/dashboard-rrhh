@@ -3,8 +3,8 @@
 // Las cifras vivas salen de los JSON del tablero (alcance: departamento Comercial);
 // las que RRHH carga a mano viven en propuesta-datos.js.
 import { DATOS } from './propuesta-datos.js';
-import { fmtQ } from './modelo.js';
-import { fmtNum, salidasDe, vacantesDe, aplicarDesglose, SIN_DETALLE } from './comun.js';
+import { fmtQ, costoSalida, PARAMS_DEFECTO, VENTAS_TIPO } from './modelo.js';
+import { fmtNum, salidasDe, vacantesDe, aplicarDesglose, SIN_DETALLE, diasCalibrados } from './comun.js';
 
 const q = (id) => document.getElementById(id);
 const pct = (a, b) => (b ? Math.round((a / b) * 100) : 0);
@@ -24,6 +24,7 @@ const salidas = salidasTodo ? salidasDe(salidasTodo, 'comercial') : null;
 const vacantes = vacantesTodo ? vacantesDe(vacantesTodo, 'comercial') : null;
 const integracion = integracionTodo?.porDepartamento?.comercial ?? integracionTodo;
 const S = DATOS.supuestos;
+const DOC = DATOS.documento;
 
 // ── 1.1 seguimiento a nuevos (control de integración, solo conteos) ───────────
 try {
@@ -148,6 +149,22 @@ try {
   q('var-c-costo').innerHTML = `Costo estimado: bono <b>${fmtQ(bonoTotal)}/mes</b> + <b>${fmtQ(S.bonoPorNuevoRetenido)}</b> por cada nuevo que llegue a 90 días (≈ ${fmtQ(bonoRetencion)}/mes si llegaran todos los ${nuevos.toFixed(1)} nuevos del mes; menos en la práctica). No cubre las ventas que deja de hacer mientras capacita.`;
 
   const p3Bajo = bonoTotal + garantiaEsperada, p3Alto = bonoTotal + garantiaTope;
+  const totBajo = p1 + p2 + p3Bajo, totAlto = p1 + p2 + p3Alto;
+
+  // costo por salida (renuncia, tienda B a tienda A) con los días reales de Comercial,
+  // igual que el Resumen del tablero: sirve para decir cuántas salidas evitadas pagan la propuesta
+  let retorno = '';
+  try {
+    const dc = vacantes?.agregados?.diasCobertura;
+    const costo = (tipo) => costoSalida(VENTAS_TIPO[tipo], 'renuncia', { ...PARAMS_DEFECTO, diasVacante: diasCalibrados(dc, tipo).dias ?? PARAMS_DEFECTO.diasVacante }).total;
+    const cB = costo('B'), cA = costo('A');
+    const evitBajo = Math.ceil((totBajo * 12) / cA), evitAlto = Math.ceil((totAlto * 12) / cB);
+    const salidas12 = Object.values(vacantes.porDepartamento ? vacantesTodo.porDepartamento.comercial.salidas12mPorTipo : {}).reduce((s, v) => s + v.renuncia + v.despido, 0);
+    retorno = `<p style="margin-top:10px"><b>Retorno.</b> Cada salida en tienda cuesta entre <b>${fmtQ(cB)}</b> (tienda B) y <b>${fmtQ(cA)}</b> (tienda A) con los días de vacante reales de Comercial.
+      La inversión anual se recupera evitando <b>entre ${fmtNum(evitBajo)} y ${fmtNum(evitAlto)} salidas al año</b>${salidas12 ? `, de las ${fmtNum(salidas12)} salidas con vacante que tuvo Comercial en los últimos 12 meses` : ''}.
+      El presupuesto de SSO se paga una sola vez y equivale a unas ${fmtNum(Math.ceil(DOC.ssoPresupuesto / cA))} salidas.</p>`;
+  } catch (e) { console.warn('retorno', e); }
+
   q('resumen-costos').innerHTML = `
     <div class="tabla-scroll"><table>
       <thead><tr><th>Propuesta</th><th class="n">Costo mensual</th><th class="n">Al año</th></tr></thead>
@@ -155,10 +172,50 @@ try {
         <tr><td>1. Asistente para el jefe de RRHH (traslado interno${S.reemplazarEnGarantias ? ', reemplazando la plaza en Garantías' : ', sin reemplazo'})</td><td class="n">${fmtQ(p1)}</td><td class="n">${fmtQ(p1 * 12)}</td></tr>
         <tr><td>2. Segundo comodín</td><td class="n">${fmtQ(p2)}</td><td class="n">${fmtQ(p2 * 12)}</td></tr>
         <tr><td>3. ${S.regiones} vendedores capacitadores (bono + garantía, variante A)</td><td class="n">${fmtQ(p3Bajo)}–${fmtQ(p3Alto)}</td><td class="n">${fmtQ(p3Bajo * 12)}–${fmtQ(p3Alto * 12)}</td></tr>
-        <tr><td><b>Total</b></td><td class="n"><b>${fmtQ(p1 + p2 + p3Bajo)}–${fmtQ(p1 + p2 + p3Alto)}</b></td><td class="n"><b>${fmtQ((p1 + p2 + p3Bajo) * 12)}–${fmtQ((p1 + p2 + p3Alto) * 12)}</b></td></tr>
+        <tr><td>4. Compensación: plan de 30 días y descuentos con tope</td><td class="n">Q0</td><td class="n">Q0</td></tr>
+        <tr><td><b>Total recurrente</b></td><td class="n"><b>${fmtQ(totBajo)}–${fmtQ(totAlto)}</b></td><td class="n"><b>${fmtQ(totBajo * 12)}–${fmtQ(totAlto * 12)}</b></td></tr>
+        <tr><td>5. Salud y seguridad ocupacional (una sola vez, ya cotizado)</td><td class="n">—</td><td class="n">${fmtQ(DOC.ssoPresupuesto)}</td></tr>
       </tbody>
     </table></div>
-    <p class="pie">Los sueldos y la comisión promedio son supuestos editables (archivo de datos de la propuesta); el número de nuevos por mes sale del tablero. Para comparar: el tablero estima el costo de rotación del departamento Comercial en su Resumen.</p>`;
+    ${retorno}
+    <p class="pie">Los sueldos y la comisión promedio son supuestos editables (archivo de datos de la propuesta); el número de nuevos por mes y el costo por salida salen del tablero. El Resumen del tablero muestra el costo de rotación del período que se elija.</p>`;
+
+  // ── 4. compensación: el hecho que delata el precipicio (permanencia viva) ──
+  try {
+    const med = salidas?.total?.diasLab?.mediana;
+    q('comp-hecho').innerHTML = `La garantía del vendedor es un piso contra las comisiones: <b>${fmtQ(DOC.pisoInicial)}</b> los primeros 4 meses y <b>${fmtQ(DOC.pisoMes5)}</b> del mes 5 en adelante, por debajo del salario mínimo de ley (${fmtQ(DOC.salarioMinimo)}).
+      ${med != null ? `La permanencia mediana al salir en Comercial es de <b>${(med / 30.4).toFixed(1)} meses</b>: la gente se va justo cuando el piso se le cae.` : ''}
+      Un buen vendedor llega con comisiones a casi el doble del mínimo; el problema es el mes malo. Punto legal a validar: completar el mínimo cuando el ingreso del mes no alcanza es obligación patronal.`;
+  } catch (e) { console.warn('compensación', e); }
+
+  // ── 5. SSO ──
+  try {
+    q('sso').innerHTML = `
+      <div class="cifras3">
+        <div><div class="cifra">${DOC.ssoTiendasCumplen} de ${DOC.tiendas}</div>tiendas cumplen todos los requisitos de SSO: en cualquier inspección de MINTRAB o IGSS hay hallazgos</div>
+        <div><div class="cifra">${DOC.ssoSinVIH} de ${DOC.tiendas}</div>tiendas sin la capacitación anual de VIH, obligatoria para todo el personal</div>
+        <div><div class="cifra">${fmtQ(DOC.ssoPresupuesto)}</div>cierra todos los hallazgos, una sola vez (cotizado junio 2025, 15 meses sin ejecutarse)</div>
+      </div>
+      <p>Fallas por requisito: señalización de punto de reunión 100%, botiquín 98%, plan de evacuación 95%, cinta antideslizante 91%, monitores 44%, plan de riesgos 35%, extintores 14%. Frio Tec y las tiendas Abi Q no tienen ninguna implementación.</p>
+      <p><b>La rotación borra las capacitaciones:</b> tiendas que cumplían en junio ya aparecen sin la capacitación en el seguimiento de septiembre porque la gente capacitada se fue. Ese costo de repetir capacitaciones aún no está en el modelo de costo.</p>
+      <p><b>Lo que se pide:</b> aprobar el presupuesto único de ${fmtQ(DOC.ssoPresupuesto)} y que lo ejecute la asistente de RRHH de campo, que es justo el tiempo que el segundo comodín le libera.</p>`;
+  } catch (e) { console.warn('sso', e); }
+
+  // ── 7. referencia de industria (plantilla viva del indicador de rotación) ──
+  try {
+    const cierre = (rotacion?.acumulado ?? []).filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
+    const plantilla = cierre?.fin;
+    const [bMin, bMax] = DOC.benchmarkRango;
+    const hoyRatio = plantilla ? (DOC.personasRRHH / plantilla) * 100 : null;
+    const conRatio = plantilla ? ((DOC.personasRRHH + DOC.personasNuevasRRHH) / plantilla) * 100 : null;
+    q('benchmark').innerHTML = `
+      <div class="cifras3">
+        <div><div class="cifra">${hoyRatio != null ? hoyRatio.toFixed(1) : '—'}</div>personas de RRHH por cada 100 colaboradores hoy (${DOC.personasRRHH} personas${plantilla ? ` para ${fmtNum(plantilla)} colaboradores al cierre de ${MES_LARGO[cierre.mesNum - 1]} ${cierre.anio}` : ''})</div>
+        <div><div class="cifra">${bMin}–${bMax}</div>rango de referencia del sector (SHRM, ADP, Indeed); las empresas con alta rotación están en la parte alta</div>
+        <div><div class="cifra">${conRatio != null ? conRatio.toFixed(1) : '—'}</div>con la propuesta (${DOC.personasRRHH + DOC.personasNuevasRRHH} personas): dentro del rango, no arriba. Los capacitadores siguen siendo vendedores</div>
+      </div>
+      <p>Las cadenas grandes del país separan reclutamiento de generalista de RRHH, y la más parecida en tamaño se apoya en un RRHH corporativo. La propuesta no infla el área; la lleva al tamaño normal de una operación como la nuestra.</p>`;
+  } catch (e) { console.warn('benchmark', e); }
 } catch (e) { console.warn('costos', e); }
 
 // ── pie ───────────────────────────────────────────────────────────────────────

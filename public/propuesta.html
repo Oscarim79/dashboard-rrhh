@@ -32,6 +32,15 @@
   .cargo ul { padding-left: 18px; margin: 0; }
   .cargo li { font-size: 14px; margin-bottom: 5px; }
   .marca-tiempo { display: inline-block; margin-top: 8px; padding: 6px 9px; border-radius: 8px; background: var(--ambar-suave); color: var(--ambar); font-size: 13px; font-weight: 600; line-height: 1.35; }
+  .deja { margin-top: 10px; padding-top: 8px; border-top: 1px dashed var(--borde); font-size: 13px; color: var(--tinta-suave); line-height: 1.4; }
+  .deja b { color: var(--rojo); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; }
+  .bloque { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .bloque h3 { margin-top: 0; font-size: 16px; }
+  .bloque p, .bloque li { font-size: 14.5px; }
+  .bloque .cifra { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+  .cifras3 { display: grid; gap: 10px; grid-template-columns: 1fr; margin: 8px 0 10px; }
+  @media (min-width: 640px) { .cifras3 { grid-template-columns: 1fr 1fr 1fr; } }
+  .cifras3 > div { background: #F4F3EE; border-radius: 8px; padding: 10px 12px; font-size: 13px; color: var(--tinta-suave); }
   .marca-nohace { display: inline-block; margin-left: 4px; padding: 1px 8px; border-radius: 999px; background: #F4DEDA; color: var(--rojo); font-size: 12px; font-weight: 700; white-space: nowrap; }
   .hecho { border-left: 4px solid var(--tinta); background: var(--tarjeta); padding: 12px 14px; border-radius: 0 10px 10px 0; font-size: 15.5px; }
 
@@ -110,6 +119,7 @@
           <li>Casos ante el Ministerio Público.</li>
           <li>Representación de la empresa ante el Ministerio de Trabajo.</li>
         </ul>
+        <p class="deja"><b>Se queda sin hacer:</b> planes de retención y clima, seguimiento a tiendas y mejora de procesos. La estrategia existe; falta quien la lleve a la operación.</p>
         <span class="marca-tiempo">⏱ Lo que más tiempo consume: MINTRAB y MP. Implica viajar, esperar y atender lo que surja en el momento.</span>
       </div>
       <div class="cargo">
@@ -121,6 +131,7 @@
           <li>Seguimiento a empleados nuevos <span class="marca-nohace">no se está haciendo por falta de tiempo</span></li>
           <li>Gestión de todo lo relacionado con Salud y Seguridad Ocupacional.</li>
         </ul>
+        <p class="deja"><b>Se queda sin hacer:</b> programa de capacitación estructurado, cumplimiento de SSO (comités, inspecciones, expedientes) y atención de quejas del personal.</p>
       </div>
       <div class="cargo">
         <h4>Asistente administrativa de RRHH</h4>
@@ -132,6 +143,7 @@
           <li>Planilla e IGSS.</li>
           <li>Gestión de uniformes.</li>
         </ul>
+        <p class="deja"><b>Se queda sin hacer:</b> soporte a tiendas y trámites que se acumulan o se retrasan.</p>
       </div>
     </div>
 
@@ -225,8 +237,35 @@
       <div class="costo" id="p3-param"></div>
     </div>
 
+    <!-- ── Resumen del documento "Propuesta de estructuración de RRHH" (sep 2026) ── -->
     <div class="solo-oculto">
-      <h3>Lo que cuesta, en conjunto</h3>
+      <h3>4. Compensación del vendedor: el piso, el mes 5 y los descuentos</h3>
+      <div class="bloque">
+        <p id="comp-hecho"></p>
+        <ul>
+          <li><b>Decisión ya tomada con Comercial:</b> la garantía de Q4,500 se evalúa caso por caso a los 4 meses y se extiende a quien vale la pena. Ya no se pide un piso permanente.</li>
+          <li><b>La exigencia va a la meta, no al piso:</b> quien tras la capacitación no alcanza ~70% de su meta entra a un plan de 30 días con su capacitador de región, con decisión al final. Costo: Q0, es gestión.</li>
+          <li><b>Descuentos con tope:</b> hoy se aplican todos de un solo (error de sistema, uniformes, IGSS) y una quincena floja puede quedar en unos Q700. Se propone tope de ~10% por quincena (el excedente se difiere en cuotas; el IGSS no se toca), uniformes en cuotas desde el mes 5 o gratis a los 6 meses, y corresponsabilidad en errores durante la curva de aprendizaje. Costo: Q0, es calendario de cobro. "Descuentos en salario" ya aparece como motivo de renuncia en la Sección 1.</li>
+        </ul>
+      </div>
+
+      <h3>5. Salud y seguridad ocupacional: trabajo obligatorio que hoy nadie puede hacer</h3>
+      <div class="bloque" id="sso"></div>
+
+      <h3>6. Compromisos de RRHH a 90 días</h3>
+      <div class="bloque">
+        <ul>
+          <li><b>Cola de vacantes:</b> cerrar las plazas abiertas hoy en 60 días y mantener el promedio de días de vacante por debajo de 10.</li>
+          <li><b>Retención temprana:</b> perfil de "vendedor capacitado" definido y capacitadores nombrados por región; meta de bajar las salidas antes de 6 meses del nivel actual a 25% en el primer semestre.</li>
+          <li><b>Cumplimiento:</b> calendario de SSO al día en las 43 tiendas, con responsable definido y constante.</li>
+          <li><b>Seguimiento:</b> indicadores mensuales en este tablero para revisar con Gerencia.</li>
+        </ul>
+      </div>
+
+      <h3>7. No es crecer RRHH: es llegar al mínimo de la industria</h3>
+      <div class="bloque" id="benchmark"></div>
+
+      <h3>8. Inversión y retorno</h3>
       <div class="tarjeta" id="resumen-costos"></div>
     </div>
   </section>
