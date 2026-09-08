@@ -28,6 +28,27 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Sesión del 2026-09-08: copies, propuesta 4 y revisión final de números
+
+- **Datos:** Oscar corrigió en el Sheet varias marcas RENUNCIA/DESPIDO (15 filas de 2026 pasaron a
+  despido) y la fórmula de días laborados. Regla confirmada: OBSERVACIONES es la razón oficial y el
+  SUB MOTIVO es lo que la persona expresó; no se reclasifica nada (está en CLAUDE.md).
+- **Copies por alcance:** el Resumen ya distingue Comercial ("puestos comerciales fuera de tienda:
+  CEDI y regiones") de General ("oficinas, CEDI y regiones"), el alcance va primero en la tarjeta
+  del costo, singular/plural correcto. Salidas: "Por área" y "Por marca" son tarjetas separadas; la
+  de área se oculta en Comercial; áreas con tildes y grafías unificadas (CREDITOS Y COBROS).
+  Simulador: la mezcla de "Usar datos reales" sale del registro de salidas.
+- **Propuesta:** nueva propuesta 4 "métrica de cultura para el gerente comercial y los supervisores"
+  (cifras vivas de clima/actitud) y una Conclusión al final que conecta cada motivo de salida con la
+  propuesta que lo ataca; el cierre explica cómo se atacan los primeros seis meses y quiénes son los
+  dueños. Anexos renumerados a 5 y 6.
+- **Revisión final (cuadre):** los JSON cuadran entre sí y contra el sheet (474 salidas, 363
+  comerciales); el costo del Resumen se reprodujo de forma independiente al quetzal (Comercial 12m
+  Q10,095,505 · General 12m Q11,590,530). Indicador de rotación vs registro de salidas: coinciden
+  mes a mes salvo pequeñas diferencias en ene–abr 2026 y **agosto 2026 sin bajas en el indicador**
+  (el pipeline ahora lo avisa en meta.json). `.claude/launch.json` sirve `public/` en el puerto 4173
+  para verificar en el navegador.
+
 ## El costo de rotación cuenta salidas con el registro de SALIDAS (2026-09-07, séptima ronda)
 
 - Oscar detectó que General y Comercial daban casi lo mismo: el costo contaba salidas con el
@@ -283,6 +304,11 @@
   menos = 20–33% de la capacidad de venta, así que 15% asume que el equipo cubre buena parte.
 
 ## Pendientes (no bloquean nada)
+
+- (2026-09-08) Sheet: agosto 2026 en DATA INDICADOR ROTACION tiene altas y plantilla pero ninguna
+  baja → llenar las desvinculadas de agosto. Tres salidas con días laborados negativos (abr 2026,
+  feb 2024, ago 2024). `propuesta-datos.js` dice 43 tiendas y 5 regiones; el archivo de tiendas
+  tiene 51 activas y 7 regiones (el 43 viene del informe de SSO; las regiones no se muestran).
 
 1. **RESUELTO 2026-09-03** (clasificación de Oscar en config/tiendas.json: Cayalá → Abi Q AA; Pradera Concepción → Abi Q A; CLM = Concepción Las Minas A; Central = Quezaltepeque Central AA; Peque 2 = Quezaltepeque 2 A; "Pradera 2 *" A con asterisco porque no se sabe cuál Pradera; Abi Q Online A; Catocha y Petapa cerradas. Solo quedan sin tipo tiendas cerradas, así que el supuesto del Resumen solo cubre sus salidas históricas). Antes — **Tiendas sin tipo**: Catocha, Petapa, Pradera Concepción (Americana), Pradera 2, Central,
    Peque 2, CLM, Abi Q Online. Desde 2026-09-01 sus salidas SÍ se costean en el Resumen con un
