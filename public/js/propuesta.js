@@ -101,10 +101,9 @@ try {
 // ── 5. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────
 try {
   q('sso').innerHTML = `
-    <div class="cifras3">
+    <div class="cifras3 dos">
       <div><div class="cifra">${DOC.ssoTiendasCumplen} de ${DOC.tiendas}</div>tiendas cumplen todos los requisitos de SSO: en cualquier inspección de MINTRAB o IGSS hay hallazgos</div>
       <div><div class="cifra">${DOC.ssoSinVIH} de ${DOC.tiendas}</div>tiendas sin la capacitación anual de VIH, obligatoria para todo el personal</div>
-      <div><div class="cifra">15 meses</div>lleva el informe de SSO (cotizado en junio de 2025) sin ejecutarse, porque no hay quién le dé seguimiento constante</div>
     </div>
     <p>Fallas por requisito: señalización de punto de reunión 100%, botiquín 98%, plan de evacuación 95%, cinta antideslizante 91%, monitores 44%, plan de riesgos 35%, extintores 14%. Frio Tec y las tiendas Abi Q no tienen ninguna implementación.</p>
     <p><b>La rotación borra las capacitaciones:</b> tiendas que cumplían en junio ya aparecen sin la capacitación en el seguimiento de septiembre porque la gente capacitada se fue. Ese costo de repetir capacitaciones aún no está en el modelo de costo.</p>`;
