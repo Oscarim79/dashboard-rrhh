@@ -55,9 +55,21 @@ confirmado).
 
 **Ampliación (Oscar, 2026-09-01):** se suma el **jefe de RRHH** (Q8,000, 100% de su tiempo
 en reclutar, repartido entre las contrataciones del mes igual que la publicidad → Q800 por
-contratación) y la coordinadora baja a **Q4,000**. Controles vigentes (ventas 275k/160k):
+contratación) y la coordinadora baja a **Q4,000**. Controles del Excel (ventas 275k/160k):
 renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
-`scripts/validar_modelo.mjs` los verifica en cada deploy.
+`scripts/validar_modelo.mjs` los verifica en cada deploy pasando los salarios de entonces.
+
+**Calibración de salarios (Oscar, 2026-09-08):** el salario del vendedor se separa en dos:
+`salarioNuevo` **Q4,500** (lo que gana en sus primeros meses; alimenta la curva) y
+`salarioVendedor` **Q6,500** (promedio del que sale; base de la indemnización). Jefe de tienda
+**Q8,000**, coordinadora de RRHH **Q4,500**. La antigüedad del despedido va en **meses**
+(`mesesServicio`, indemnización proporcional). Los gastos de reclutamiento y contratación
+(kit, polígrafo, viáticos, pauta, volanteo, radio, internet, contrataciones/mes, jefe de RRHH)
+son **fijos**: en el Simulador se muestran sin slider. Controles vigentes con los valores por
+defecto: renuncia A Q71,294 · B Q54,044 · despido A Q75,794 · B Q58,544 (también en el validador).
+La "coordinadora de RRHH" del modelo es el **comodín** que RRHH manda a la tienda a cubrir la
+plaza (fila "Apoyo Coordinadora RRHH" del Excel); por eso está junto al jefe de tienda en
+"Cobertura interna" y se multiplica por la fracción de vacantes en que sí va.
 Ojo: el Excel de Oscar aún tiene la fila Telo en su hoja "Despido" (por eso su Resumen dice
 Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
 

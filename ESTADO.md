@@ -28,6 +28,34 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## Simulador: salarios recalibrados, gastos fijos y antigüedad en meses (2026-09-08, tarde)
+
+Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag-simulador.js`:
+
+- **Cobertura interna explicada.** El grupo ahora se llama "Cobertura interna: quién hace el
+  trabajo del vendedor que falta" y lleva una nota: el jefe de tienda siempre tapa parte del
+  hueco con parte de su jornada, y la coordinadora de RRHH es el **comodín** que RRHH manda a la
+  tienda cuando se puede (fila "Apoyo Coordinadora RRHH" del Excel). Las etiquetas y las cajitas
+  de fórmula de ambos lo dicen en palabras ("En cuántas vacantes se logra mandarla" en vez de
+  "Probabilidad de ese apoyo").
+- **Salarios.** El del vendedor se partió en dos: `salarioNuevo` Q4,500 (sus primeros meses,
+  alimenta la curva) y `salarioVendedor` Q6,500 (promedio del que sale, base de la indemnización,
+  ahora en el grupo "Costo de salida"). Jefe de tienda Q8,000 y coordinadora Q4,500 (Oscar
+  escribió "4500 al igual que el de 4500 y el de un jefe promedio son 8"; se interpretó como
+  vendedor nuevo / coordinadora / jefe). La curva se dejó en 3 meses.
+- **Gastos de reclutamiento y contratación fijos.** Kit, polígrafo, viáticos, pauta, volanteo,
+  radio, internet, contrataciones al mes y jefe de RRHH se muestran con su valor y la etiqueta
+  "fijo", sin slider (`fijo: true` en CONTROLES). Restablecer no los toca porque nunca cambian.
+- **Antigüedad en meses.** `aniosServicio` → `mesesServicio` (0 a 120, paso 1) con etiqueta
+  "1 año y 3 meses"; la indemnización es salario × meses ÷ 12.
+- Controles nuevos: renuncia A Q71,294 · B Q54,044 · despido A Q75,794 · B Q58,544. El validador
+  sigue comprobando también los del Excel (Q72,262 …) pasando los salarios de entonces. El
+  Resumen usa los mismos valores por defecto, así que sus cifras de costo bajaron ~Q970 por salida.
+- Verificado en el navegador local: sin errores de consola, meses de servicio a 15 → "1 año y 3
+  meses" y Q8,125 de indemnización, botones "datos reales", "mitad de días" y "restablecer" bien.
+- Nota: apareció un `AGENTS.md` sin commitear en la raíz (copia casi idéntica de CLAUDE.md, no la
+  creó esta sesión). Se dejó fuera del commit.
+
 ## Sesión del 2026-09-08: copies, propuesta 4 y revisión final de números
 
 - **Datos:** Oscar corrigió en el Sheet varias marcas RENUNCIA/DESPIDO (15 filas de 2026 pasaron a
@@ -300,8 +328,12 @@
 - Canales de atracción sin Telo; "Internet" es gasto aparte y se queda (confirmado por Oscar).
 - Modelo ampliado (Oscar, 2026-09-01): se suma el **jefe de RRHH** (Q8,000, 100% en reclutar,
   repartido entre las contrataciones del mes → Q800 por contratación) y la coordinadora baja a
-  Q4,000. Controles vigentes: renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
-  validados en cada deploy por `scripts/validar_modelo.mjs`.
+  Q4,000. Controles del Excel: renuncia A Q72,262 · B Q55,012 · despido A Q76,762 · B Q59,512 —
+  validados en cada deploy por `scripts/validar_modelo.mjs` con los salarios de entonces.
+- Recalibración (Oscar, 2026-09-08): vendedor nuevo Q4,500 (curva) · vendedor que sale Q6,500
+  (indemnización) · jefe de tienda Q8,000 · coordinadora Q4,500 · antigüedad en meses · gastos de
+  reclutamiento fijos. Controles vigentes: renuncia A Q71,294 · B Q54,044 · despido A Q75,794 ·
+  B Q58,544.
 - Calibración con datos reales: **mediana 16 días / promedio 22** de vacante (n=151 cerradas con
   dato; 74 cerradas sin fechas ni días quedan fuera). Corregido 2026-08-31 tras el reclamo de Oscar:
   un bug convertía celdas vacías en 0 días. La mezcla real: 84% renuncias / 16% despidos.

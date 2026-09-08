@@ -33,6 +33,13 @@ aplicarFiltros();
 const fq = (v) => fmtQ(v);
 const fd = (v) => `${v} días`;
 const fp = (v) => Math.round(v * 100) + '%';
+const fMeses = (m) => {
+  const a = Math.floor(m / 12), r = m % 12;
+  const pa = a ? `${a} ${a === 1 ? 'año' : 'años'}` : '';
+  const pr = r ? `${r} ${r === 1 ? 'mes' : 'meses'}` : '';
+  return pa && pr ? `${pa} y ${pr}` : pa || pr || '0 meses';
+};
+// fijo: true → se muestra el valor pero no hay slider (gastos reales de la empresa)
 const CONTROLES = [
   { grupo: 'Vacante y ventas' },
   { k: 'diasVacante', eti: 'Días que dura la vacante', min: 1, max: 90, step: 1, fmt: fd },
@@ -41,38 +48,44 @@ const CONTROLES = [
   { grupo: 'Curva de aprendizaje del nuevo' },
   { k: 'mesesCurva', eti: 'Meses de curva', min: 0, max: 6, step: 0.5, fmt: (v) => `${v} meses` },
   { k: 'prodCurva', eti: 'Productividad durante la curva', min: 0, max: 1, step: 0.05, fmt: fp },
-  { k: 'salarioVendedor', eti: 'Salario del vendedor', min: 3000, max: 15000, step: 100, fmt: fq },
+  { k: 'salarioNuevo', eti: 'Salario del vendedor nuevo (sus primeros meses)', min: 3000, max: 15000, step: 100, fmt: fq },
   { f: 'cp' },
-  { grupo: 'Cobertura interna' },
+  { grupo: 'Cobertura interna: quién hace el trabajo del vendedor que falta',
+    nota: 'Mientras la plaza está vacía, ese trabajo lo tapan dos personas que ya tienen sueldo: ' +
+      'el <b>jefe de tienda</b> (siempre, con parte de su jornada) y la <b>coordinadora de RRHH</b>, ' +
+      'que es el comodín que RRHH manda a la tienda cuando se puede. Se cuenta el tiempo pagado que ' +
+      'cada uno desvía a cubrir la plaza; lo que ninguno alcanza a tapar lo carga el equipo (sobrecarga).' },
   { k: 'salarioJefe', eti: 'Salario del jefe de tienda', min: 3000, max: 20000, step: 100, fmt: fq },
-  { k: 'semanasJefe', eti: 'Semanas que el jefe cubre el puesto', min: 0, max: 16, step: 1, fmt: (v) => `${v} sem` },
-  { k: 'pctJefe', eti: 'Tiempo del jefe dedicado a cubrir', min: 0, max: 1, step: 0.05, fmt: fp },
+  { k: 'semanasJefe', eti: 'Semanas que el jefe cubre la plaza', min: 0, max: 16, step: 1, fmt: (v) => `${v} sem` },
+  { k: 'pctJefe', eti: 'Parte de su jornada que dedica a cubrirla', min: 0, max: 1, step: 0.05, fmt: fp },
   { f: 'jefe' },
-  { k: 'salarioCoord', eti: 'Salario coordinadora RRHH', min: 2000, max: 12000, step: 100, fmt: fq },
-  { k: 'semanasCoord', eti: 'Semanas de apoyo de coordinadora', min: 0, max: 16, step: 1, fmt: (v) => `${v} sem` },
-  { k: 'pctCoord', eti: 'Tiempo de coordinadora dedicado', min: 0, max: 1, step: 0.05, fmt: fp },
-  { k: 'probCoord', eti: 'Probabilidad de ese apoyo', min: 0, max: 1, step: 0.05, fmt: fp },
+  { k: 'salarioCoord', eti: 'Salario de la coordinadora de RRHH (comodín)', min: 2000, max: 12000, step: 100, fmt: fq },
+  { k: 'semanasCoord', eti: 'Semanas que la coordinadora cubre la plaza', min: 0, max: 16, step: 1, fmt: (v) => `${v} sem` },
+  { k: 'pctCoord', eti: 'Parte de su jornada que dedica a cubrirla', min: 0, max: 1, step: 0.05, fmt: fp },
+  { k: 'probCoord', eti: 'En cuántas vacantes se logra mandarla', min: 0, max: 1, step: 0.05, fmt: fp },
   { f: 'coord' },
   { k: 'overtime', eti: 'Sobrecarga / overtime del equipo', min: 0, max: 6000, step: 100, fmt: fq },
   { k: 'retrabajo', eti: 'Retrabajo por errores', min: 0, max: 3000, step: 100, fmt: fq },
   { f: 'sobrecarga' },
-  { grupo: 'Reclutamiento y contratación' },
-  { k: 'kit', eti: 'Kit de ingreso', min: 0, max: 2000, step: 50, fmt: fq },
-  { k: 'poligrafo', eti: 'Polígrafo', min: 0, max: 6000, step: 100, fmt: fq },
-  { k: 'viaticos', eti: 'Viáticos', min: 0, max: 5000, step: 100, fmt: fq },
+  { grupo: 'Reclutamiento y contratación',
+    nota: 'Estos son gastos reales y fijos de la empresa: se muestran como referencia y no se pueden mover.' },
+  { k: 'kit', eti: 'Kit de ingreso', fijo: true, fmt: fq },
+  { k: 'poligrafo', eti: 'Polígrafo', fijo: true, fmt: fq },
+  { k: 'viaticos', eti: 'Viáticos', fijo: true, fmt: fq },
   { f: 'directos' },
-  { k: 'pautaRedesMes', eti: 'Pauta en redes (Q/mes)', min: 0, max: 15000, step: 500, fmt: fq },
-  { k: 'volanteoBimestre', eti: 'Volanteo y roll-ups (Q/bimestre)', min: 0, max: 15000, step: 500, fmt: fq },
-  { k: 'radioBimestre', eti: 'Radio (Q/bimestre)', min: 0, max: 10000, step: 500, fmt: fq },
-  { k: 'internetMes', eti: 'Internet (Q/mes)', min: 0, max: 15000, step: 500, fmt: fq },
-  { k: 'contratacionesMes', eti: 'Contrataciones promedio al mes', min: 1, max: 30, step: 1, fmt: (v) => `${v}` },
+  { k: 'pautaRedesMes', eti: 'Pauta en redes (Q/mes)', fijo: true, fmt: fq },
+  { k: 'volanteoBimestre', eti: 'Volanteo y roll-ups (Q/bimestre)', fijo: true, fmt: fq },
+  { k: 'radioBimestre', eti: 'Radio (Q/bimestre)', fijo: true, fmt: fq },
+  { k: 'internetMes', eti: 'Internet (Q/mes)', fijo: true, fmt: fq },
+  { k: 'contratacionesMes', eti: 'Contrataciones promedio al mes', fijo: true, fmt: (v) => `${v}` },
   { f: 'atraccion' },
-  { k: 'salarioJefeRRHH', eti: 'Salario del jefe de RRHH', min: 3000, max: 20000, step: 100, fmt: fq },
-  { k: 'pctJefeRRHH', eti: 'Tiempo del jefe de RRHH en reclutar', min: 0, max: 1, step: 0.05, fmt: fp },
+  { k: 'salarioJefeRRHH', eti: 'Salario del jefe de RRHH', fijo: true, fmt: fq },
+  { k: 'pctJefeRRHH', eti: 'Tiempo del jefe de RRHH en reclutar', fijo: true, fmt: fp },
   { f: 'rrhh' },
   { grupo: 'Costo de salida' },
   { k: 'isRenuncia', eti: 'Finiquito estimado por renuncia', min: 0, max: 10000, step: 250, fmt: fq },
-  { k: 'aniosServicio', eti: 'Años de servicio (indemnización por despido)', min: 0, max: 10, step: 0.5, fmt: (v) => `${v} años` },
+  { k: 'salarioVendedor', eti: 'Salario promedio del vendedor que sale', min: 3000, max: 15000, step: 100, fmt: fq },
+  { k: 'mesesServicio', eti: 'Tiempo de servicio (indemnización por despido)', min: 0, max: 120, step: 1, fmt: fMeses },
   { f: 'salida' },
   { f: 'total' },
 ];
@@ -87,18 +100,25 @@ const FORMULAS = {
     `1 jefe y 1 asistente: un vendedor menos es el 20–33% de la capacidad de venta. Asumir solo ` +
     `15% ya da por hecho que el resto del equipo cubre buena parte. Muévelo para probar otros escenarios.`,
   cp: (p, v, r) =>
-    `<b>Costo de la curva</b> = salario × meses × lo que el nuevo aún no produce (100% − ${fp(p.prodCurva)})<br>` +
-    `= ${fq(p.salarioVendedor)} × ${p.mesesCurva} × ${fp(1 - p.prodCurva)} = <b>${fq(r.cp)}</b>`,
+    `<b>Costo de la curva</b> = salario del nuevo × meses × lo que aún no produce (100% − ${fp(p.prodCurva)})<br>` +
+    `= ${fq(p.salarioNuevo)} × ${p.mesesCurva} × ${fp(1 - p.prodCurva)} = <b>${fq(r.cp)}</b><br>` +
+    `Se usa lo que gana un vendedor en sus primeros meses (${fq(p.salarioNuevo)}), no el salario promedio.`,
   jefe: (p, v, r) =>
-    `<b>Costo del jefe</b> = (salario ÷ 4.33 semanas del mes) × semanas × % de su tiempo<br>` +
-    `= (${fq(p.salarioJefe)} ÷ 4.33) × ${p.semanasJefe} × ${fp(p.pctJefe)} = <b>${fq(r.jefe)}</b>`,
+    `<b>Tiempo del jefe de tienda cubriendo la plaza</b> = (salario ÷ 4.33 semanas del mes) × semanas × parte de su jornada<br>` +
+    `= (${fq(p.salarioJefe)} ÷ 4.33) × ${p.semanasJefe} × ${fp(p.pctJefe)} = <b>${fq(r.jefe)}</b><br>` +
+    `El jefe es quien primero tapa el hueco: atiende y vende en lugar del vendedor que falta. ` +
+    `Ese tiempo se lo quita a su propio trabajo y ya está pagado, por eso cuenta como costo.`,
   coord: (p, v, r) =>
-    `<b>Costo de coordinadora</b> = (salario ÷ 4.33) × semanas × % de su tiempo × probabilidad de que apoye<br>` +
-    `= (${fq(p.salarioCoord)} ÷ 4.33) × ${p.semanasCoord} × ${fp(p.pctCoord)} × ${fp(p.probCoord)} = <b>${fq(r.coord)}</b>`,
+    `<b>Apoyo de la coordinadora de RRHH</b> = (salario ÷ 4.33) × semanas × parte de su jornada × en cuántas vacantes va<br>` +
+    `= (${fq(p.salarioCoord)} ÷ 4.33) × ${p.semanasCoord} × ${fp(p.pctCoord)} × ${fp(p.probCoord)} = <b>${fq(r.coord)}</b><br>` +
+    `La coordinadora es el comodín: RRHH la manda a la tienda a cubrir la plaza mientras llega el reemplazo. ` +
+    `Solo hay una para todas las tiendas, así que no llega a todas las vacantes: ${fp(p.probCoord)} quiere decir ` +
+    `que ese porcentaje de las vacantes recibe su apoyo. Es un costo aparte del jefe porque son dos personas ` +
+    `distintas cuyo tiempo pagado se desvía a la misma plaza vacía.`,
   sobrecarga: (p) =>
     `<b>Sobrecarga del equipo</b>: se suman tal cual → ${fq(p.overtime)} + ${fq(p.retrabajo)} = <b>${fq(p.overtime + p.retrabajo)}</b>`,
   directos: (p) =>
-    `<b>Gastos de contratación</b>: se suman tal cual → kit ${fq(p.kit)} + polígrafo ${fq(p.poligrafo)} + viáticos ${fq(p.viaticos)} = <b>${fq(p.kit + p.poligrafo + p.viaticos)}</b>`,
+    `<b>Gastos de contratación</b> (fijos): se suman tal cual → kit ${fq(p.kit)} + polígrafo ${fq(p.poligrafo)} + viáticos ${fq(p.viaticos)} = <b>${fq(p.kit + p.poligrafo + p.viaticos)}</b>`,
   atraccion: (p, v, r) =>
     `<b>Publicidad por contratación</b> = (pauta + volanteo÷2 + radio÷2 + internet) ÷ contrataciones del mes<br>` +
     `= (${fq(p.pautaRedesMes)} + ${fq(p.volanteoBimestre / 2)} + ${fq(p.radioBimestre / 2)} + ${fq(p.internetMes)}) ÷ ${p.contratacionesMes} = <b>${fq(r.atraccion)}</b><br>` +
@@ -107,9 +127,11 @@ const FORMULAS = {
     `<b>Jefe de RRHH por contratación</b> = salario × % de su tiempo en reclutar ÷ contrataciones del mes<br>` +
     `= (${fq(p.salarioJefeRRHH)} × ${fp(p.pctJefeRRHH)}) ÷ ${p.contratacionesMes} = <b>${fq(r.rrhh)}</b><br>` +
     `Su costo se reparte porque entrevista para todas las vacantes del mes, no solo para una.`,
-  salida: (p) =>
+  salida: (p, v, r, d) =>
     `<b>Renuncia</b>: se paga el finiquito tal cual = <b>${fq(p.isRenuncia)}</b><br>` +
-    `<b>Despido</b>: indemnización = salario × años de servicio = ${fq(p.salarioVendedor)} × ${p.aniosServicio} = <b>${fq(p.salarioVendedor * p.aniosServicio)}</b>`,
+    `<b>Despido</b>: indemnización = un salario por año de servicio, proporcional a los meses<br>` +
+    `= ${fq(p.salarioVendedor)} × (${p.mesesServicio} meses ÷ 12) = <b>${fq(d.salida)}</b><br>` +
+    `Se usa el salario promedio del vendedor que sale (${fq(p.salarioVendedor)}), no el del nuevo.`,
   total: (p, v, r, d) =>
     `<b>Suma final</b> = ventas perdidas + curva + cobertura interna + reclutamiento + costo de salida<br>` +
     `Cada <b>renuncia</b> = ${fq(r.iv)} + ${fq(r.cp)} + ${fq(r.composicion.cobertura)} + ${fq(r.composicion.reclutamiento)} + ${fq(r.composicion.salida)} = <b>${fq(r.total)}</b><br>` +
@@ -132,21 +154,22 @@ slVentas.oninput = () => { ventas = +slVentas.value; recalcular(); };
 
 // ── render de controles ────────────────────────────────────────────────────
 document.getElementById('controles').innerHTML = CONTROLES.map((c) =>
-  c.grupo ? `<h3 style="margin:14px 0 8px">${c.grupo}</h3>`
+  c.grupo ? `<h3 style="margin:14px 0 8px">${c.grupo}</h3>${c.nota ? `<p class="sub nota-grupo">${c.nota}</p>` : ''}`
   : c.f ? `<div class="formula" id="f-${c.f}"></div>`
+  : c.fijo ? `<div class="control fijo"><label>${c.eti} <span><b id="v-${c.k}"></b><em>fijo</em></span></label></div>`
   : `<div class="control">
        <label>${c.eti} <b id="v-${c.k}"></b></label>
        <input type="range" id="sl-${c.k}" min="${c.min}" max="${c.max}" step="${c.step}">
      </div>`).join('');
 for (const c of CONTROLES) {
-  if (!c.k) continue;
+  if (!c.k || c.fijo) continue;
   const sl = document.getElementById(`sl-${c.k}`);
   sl.oninput = () => { params[c.k] = +sl.value; escenarioNota = ''; recalcular(); };
 }
 
 function sincronizar() {
   for (const c of CONTROLES) {
-    if (!c.k) continue;
+    if (!c.k || c.fijo) continue;
     document.getElementById(`sl-${c.k}`).value = params[c.k];
   }
   slVentas.value = ventas;

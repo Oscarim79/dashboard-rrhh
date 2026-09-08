@@ -2,17 +2,22 @@
 // Replica el Excel de referencia de Oscar (versión sin Telo, con Pauta en Redes,
 // canal Internet vigente en ambos escenarios) más el tiempo del jefe de RRHH
 // (acuerdo Oscar 2026-09-01: Q8,000 al 100% en reclutar, repartido entre las
-// contrataciones del mes; coordinadora a Q4,000). Valores de control con ventas
-// del modelo original (A=275000, B=160000):
-//   renuncia A Q72,262 · renuncia B Q55,012 · despido A Q76,762 · despido B Q59,512
-// El Excel usa 4.33 semanas/mes (no 4.3333) — cambiarlo rompe los controles.
+// contrataciones del mes).
+// Calibración de salarios (Oscar, 2026-09-08): el vendedor nuevo gana Q4,500 durante
+// la curva; el vendedor promedio que sale (base de la indemnización) Q6,500; jefe de
+// tienda Q8,000; coordinadora de RRHH (comodín que cubre plazas) Q4,500.
+// Valores de control con ventas del modelo original (A=275000, B=160000):
+//   renuncia A Q71,294 · renuncia B Q54,044 · despido A Q75,794 · despido B Q58,544
+// `scripts/validar_modelo.mjs` además verifica los controles del Excel (2026-09-01)
+// pasando los salarios de entonces. El Excel usa 4.33 semanas/mes (no 4.3333).
 
 export const SEMANAS_MES = 4.33;
 
 export const PARAMS_DEFECTO = {
-  salarioVendedor: 6500,
-  salarioJefe: 6500,
-  salarioCoord: 4000,
+  salarioNuevo: 4500,      // lo que gana el vendedor nuevo en sus primeros meses (curva)
+  salarioVendedor: 6500,   // salario promedio del vendedor que sale (base de la indemnización)
+  salarioJefe: 8000,
+  salarioCoord: 4500,
   salarioJefeRRHH: 8000,
   pctJefeRRHH: 1,
   diasVacante: 30,
@@ -26,6 +31,7 @@ export const PARAMS_DEFECTO = {
   probCoord: 0.5,
   overtime: 1500,
   retrabajo: 500,
+  // Gastos fijos de reclutamiento y contratación (Oscar, 2026-09-08: no se mueven en el Simulador)
   kit: 450,
   poligrafo: 3000,
   viaticos: 1500,
@@ -35,7 +41,7 @@ export const PARAMS_DEFECTO = {
   internetMes: 5000,
   contratacionesMes: 10,
   isRenuncia: 2000,
-  aniosServicio: 1,
+  mesesServicio: 12,       // antigüedad del despedido, en meses (la indemnización es proporcional)
 };
 
 // Venta mensual representativa por tipo (punto medio de los rangos de Oscar,
@@ -48,7 +54,11 @@ export const ORDEN_TIPOS = ['AA', 'A', 'B', 'C'];
 // ventas: venta mensual de la tienda · escenario: 'renuncia' | 'despido'
 export function costoSalida(ventas, escenario, p = PARAMS_DEFECTO) {
   const iv = ventas * p.factorImpacto * (p.diasVacante / 30);
-  const cp = p.salarioVendedor * p.mesesCurva * (1 - p.prodCurva);
+  const cp = p.salarioNuevo * p.mesesCurva * (1 - p.prodCurva);
+  // Cobertura interna: mientras la plaza está vacía, el trabajo del vendedor lo tapan
+  // dos personas que ya tienen sueldo. El jefe de tienda siempre (parte de su jornada);
+  // la coordinadora de RRHH es el comodín que se manda a la tienda cuando se puede, por
+  // eso su costo se multiplica por la fracción de vacantes en que sí va (probCoord).
   const jefe = (p.salarioJefe / SEMANAS_MES) * p.semanasJefe * p.pctJefe;
   const coord = (p.salarioCoord / SEMANAS_MES) * p.semanasCoord * p.pctCoord * p.probCoord;
   const atraccion =
@@ -59,7 +69,8 @@ export function costoSalida(ventas, escenario, p = PARAMS_DEFECTO) {
   // El jefe de RRHH entrevista para TODAS las vacantes: su mes se reparte
   // entre las contrataciones del mes (como la publicidad), no por vacante.
   const rrhh = (p.salarioJefeRRHH * p.pctJefeRRHH) / p.contratacionesMes;
-  const salida = escenario === 'despido' ? p.salarioVendedor * p.aniosServicio : p.isRenuncia;
+  // Despido: un salario por año de servicio, proporcional a los meses.
+  const salida = escenario === 'despido' ? p.salarioVendedor * (p.mesesServicio / 12) : p.isRenuncia;
 
   const total = iv + cp + jefe + coord + p.overtime + p.retrabajo +
     p.kit + p.poligrafo + p.viaticos + atraccion + rrhh + salida;

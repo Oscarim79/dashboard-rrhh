@@ -234,3 +234,10 @@ footer {
   h1 { font-size: 26px; }
   .kpi-valor.grande { font-size: 42px; }
 }
+/* Simulador: nota bajo el título de un grupo y supuestos fijos (sin slider) */
+.nota-grupo { margin: -2px 0 12px; line-height: 1.5; }
+.control.fijo label { border-bottom: 1px dashed var(--borde); padding-bottom: 6px; }
+.control.fijo em {
+  font-style: normal; font-size: 11px; color: var(--tinta-suave);
+  border: 1px solid var(--borde); border-radius: 4px; padding: 0 5px; margin-left: 6px;
+}
