@@ -187,7 +187,10 @@ export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = nul
   const hoyYm = new Date(generado).toISOString().slice(0, 7);
   const mesesAsc = [...new Set(meses)].sort();
   const hastaYm = [...mesesAsc].reverse().find((ym) => ym <= hoyYm) ?? mesesAsc.at(-1);
-  const nota = notaRegistro ?? (mesesAsc.length ? `"Todo el registro" cubre de ${fmtYm(mesesAsc[0])} a ${fmtYm(hastaYm)}.` : '');
+  // Oscar (2026-09-08): el sheet se terminó de estructurar a mediados de 2025; antes la captura
+  // era menos rigurosa, así que los últimos 12 meses son el corte más confiable.
+  const nota = (notaRegistro ?? (mesesAsc.length ? `"Todo el registro" cubre de ${fmtYm(mesesAsc[0])} a ${fmtYm(hastaYm)}.` : ''))
+    + (mesesAsc.length ? ` <b>Los datos más finos y confiables son los de los últimos 12 meses</b>: el registro se terminó de estructurar a mediados de 2025 y antes de esa fecha la captura era menos rigurosa.` : '');
   const botones = [['todo', 'Todo el registro'], ['12m', 'Últimos 12 meses'],
     ...[...new Set(anios.map(String))].sort().reverse().map((a) => [`a:${a}`, a === anioActual ? `${a} a la fecha` : a])];
   const mesesOrd = [...new Set(meses)].sort().reverse();

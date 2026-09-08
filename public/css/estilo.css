@@ -72,7 +72,8 @@ body {
 }
 .barra-periodo button, .barra-periodo select { font-size: 13px; padding: 7px 11px; }
 .barra-periodo select.primario, .barra-periodo .sel-mes.primario { background: var(--verde); border-color: var(--verde); color: #fff; font-weight: 600; }
-.barra-periodo-nota { flex-basis: 100%; font-size: 12.5px; color: var(--tinta-suave); margin-top: 2px; }
+.barra-periodo-nota { flex-basis: 100%; font-size: 12.5px; color: var(--tinta-suave); margin-top: 2px; line-height: 1.45; }
+.barra-periodo-nota b { color: var(--tinta); }
 
 /* ── menú lateral ── */
 nav#menu {
