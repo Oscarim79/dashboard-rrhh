@@ -20,6 +20,8 @@ if (!salidasTodo.total) {
   pintarPie(meta);
 } else {
   const titulo = (s) => s.startsWith('(') ? s.replace(/[()]/g, '').toLowerCase() : s.charAt(0) + s.slice(1).toLowerCase();
+  // El sheet trae las áreas en mayúsculas y sin tildes; nombres legibles para la gráfica.
+  const NOMBRE_AREA = { COMERCIAL: 'Comercial', LOGISTICA: 'Logística', MERCADEO: 'Mercadeo', 'CREDITOS Y COBROS': 'Créditos y cobros', CONTABILIDAD: 'Contabilidad', AUDITORIA: 'Auditoría', REPARTO: 'Reparto', GARANTIAS: 'Garantías', 'SOPORTE IT': 'Soporte IT' };
   const RANGOS_TEMPRANOS = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES'];
   const tempranas = (d) => RANGOS_TEMPRANOS.reduce((s, k) => s + (d.rango[k] ?? 0), 0);
   const ORDEN_RANGO = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES', 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES', 'DE 1 A 2 ANOS', 'DE 2 A 5 ANOS', 'MAS DE 5 ANOS', 'MAS DE UN ANO'];
@@ -33,6 +35,7 @@ if (!salidasTodo.total) {
     const D = dimsSalidas(salidas, periodo);
     const etiP = etiquetaPeriodo(periodo, generado);
     document.getElementById('alcance').innerHTML = notaAlcance(depto);
+    document.getElementById('card-area').hidden = depto === 'comercial';
 
     // ── períodos evaluados (calculados de los datos, nunca a mano) ──
     const mesesOrdenados = Object.keys(salidas.porMes).sort();
@@ -116,9 +119,9 @@ if (!salidasTodo.total) {
         return { eti: tipo ? `${nombre} (${tipo})` : titulo(nombre), valor: v, color: '#46615A' };
       }), { formato: fmtNum });
 
-    // ── área y marca ──
+    // ── área y marca (en Comercial todas las salidas son del área comercial: la tarjeta sobra) ──
     document.getElementById('area').innerHTML = barrasH(
-      Object.entries(D.area).map(([k, v]) => ({ eti: titulo(k), valor: v, color: '#46615A' })),
+      Object.entries(D.area).map(([k, v]) => ({ eti: NOMBRE_AREA[k] ?? titulo(k), valor: v, color: '#46615A' })),
       { formato: fmtNum });
     document.getElementById('marca').innerHTML = barrasH(
       Object.entries(D.marca).map(([k, v]) => ({ eti: k, valor: v, color: '#8FA69B' })),

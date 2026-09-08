@@ -9,6 +9,7 @@ const datos = await cargarDatos();
 const { meta } = datos;
 const salidasTodo = await fetch('data/salidas.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 let salidasPorTipo = {}; // salidas del período por tipo de tienda (registro de SALIDAS)
+let mezclaSalidas = { pctRenuncia: null, pctDespido: null }; // renuncias vs despidos (registro de SALIDAS)
 // El modelo de costo es el mismo con cualquier alcance (es por tipo de tienda); el selector
 // solo cambia los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo).
 let A = datos.vacantes.agregados;
@@ -16,7 +17,10 @@ let deptoSel = 'comercial', periodoSel = '12m';
 function aplicarFiltros() {
   const v = vacantesDe(datos.vacantes, deptoSel);
   A = agregarVacantes(vacantesEnPeriodo(v.filas, periodoSel, v.generado));
-  salidasPorTipo = dimsSalidas(salidasDe(salidasTodo, deptoSel), periodoSel).porTipoTienda ?? {};
+  const dz = dimsSalidas(salidasDe(salidasTodo, deptoSel), periodoSel);
+  salidasPorTipo = dz.porTipoTienda ?? {};
+  const rd = (dz.razon?.RENUNCIA ?? 0) + (dz.razon?.DESPIDO ?? 0);
+  mezclaSalidas = { pctRenuncia: rd ? (dz.razon.RENUNCIA ?? 0) / rd : null, pctDespido: rd ? (dz.razon.DESPIDO ?? 0) / rd : null };
   document.getElementById('alcance').innerHTML = notaAlcance(deptoSel) +
     ` El modelo de costo no cambia con los selectores; solo cambian los datos reales con que se calibra (días de vacante, mezcla y salidas por tipo · ${etiquetaPeriodo(periodoSel, v.generado)}).`;
 }
@@ -212,7 +216,7 @@ document.getElementById('btn-reales').onclick = () => {
   const g = A.diasCobertura.global;
   if (g.mediana == null) { escenarioNota = 'No hay vacantes cerradas con dato en el período elegido: no se puede calibrar. Cambia el período arriba.'; sincronizar(); return; }
   params = { ...params, diasVacante: g.mediana };
-  escenarioNota = `Calibrado con datos reales (${etiquetaPeriodo(periodoSel, datos.vacantes.generado)}): la vacante dura ${g.mediana} días (mediana de ${g.n} vacantes cerradas). La mezcla real es ${Math.round((A.mezcla.pctRenuncia ?? 0) * 100)}% renuncias / ${Math.round((A.mezcla.pctDespido ?? 0) * 100)}% despidos.`;
+  escenarioNota = `Calibrado con datos reales (${etiquetaPeriodo(periodoSel, datos.vacantes.generado)}): la vacante dura ${g.mediana} días (mediana de ${g.n} vacantes cerradas). ${mezclaSalidas.pctRenuncia != null ? `La mezcla real (registro de salidas) es ${Math.round(mezclaSalidas.pctRenuncia * 100)}% renuncias / ${Math.round(mezclaSalidas.pctDespido * 100)}% despidos.` : ''}`;
   sincronizar();
 };
 document.getElementById('btn-mitad').onclick = () => {

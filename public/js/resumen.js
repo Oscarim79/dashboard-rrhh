@@ -23,6 +23,12 @@ const NOMBRE_TIPO = {
 const NOMBRE_CORTO = { AA: 'tipo AA', A: 'tipo A', B: 'tipo B', C: 'tipo C', NT: 'de oficinas, CEDI y regiones' };
 
 function pintar(depto, periodo) {
+  // Cómo se llaman las salidas fuera de tienda según el alcance: en Comercial solo pueden ser
+  // puestos comerciales en CEDI o regiones; en General también entran las oficinas.
+  const esCom = depto === 'comercial';
+  const NT_ETI = esCom ? 'fuera de tienda (CEDI y regiones)' : 'de oficinas, CEDI y regiones';
+  NOMBRE_TIPO.NT = esCom ? 'Puestos comerciales fuera de tienda (CEDI y regiones) · sin ventas perdidas' : 'Oficinas, CEDI y regiones · sin ventas perdidas';
+  NOMBRE_CORTO.NT = NT_ETI;
   const vacantes = vacantesDe(datos.vacantes, depto);
   const salidas = salidasDe(salidasTodo, depto);
   const generado = vacantes.generado;
@@ -101,7 +107,7 @@ function pintar(depto, periodo) {
     const salidas12 = salidasCosteadas + salidasSinTipo + salidasNoTienda;
     if (cierre && cierre.fin > 0 && salidas12 > 0) {
       const pct = Math.round((salidas12 / cierre.fin) * 100);
-      tiles.push(kpi(`${pct}%`, `de la plantilla ${depto === 'comercial' ? 'comercial ' : ''}se reemplazó · ${etiP}`,
+      tiles.push(kpi(`${pct}%`, `de la plantilla ${esCom ? 'comercial' : 'de toda la empresa'} se reemplazó · ${etiP}`,
         `${fmtNum(salidas12)} renuncias y despidos (registro de salidas) · ${fmtNum(cierre.fin)} colaboradores al cierre de ${MES_CORTO[cierre.mesNum - 1]} ${cierre.anio}`,
         pct >= 50 ? 'rojo' : ''));
     }
@@ -166,13 +172,15 @@ function pintar(depto, periodo) {
   const medianaDias = A.diasCobertura.global.mediana;
   function pintarKpis() {
     const extra = supuesto ? costoSupuesto() : 0;
+    const enTiendas = salidasCosteadas - salidasNoTienda;
     document.getElementById('kpis').innerHTML = `
     <div class="kpi" style="grid-column: 1 / -1;">
       <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
-      <div class="kpi-eti">costo de rotación · ${etiP} (${fmtNum(salidasCosteadas - salidasNoTienda)} renuncias y despidos en tiendas clasificadas${salidasNoTienda ? ` + ${fmtNum(salidasNoTienda)} en oficinas, CEDI y regiones` : ''}${supuesto ? ` + ${fmtNum(salidasSinTipo)} estimadas por supuesto` : ''}, según el registro de salidas) · ${etiquetaDepto(depto)}</div>
+      <div class="kpi-eti">costo de rotación · <b>${etiquetaDepto(depto)}</b> · ${etiP}</div>
+      <div class="kpi-nota">Suma de <b>${fmtNum(salidasCosteadas + salidasSinTipo)}</b> renuncias y despidos según el registro de salidas: ${fmtNum(enTiendas)} en tiendas clasificadas${salidasNoTienda ? `, ${fmtNum(salidasNoTienda)} ${NT_ETI}` : ''}${supuesto ? `, ${fmtNum(salidasSinTipo)} en tiendas sin clasificar (estimadas por supuesto)` : ''}.${!esCom && salidasNoTienda ? ' Las salidas en tiendas son las mismas que en Comercial: todas las tiendas pertenecen a ese departamento; la diferencia está en las de oficinas, CEDI y regiones.' : ''}</div>
       ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre ${salidasSinTipo === 1 ? 'la salida' : `las ${fmtNum(salidasSinTipo)} salidas`} en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
-      ${salidasNoTienda ? `<div class="kpi-nota">Las ${fmtNum(salidasNoTienda)} salidas de oficinas, CEDI y regiones se costean <b>sin ventas perdidas</b> (no hay piso de venta): solo curva de aprendizaje, tiempo de jefatura y RRHH, gastos de contratación y finiquito o indemnización. Ver su tarjeta más abajo.</div>` : ''}
-      ${salidasOtras ? `<div class="kpi-nota">${fmtNum(salidasOtras)} salidas más no se costean por no ser renuncia ni despido (no confirmados, vacacionistas o sin razón registrada).</div>` : ''}
+      ${salidasNoTienda ? `<div class="kpi-nota">${salidasNoTienda === 1 ? `La salida ${NT_ETI} se costea` : `Las ${fmtNum(salidasNoTienda)} salidas ${NT_ETI} se costean`} <b>sin ventas perdidas</b> (no hay piso de venta): solo curva de aprendizaje, tiempo de jefatura y RRHH, gastos de contratación y finiquito o indemnización. Ver su tarjeta más abajo.</div>` : ''}
+      ${salidasOtras ? `<div class="kpi-nota">${salidasOtras === 1 ? '1 salida más no se costea' : `${fmtNum(salidasOtras)} salidas más no se costean`} por no ser renuncia ni despido (no confirmados, vacacionistas o sin razón registrada).</div>` : ''}
       ${!salidasCosteadas && !salidasSinTipo ? '<div class="kpi-nota">No hay renuncias ni despidos registrados en este período y alcance.</div>' : ''}
     </div>
     <div class="kpi">
@@ -241,7 +249,7 @@ function pintar(depto, periodo) {
   document.getElementById('tarjetas-tipo').innerHTML = detallePorTipo.length ? detallePorTipo.map((d) => `
     <div class="tarjeta">
       <h3>${NOMBRE_TIPO[d.tipo]}</h3>
-      ${d.tipo === 'NT' ? '<p class="sub" style="margin-bottom:8px">Bajas en oficinas, CEDI y regiones. Mismo modelo, pero sin ventas perdidas porque no hay piso de venta; el resto (curva de aprendizaje, jefatura y RRHH, contratación, finiquito o indemnización) aplica igual.</p>' : ''}
+      ${d.tipo === 'NT' ? `<p class="sub" style="margin-bottom:8px">${esCom ? 'Bajas de puestos comerciales fuera de tienda (CEDI y regiones).' : 'Bajas en oficinas, CEDI y regiones.'} Mismo modelo, pero sin ventas perdidas porque no hay piso de venta; el resto (curva de aprendizaje, jefatura y RRHH, contratación, finiquito o indemnización) aplica igual.</p>` : ''}
       <div style="display:flex; justify-content:space-between; align-items:baseline; gap:8px;">
         <span><span class="pill verde">Renuncia</span> <span class="una-salida">cada una cuesta</span></span>
         <b class="num" style="font-size:20px">${fmtQ(d.cR.total)}</b>
@@ -289,12 +297,12 @@ function pintar(depto, periodo) {
   // 3. dónde se concentran las salidas
   const topTipo = [...detallePorTipo].sort((a, b) => b.anual - a.anual)[0];
   if (topTipo && costoAnual > 0) {
-    hallazgos.push(`Las ${topTipo.tipo === 'NT' ? 'salidas <b>de oficinas, CEDI y regiones</b>' : `tiendas <b>${NOMBRE_CORTO[topTipo.tipo]}</b>`} concentran la mayor parte del costo: <b>${fmtQ(topTipo.anual)}</b> en ${etiP} (${Math.round((topTipo.anual / costoAnual) * 100)}% del total costeado), entre volumen de salidas y ventas en riesgo.`);
+    hallazgos.push(`Las ${topTipo.tipo === 'NT' ? `salidas <b>${NT_ETI}</b>` : `tiendas <b>${NOMBRE_CORTO[topTipo.tipo]}</b>`} concentran la mayor parte del costo: <b>${fmtQ(topTipo.anual)}</b> en ${etiP} (${Math.round((topTipo.anual / costoAnual) * 100)}% del total costeado), entre volumen de salidas y ventas en riesgo.`);
   }
 
   // 4. (si aplica) salidas sin clasificar
   if (salidasSinTipo && salidasSinTipo >= salidasCosteadas * 0.25) {
-    hallazgos.push(`Hay <b>${fmtNum(salidasSinTipo)} salidas</b> en tiendas todavía sin tipo (Catocha, Petapa, etc.). Su costo se estima con un <b>supuesto ajustable</b> (arriba); clasificarlas en el archivo de tiendas reemplaza el supuesto por el dato real.`);
+    hallazgos.push(`Hay <b>${fmtNum(salidasSinTipo)} salidas</b> en tiendas todavía sin tipo${origenSinTipo ? ` (${origenSinTipo})` : ''}. Su costo se estima con un <b>supuesto ajustable</b> (arriba); clasificarlas en el archivo de tiendas reemplaza el supuesto por el dato real.`);
   }
 
   document.getElementById('hallazgos').innerHTML = hallazgos.length
