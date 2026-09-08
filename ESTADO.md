@@ -28,6 +28,33 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## ⏳ PENDIENTE PARA MAÑANA — pedido del CEO (anotado 2026-09-08, noche)
+
+Oscar lo dejó como nota; se trabaja en la sesión del 2026-09-09. Dos cosas:
+
+1. **Comparativa enero–julio 2025 vs enero–julio 2026 de toda la data de salidas**, lado a
+   lado (a la par). Toda la data = las mismas vistas de la página Salidas: total, razón
+   (renuncia/despido), sub-motivos, antigüedad por rango, área, marca, agencia, género.
+   - Lo que ya hay: `salidas.json → porMesDetalle` trae cada mes con todas esas dimensiones
+     (razon, subMotivo, subMotivoRenuncias, genero, area, marca, agencia, rango, diasLab, n),
+     así que se pueden sumar los meses ene–jul de cada año en el navegador, igual que se hace
+     con los meses sueltos. Falta decidir si el selector de período gana una opción de
+     "comparar dos rangos" o si es una sección nueva en Salidas.
+   - Ojo con la regla n≥3 → OTROS: al sumar meses hay que aplicarla sobre el rango sumado, no
+     mes por mes (si no, se pierden sub-motivos que sí llegan a 3 en el semestre).
+   - Ojo con la confiabilidad: 2025 antes de mitad de año se capturaba con menos rigor (nota
+     ya visible bajo la barra de período). La comparativa debe llevar esa advertencia.
+
+2. **POR QUÉ se fueron las personas que salieron antes de los 6 meses.** Hoy el sitio muestra
+   "razón" y "sub-motivo" por separado de "antigüedad": NO existe el cruce
+   sub-motivo × antigüedad < 6 meses. Hay que agregarlo en `scripts/actualizar_datos.mjs`
+   (conteo agregado: razón y sub-motivo solo de las filas con rango MENOS 1 MES, 1–2, 2–4 y
+   4–6 MESES; regla n≥3 → OTROS; sin nombres ni supervisores) y publicarlo en `salidas.json`
+   (por año y por mes, para que respete los selectores). Luego una tarjeta/gráfica en Salidas
+   ("Los que se van antes de 6 meses se van por…") y, si aplica, en la comparativa del punto 1.
+
+Ambas cosas van filtradas por el selector General/Comercial como todo lo demás.
+
 ## Simulador: salarios recalibrados, gastos fijos y antigüedad en meses (2026-09-08, tarde)
 
 Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag-simulador.js`:
