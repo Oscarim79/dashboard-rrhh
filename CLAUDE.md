@@ -82,6 +82,11 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   (`salidas.json → porTipoTienda`, `razon`, `rango`). Es el registro completo.
 - **Oficinas, CEDI y regiones ('no tienda'):** se costean con el modelo con ventas = 0 (sin ventas
   perdidas), tarjeta "NT" en el Resumen.
+- **Renuncia vs despido:** manda la columna OBSERVACIONES de SALIDAS (razón oficial). El SUB MOTIVO es
+  lo que la persona expresó en la entrevista de salida o al jefe de RRHH, y puede no "cuadrar" con la
+  razón oficial (p. ej. RENUNCIA con sub-motivo "mala actitud", o DESPIDO con "salario"). Oscar lo
+  confirmó (2026-09-08): NO es error de captura ni hay que reclasificar. La mezcla real cambia por
+  período (2024 ≈ 64/36, 2026 ≈ 82/18, últimos 12m Comercial ≈ 90/10).
 - **Días de vacante y plazas abiertas:** control de VACANTES. NO usarlo para contar salidas:
   solo registra las plazas que se abrieron (171 vs 474 bajas en todo el registro).
 
