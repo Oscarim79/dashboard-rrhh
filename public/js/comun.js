@@ -179,9 +179,15 @@ export function mesesDelPeriodo(p, mesesDisponibles, generado) {
 // Opciones extra: `contenedor` (elemento donde pintar la barra, en vez de bajo la nota de
 // alcance) y `guardar: false` (barra local: no lee ni escribe la memoria global; arranca en
 // `inicial`, por defecto 'todo').
-export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = null, guardar = true, inicial = 'todo' }, onCambio) {
+export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = null, guardar = true, inicial = 'todo', notaRegistro = null }, onCambio) {
   let actual = guardar ? periodoActual() : inicial;
   const anioActual = anioDe(generado);
+  // Desde cuándo hay datos (pregunta que le hicieron a Oscar, 2026-09-08): se muestra bajo la barra.
+  // El último mes se limita al mes de la lectura por si alguna fila trae fecha futura por error.
+  const hoyYm = new Date(generado).toISOString().slice(0, 7);
+  const mesesAsc = [...new Set(meses)].sort();
+  const hastaYm = [...mesesAsc].reverse().find((ym) => ym <= hoyYm) ?? mesesAsc.at(-1);
+  const nota = notaRegistro ?? (mesesAsc.length ? `"Todo el registro" cubre de ${fmtYm(mesesAsc[0])} a ${fmtYm(hastaYm)}.` : '');
   const botones = [['todo', 'Todo el registro'], ['12m', 'Últimos 12 meses'],
     ...[...new Set(anios.map(String))].sort().reverse().map((a) => [`a:${a}`, a === anioActual ? `${a} a la fecha` : a])];
   const mesesOrd = [...new Set(meses)].sort().reverse();
@@ -194,6 +200,7 @@ export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = nul
       <option value="">Un mes…</option>
       ${mesesOrd.map((ym) => `<option value="m:${ym}" ${`m:${ym}` === actual ? 'selected' : ''}>${fmtYm(ym)}</option>`).join('')}
     </select>
+    ${nota ? `<span class="barra-periodo-nota">${nota}</span>` : ''}
   </div>`;
   let barra;
   if (contenedor) {

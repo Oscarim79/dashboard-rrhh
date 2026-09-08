@@ -5,7 +5,7 @@
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -360,8 +360,15 @@ function pintar(depto, periodo) {
 
 // ── selectores globales ──────────────────────────────────────────────────────
 let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });
+// desde cuándo hay datos en cada fuente (el Resumen mezcla las tres)
+const hoyYm = datos.vacantes.generado.slice(0, 7);
+const primerMes = (arr) => arr.filter(Boolean).sort()[0];
+const desdeSal = primerMes(Object.keys(salidasTodo?.porMes ?? {}));
+const desdeVac = primerMes(datos.vacantes.filas.map((f) => f.solicitud?.slice(0, 7)));
+const desdeRot = primerMes(rotacion.acumulado.map((r) => `${r.anio}-${String(r.mesNum).padStart(2, '0')}`));
+const notaRegistro = `"Todo el registro" cubre hasta ${fmtYm(hoyYm)}: registro de salidas desde ${desdeSal ? fmtYm(desdeSal) : '—'}, control de vacantes desde ${desdeVac ? fmtYm(desdeVac) : '—'} e indicador de rotación desde ${desdeRot ? fmtYm(desdeRot) : '—'}.`;
 let periodo = pintarSelectorPeriodo(
-  { ...aniosYMeses({ vacantes: datos.vacantes, salidas: salidasTodo, rotacion }), generado: datos.vacantes.generado },
+  { ...aniosYMeses({ vacantes: datos.vacantes, salidas: salidasTodo, rotacion }), generado: datos.vacantes.generado, notaRegistro },
   (p) => { periodo = p; pintar(depto, periodo); });
 pintar(depto, periodo);
 pintarPie(meta);

@@ -447,7 +447,12 @@ const REQ_SAL = [['DIAS LAB'], ['RANGO MES'], ['GENERO'], ['AGENCIA'], ['BAJA']]
 const sal = detectar(wb, REQ_SAL);
 let salidasJson = null;
 if (!sal) {
-  calidad.push({ tipo: 'aviso', mensaje: 'No se encontró la pestaña de SALIDAS (busqué: DIAS LAB, RANGO MES, GENERO, AGENCIA, fecha de BAJA). La página de Salidas quedará sin datos.' });
+  // 2026-09-08: pasó de verdad (el encabezado DIAS LAB se perdió al editar una fórmula). Publicar
+  // "sin datos" dejaría el Resumen y Salidas vacíos, así que se aborta y el sitio conserva la
+  // última versión buena. Cuando el encabezado vuelva, la siguiente corrida publica normal.
+  console.error('✖ No se encontró la pestaña de SALIDAS (busqué encabezados: DIAS LAB, RANGO MES, GENERO, AGENCIA, fecha de BAJA). ' +
+    'Revisa que esos encabezados sigan en la primera fila de la pestaña. NO se publica nada para no dejar el sitio sin salidas.');
+  process.exit(1);
 } else {
   console.log(`Salidas: pestaña "${sal.nombre}" (${sal.filas.length} filas, solo agregados)`);
   const HS = sal.headers;
@@ -462,6 +467,8 @@ if (!sal) {
   const AREA_ALIAS = { 'COBROS Y CREDITOS': 'CREDITOS Y COBROS', 'COBROS': 'CREDITOS Y COBROS' };
   const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
   let diasLabMalos = 0, sinRazon = 0, masDeUnAnoSinDias = 0;
+  const bajasFuturas = {}; // mes → cuántas bajas tienen fecha posterior a hoy (error de captura)
+  const hoyISO = hoy.toISOString().slice(0, 10);
   // El sheet trae un solo rango "MAS DE UN ANO" que junta de 1 a 15+ años y en la
   // gráfica parecía la mayoría (barra desproporcionada frente a tramos de 1-2 meses).
   // Se parte con los días laborados en 1-2 / 2-5 / más de 5 años; si no hay días
@@ -475,6 +482,7 @@ if (!sal) {
   for (const f of sal.filas) {
     const baja = fechaISO(f[IS.baja]);
     if (!baja) continue;
+    if (baja > hoyISO) bajasFuturas[baja.slice(0, 7)] = (bajasFuturas[baja.slice(0, 7)] ?? 0) + 1;
     const marcaCruda = norm(f[IS.marca]);
     const { resuelto } = resolverLugar(f[IS.agencia], MARCA_EMPRESA[marcaCruda] ?? '');
     const razon = norm(f[IS.razon]) || null;
@@ -580,6 +588,8 @@ if (!sal) {
   console.log(`Salidas: ${regs.length} en total, ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
+  const nFut = Object.values(bajasFuturas).reduce((a, b) => a + b, 0);
+  if (nFut) calidad.push({ tipo: 'aviso', n: nFut, mensaje: `${nFut} ${nFut === 1 ? 'salida tiene' : 'salidas tienen'} fecha de baja posterior a hoy (${Object.entries(bajasFuturas).map(([m, n]) => `${m}: ${n}`).join(', ')}); se cuenta igual, pero conviene corregir la fecha en el sheet.` });
   if (masDeUnAnoSinDias) calidad.push({ tipo: 'aviso', n: masDeUnAnoSinDias, mensaje: `${masDeUnAnoSinDias} salidas con rango "más de un año" no tienen días laborados válidos (o son menos de 365); se muestran como "Más de un año (sin detalle de años)".` });
 }
 

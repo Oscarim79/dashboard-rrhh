@@ -39,12 +39,14 @@ if (!salidasTodo.total) {
 
     // ── períodos evaluados (calculados de los datos, nunca a mano) ──
     const mesesOrdenados = Object.keys(salidas.porMes).sort();
-    const rangoTotal = `${fmtYm(mesesOrdenados[0])} a ${fmtYm(mesesOrdenados.at(-1))}`;
+    const hoyYm = generado.slice(0, 7);
+    const ultimoMes = [...mesesOrdenados].reverse().find((ym) => ym <= hoyYm) ?? mesesOrdenados.at(-1);
+    const rangoTotal = `${fmtYm(mesesOrdenados[0])} a ${fmtYm(ultimoMes)}`;
     const gen = new Date(generado);
     const corte12 = new Date(gen); corte12.setFullYear(gen.getFullYear() - 1);
     const rango12m = `${MES_LARGO[corte12.getMonth()]} ${corte12.getFullYear()} a ${MES_LARGO[gen.getMonth()]} ${gen.getFullYear()}`;
     document.getElementById('periodo-eval').textContent =
-      `Registro completo: ${rangoTotal}. Viendo ${etiP}${periodo === '12m' ? ` (${rango12m})` : ''}.`;
+      `Viendo ${etiP}${periodo === '12m' ? ` (${rango12m})` : ''}.`;
 
     document.getElementById('h-razon').textContent = `Razón de salida · ${etiP}`;
     document.getElementById('h-agencia').textContent = `Por agencia / tienda · ${etiP}`;
