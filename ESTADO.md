@@ -305,10 +305,11 @@
 
 ## Pendientes (no bloquean nada)
 
-- (2026-09-08) Sheet: agosto 2026 en DATA INDICADOR ROTACION tiene altas y plantilla pero ninguna
-  baja → llenar las desvinculadas de agosto. Tres salidas con días laborados negativos (abr 2026,
-  feb 2024, ago 2024). `propuesta-datos.js` dice 43 tiendas y 5 regiones; el archivo de tiendas
-  tiene 51 activas y 7 regiones (el 43 viene del informe de SSO; las regiones no se muestran).
+- (2026-09-08) Sheet: agosto 2026 en DATA INDICADOR ROTACION aún no tiene data (Oscar: la data va
+  hasta julio); el pipeline deja fuera cualquier mes con altas/plantilla pero sin bajas y lo avisa
+  en meta.json — entra solo cuando lo llenen. Tres salidas con días laborados negativos (abr 2026,
+  feb 2024, ago 2024). `propuesta-datos.js` dice 43 tiendas (≈ las 44 Americana activas del archivo
+  de tiendas; las 51 incluyen 5 Abi Q y 2 Friotec) y 5 regiones (no se muestran en la página).
 
 1. **RESUELTO 2026-09-03** (clasificación de Oscar en config/tiendas.json: Cayalá → Abi Q AA; Pradera Concepción → Abi Q A; CLM = Concepción Las Minas A; Central = Quezaltepeque Central AA; Peque 2 = Quezaltepeque 2 A; "Pradera 2 *" A con asterisco porque no se sabe cuál Pradera; Abi Q Online A; Catocha y Petapa cerradas. Solo quedan sin tipo tiendas cerradas, así que el supuesto del Resumen solo cubre sus salidas históricas). Antes — **Tiendas sin tipo**: Catocha, Petapa, Pradera Concepción (Americana), Pradera 2, Central,
    Peque 2, CLM, Abi Q Online. Desde 2026-09-01 sus salidas SÍ se costean en el Resumen con un

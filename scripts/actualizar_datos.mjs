@@ -431,7 +431,12 @@ if (!data) {
   const porMesTot = new Map();
   for (const r of mensual) { const k = `${r.anio}-${String(r.mesNum).padStart(2, '0')}`; const t = porMesTot.get(k) ?? { bajas: 0, altas: 0, fin: 0 }; t.bajas += r.bajas; t.altas += r.altas; t.fin += r.fin; porMesTot.set(k, t); }
   const mesesSinBajas = [...porMesTot.entries()].filter(([, t]) => t.bajas === 0 && (t.altas > 0 || t.fin > 0)).map(([k]) => k);
-  if (mesesSinBajas.length) calidad.push({ tipo: 'aviso', n: mesesSinBajas.length, mensaje: `El indicador de rotación mensual tiene ${mesesSinBajas.length === 1 ? 'un mes' : 'meses'} con altas y plantilla pero sin ninguna baja registrada (${mesesSinBajas.join(', ')}): probablemente aún no está lleno; en el sitio aparece con 0 bajas.` });
+  // Oscar (2026-09-08): ese mes todavía no tiene data cargada; se deja fuera para que el sitio
+  // no muestre "0 bajas" como si fuera dato. Cuando lo llenen, entra solo.
+  if (mesesSinBajas.length) {
+    mensual = mensual.filter((r) => !mesesSinBajas.includes(`${r.anio}-${String(r.mesNum).padStart(2, '0')}`));
+    calidad.push({ tipo: 'aviso', n: mesesSinBajas.length, mensaje: `El indicador de rotación mensual tiene ${mesesSinBajas.length === 1 ? 'un mes' : 'meses'} con altas y plantilla pero sin ninguna baja registrada (${mesesSinBajas.join(', ')}): aún no está lleno, así que no se publica hasta que tenga bajas.` });
+  }
 }
 
 const rotacionJson = { generado: hoy.toISOString(), acumulado, mensual };
