@@ -126,6 +126,17 @@ try {
     <p>Las cadenas grandes del país separan reclutamiento de generalista de RRHH, y la más parecida en tamaño se apoya en un RRHH corporativo. La propuesta no infla el área; la lleva al tamaño normal de una operación como la nuestra.</p>`;
 } catch (e) { console.warn('benchmark', e); }
 
+// ── alternativa de Gerencia: ratio de RRHH con una sola persona nueva ─────────
+try {
+  const cierre = (rotacion?.acumulado ?? []).filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
+  const plantilla = cierre?.fin;
+  if (plantilla && DOC.personasNuevasRRHHAlt != null) {
+    const conAlt = ((DOC.personasRRHH + DOC.personasNuevasRRHHAlt) / plantilla) * 100;
+    const conProp = ((DOC.personasRRHH + DOC.personasNuevasRRHH) / plantilla) * 100;
+    q('alt-ratio').innerHTML = `RRHH suma <b>una persona en vez de dos</b>: ${DOC.personasRRHH + DOC.personasNuevasRRHHAlt} personas para ${fmtNum(plantilla)} colaboradores (${conAlt.toFixed(1)} por cada 100, frente a ${conProp.toFixed(1)} con la propuesta de RRHH; el mínimo del sector es ${DOC.benchmarkRango[0]}).`;
+  }
+} catch (e) { console.warn('alternativa', e); }
+
 // ── pie ───────────────────────────────────────────────────────────────────────
 try {
   const g = new Date(meta?.generado ?? salidasTodo?.generado);

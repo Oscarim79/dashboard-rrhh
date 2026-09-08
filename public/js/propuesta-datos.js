@@ -28,6 +28,7 @@ export const DATOS = {
   documento: {
     personasRRHH: 3,                  // jefe + dos asistentes
     personasNuevasRRHH: 2,            // asistente del jefe (traslado) + segundo comodín
+    personasNuevasRRHHAlt: 1,         // alternativa de Gerencia: regresa una asistente; comodines y capacitador los pone Comercial
     tiendas: 43,
     ssoPresupuesto: 202595,           // cerrar TODOS los hallazgos de SSO, una sola vez (cotizado jun 2025)
     ssoTiendasCumplen: 0,

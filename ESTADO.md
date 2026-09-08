@@ -42,6 +42,14 @@
   (cifras vivas de clima/actitud) y una Conclusión al final que conecta cada motivo de salida con la
   propuesta que lo ataca; el cierre explica cómo se atacan los primeros seis meses y quiénes son los
   dueños. Anexos renumerados a 5 y 6.
+- **Alternativa de Gerencia (tarde, 2026-09-08):** el jefe propuso que regrese a RRHH la colaboradora
+  que ya fue asistente del área (seguimiento, entrevistas, viajes, SSO), que Comercial designe 2
+  comodines y 1 capacitador por región, y que la inducción general se automatice con IA en una web
+  controlada por esa asistente. Está en la Propuesta como bloque "Alternativa planteada por Gerencia"
+  (tabla necesidad → propuesta RRHH → alternativa, por qué conviene, qué falta definir) después de
+  la propuesta 4; `personasNuevasRRHHAlt: 1` en propuesta-datos.js alimenta el ratio. Sin nombres.
+  Pendiente de confirmar con Oscar si esa colaboradora es la misma candidata de Garantías de la
+  propuesta 1 (si lo es, la propuesta 1 y la alternativa se solapan y habría que fundirlas).
 - **Revisión final (cuadre):** los JSON cuadran entre sí y contra el sheet (474 salidas, 363
   comerciales); el costo del Resumen se reprodujo de forma independiente al quetzal (Comercial 12m
   Q10,095,505 · General 12m Q11,590,530). Indicador de rotación vs registro de salidas: coinciden
