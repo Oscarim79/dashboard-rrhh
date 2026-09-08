@@ -42,7 +42,8 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   alimenta la curva) y `salarioVendedor` Q6,500 (promedio del que sale, base de la indemnización,
   ahora en el grupo "Costo de salida"). Jefe de tienda Q8,000 y coordinadora Q4,500 (Oscar
   escribió "4500 al igual que el de 4500 y el de un jefe promedio son 8"; se interpretó como
-  vendedor nuevo / coordinadora / jefe). La curva se dejó en 3 meses.
+  vendedor nuevo / coordinadora / jefe y **Oscar lo confirmó** el mismo día). La curva se queda
+  en **3 meses** (confirmado por Oscar).
 - **Gastos de reclutamiento y contratación fijos.** Kit, polígrafo, viáticos, pauta, volanteo,
   radio, internet, contrataciones al mes y jefe de RRHH se muestran con su valor y la etiqueta
   "fijo", sin slider (`fijo: true` en CONTROLES). Restablecer no los toca porque nunca cambian.
