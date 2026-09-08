@@ -586,7 +586,7 @@ if (!sal) {
     porDepartamento: { comercial: bloqueSalidas(regsComercial) },
   };
   console.log(`Salidas: ${regs.length} en total, ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
-  if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} salidas tienen días laborados imposibles (negativos o enormes); se excluyen de la antigüedad.` });
+  if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} ${diasLabMalos === 1 ? 'salida tiene' : 'salidas tienen'} días laborados imposibles (negativos o enormes); se ${diasLabMalos === 1 ? 'excluye' : 'excluyen'} de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
   const nFut = Object.values(bajasFuturas).reduce((a, b) => a + b, 0);
   if (nFut) calidad.push({ tipo: 'aviso', n: nFut, mensaje: `${nFut} ${nFut === 1 ? 'salida tiene' : 'salidas tienen'} fecha de baja posterior a hoy (${Object.entries(bajasFuturas).map(([m, n]) => `${m}: ${n}`).join(', ')}); se cuenta igual, pero conviene corregir la fecha en el sheet.` });
