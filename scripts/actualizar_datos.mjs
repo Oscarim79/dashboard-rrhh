@@ -426,6 +426,12 @@ if (!data) {
     ...r,
     pctMes: r.inicio + r.fin > 0 ? +(r.bajas / ((r.inicio + r.fin) / 2)).toFixed(4) : null,
   })).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum || a.departamento.localeCompare(b.departamento));
+  // Un mes con altas y plantilla pero sin ninguna baja en toda la empresa casi siempre es un mes
+  // que todavía no se terminó de llenar en el sheet: se avisa para no leer ese 0 como dato.
+  const porMesTot = new Map();
+  for (const r of mensual) { const k = `${r.anio}-${String(r.mesNum).padStart(2, '0')}`; const t = porMesTot.get(k) ?? { bajas: 0, altas: 0, fin: 0 }; t.bajas += r.bajas; t.altas += r.altas; t.fin += r.fin; porMesTot.set(k, t); }
+  const mesesSinBajas = [...porMesTot.entries()].filter(([, t]) => t.bajas === 0 && (t.altas > 0 || t.fin > 0)).map(([k]) => k);
+  if (mesesSinBajas.length) calidad.push({ tipo: 'aviso', n: mesesSinBajas.length, mensaje: `El indicador de rotación mensual tiene ${mesesSinBajas.length === 1 ? 'un mes' : 'meses'} con altas y plantilla pero sin ninguna baja registrada (${mesesSinBajas.join(', ')}): probablemente aún no está lleno; en el sitio aparece con 0 bajas.` });
 }
 
 const rotacionJson = { generado: hoy.toISOString(), acumulado, mensual };

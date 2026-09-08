@@ -37,7 +37,7 @@ function pintar(depto, periodo) {
   const masVieja = abiertas.reduce((m, r) => Math.max(m, r.diasAbierta ?? 0), 0);
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><div class="kpi-valor">${fmtNum(abiertas.length)}</div><div class="kpi-eti">abiertas hoy</div></div>
-    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div><div class="kpi-nota">${fmtNum(A.diasCobertura.global.n)} cerradas con dato · ${etiP}</div></div>
+    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div><div class="kpi-nota">${A.diasCobertura.global.n === 1 ? '1 cerrada' : `${fmtNum(A.diasCobertura.global.n)} cerradas`} con dato · ${etiP}</div></div>
     <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.promedio ?? '—'} días</div><div class="kpi-eti">promedio para cerrar</div><div class="kpi-nota">${etiP}</div></div>
     <div class="kpi"><div class="kpi-valor ${masVieja > 30 ? 'rojo' : ''}">${fmtNum(masVieja)} días</div><div class="kpi-eti">la vacante abierta más antigua</div></div>`;
 

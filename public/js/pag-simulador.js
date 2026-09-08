@@ -216,7 +216,7 @@ document.getElementById('btn-reales').onclick = () => {
   const g = A.diasCobertura.global;
   if (g.mediana == null) { escenarioNota = 'No hay vacantes cerradas con dato en el período elegido: no se puede calibrar. Cambia el período arriba.'; sincronizar(); return; }
   params = { ...params, diasVacante: g.mediana };
-  escenarioNota = `Calibrado con datos reales (${etiquetaPeriodo(periodoSel, datos.vacantes.generado)}): la vacante dura ${g.mediana} días (mediana de ${g.n} vacantes cerradas). ${mezclaSalidas.pctRenuncia != null ? `La mezcla real (registro de salidas) es ${Math.round(mezclaSalidas.pctRenuncia * 100)}% renuncias / ${Math.round(mezclaSalidas.pctDespido * 100)}% despidos.` : ''}`;
+  escenarioNota = `Calibrado con datos reales (${etiquetaPeriodo(periodoSel, datos.vacantes.generado)}): la vacante dura ${g.mediana} días (mediana de ${g.n === 1 ? '1 vacante cerrada' : `${g.n} vacantes cerradas`}). ${mezclaSalidas.pctRenuncia != null ? `La mezcla real (registro de salidas) es ${Math.round(mezclaSalidas.pctRenuncia * 100)}% renuncias / ${Math.round(mezclaSalidas.pctDespido * 100)}% despidos.` : ''}`;
   sincronizar();
 };
 document.getElementById('btn-mitad').onclick = () => {

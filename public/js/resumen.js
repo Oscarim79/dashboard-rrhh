@@ -141,7 +141,7 @@ function pintar(depto, periodo) {
     const g = A.diasCobertura.global;
     if (g.mediana != null) {
       tiles.push(kpi(`${g.mediana} / ${g.promedio} días`, 'mediana / promedio para cubrir una vacante',
-        `${fmtNum(g.n)} vacantes cerradas con dato · ${etiP}`, '', 'medio'));
+        `${g.n === 1 ? '1 vacante cerrada' : `${fmtNum(g.n)} vacantes cerradas`} con dato · ${etiP}`, '', 'medio'));
     }
 
     // 6. renuncias vs despidos (registro de salidas)
