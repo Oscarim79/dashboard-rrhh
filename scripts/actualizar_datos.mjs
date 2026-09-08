@@ -447,6 +447,8 @@ if (!sal) {
     // texto libre con la razón detallada: SOLO se registra si está escrito o no (nunca el texto)
     razonLibre: colIdx(HS, 'RAZON', 'SALIDA'),
   };
+  // La misma área aparece con varias grafías en el sheet; se unifican para no contarlas aparte.
+  const AREA_ALIAS = { 'COBROS Y CREDITOS': 'CREDITOS Y COBROS', 'COBROS': 'CREDITOS Y COBROS' };
   const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
   let diasLabMalos = 0, sinRazon = 0, masDeUnAnoSinDias = 0;
   // El sheet trae un solo rango "MAS DE UN ANO" que junta de 1 a 15+ años y en la
@@ -473,7 +475,7 @@ if (!sal) {
       razon: razon ?? '(SIN RAZON)',
       sub: norm(f[IS.sub]) || '(SIN SUBMOTIVO)',
       genero: norm(f[IS.genero]) || '(SIN DATO)',
-      area: norm(f[IS.area]) || '(SIN AREA)',
+      area: AREA_ALIAS[norm(f[IS.area])] ?? (norm(f[IS.area]) || '(SIN AREA)'),
       marca: MARCA_EMPRESA[marcaCruda] ?? (String(f[IS.marca] ?? '').trim() || '(SIN MARCA)'),
       agencia: resuelto?.esTienda ? resuelto.nombre : (String(f[IS.agencia] ?? '').trim() || '(SIN AGENCIA)'),
       tipoTienda: resuelto?.esTienda ? (resuelto.tipo ?? null) : null,

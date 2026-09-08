@@ -118,7 +118,7 @@ if (!salidasTodo.total) {
 
     // ── área y marca ──
     document.getElementById('area').innerHTML = barrasH(
-      Object.entries(D.area).slice(0, 8).map(([k, v]) => ({ eti: titulo(k), valor: v, color: '#46615A' })),
+      Object.entries(D.area).map(([k, v]) => ({ eti: titulo(k), valor: v, color: '#46615A' })),
       { formato: fmtNum });
     document.getElementById('marca').innerHTML = barrasH(
       Object.entries(D.marca).map(([k, v]) => ({ eti: k, valor: v, color: '#8FA69B' })),
