@@ -48,8 +48,9 @@
   controlada por esa asistente. Está en la Propuesta como bloque "Alternativa planteada por Gerencia"
   (tabla necesidad → propuesta RRHH → alternativa, por qué conviene, qué falta definir) después de
   la propuesta 4; `personasNuevasRRHHAlt: 1` en propuesta-datos.js alimenta el ratio. Sin nombres.
-  Pendiente de confirmar con Oscar si esa colaboradora es la misma candidata de Garantías de la
-  propuesta 1 (si lo es, la propuesta 1 y la alternativa se solapan y habría que fundirlas).
+  Oscar aclaró: NO es la candidata de Garantías; es la persona que hoy es el comodín de RRHH (antes
+  fue la asistente). Por eso el bloque se llama "Alternativa 2" y `personasNuevasRRHHAlt: 0` (RRHH
+  no crece; queda en 1.1 por cada 100, debajo del mínimo 1.5, y la página lo dice).
 - **Revisión final (cuadre):** los JSON cuadran entre sí y contra el sheet (474 salidas, 363
   comerciales); el costo del Resumen se reprodujo de forma independiente al quetzal (Comercial 12m
   Q10,095,505 · General 12m Q11,590,530). Indicador de rotación vs registro de salidas: coinciden

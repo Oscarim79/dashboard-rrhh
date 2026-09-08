@@ -133,7 +133,8 @@ try {
   if (plantilla && DOC.personasNuevasRRHHAlt != null) {
     const conAlt = ((DOC.personasRRHH + DOC.personasNuevasRRHHAlt) / plantilla) * 100;
     const conProp = ((DOC.personasRRHH + DOC.personasNuevasRRHH) / plantilla) * 100;
-    q('alt-ratio').innerHTML = `RRHH suma <b>una persona en vez de dos</b>: ${DOC.personasRRHH + DOC.personasNuevasRRHHAlt} personas para ${fmtNum(plantilla)} colaboradores (${conAlt.toFixed(1)} por cada 100, frente a ${conProp.toFixed(1)} con la propuesta de RRHH; el mínimo del sector es ${DOC.benchmarkRango[0]}).`;
+    const nAlt = DOC.personasRRHH + DOC.personasNuevasRRHHAlt;
+    q('alt-ratio').innerHTML = `RRHH <b>no abre ninguna plaza nueva</b>: sigue con ${nAlt} personas para ${fmtNum(plantilla)} colaboradores (${conAlt.toFixed(1)} por cada 100, frente a ${conProp.toFixed(1)} con las propuestas 1 y 2). Ojo: queda ${conAlt < DOC.benchmarkRango[0] ? 'por debajo del' : 'en el'} mínimo del sector (${DOC.benchmarkRango[0]}); lo compensa que Comercial absorbe comodines y capacitador.`;
   }
 } catch (e) { console.warn('alternativa', e); }
 
