@@ -69,7 +69,24 @@ try {
   }
 } catch (e) { console.warn('motivos', e); }
 
-// ── 4. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────
+// ── Propuesta 4: cultura. Salidas comerciales cuyo motivo es clima laboral, mal ambiente,
+// mal trato o mala actitud (registro de salidas, cifras vivas; todo el registro y 12 meses) ──
+try {
+  const CULTURA = ['CLIMA LABORAL', 'MAL AMBIENTE', 'MAL TRATO', 'MALA ACTITUD'];
+  const cuenta = (d) => CULTURA.reduce((s, k) => s + (d?.subMotivo?.[k] ?? 0), 0);
+  if (salidas?.total?.n) {
+    const T = salidas.total, U = salidas.ult12m ?? { n: 0, subMotivo: {} };
+    const cT = cuenta(T), cU = cuenta(U);
+    const sU = (U.subMotivo?.SALARIO ?? 0) + (U.subMotivo?.['POR SALARIO'] ?? 0);
+    const vsSalario = sU ? (cU > sU ? `más que las ${fmtNum(sU)} que se fueron por salario` : `frente a ${fmtNum(sU)} que se fueron por salario`) : '';
+    q('cultura-cifras').innerHTML = `
+      <div><div class="cifra">${fmtNum(cT)} de ${fmtNum(T.n)}</div>salidas comerciales de todo el registro (${pct(cT, T.n)}%) se fueron por clima laboral, mal trato o mala actitud</div>
+      <div><div class="cifra">${fmtNum(cU)} de ${fmtNum(U.n)}</div>en los últimos 12 meses (${pct(cU, U.n)}%)${vsSalario ? `, ${vsSalario}` : ''}</div>
+      <div><div class="cifra">0</div>indicadores del área comercial miden hoy el ambiente de una tienda</div>`;
+  }
+} catch (e) { console.warn('cultura', e); }
+
+// ── 5. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────
 try {
   q('sso').innerHTML = `
     <div class="cifras3">
@@ -81,7 +98,7 @@ try {
     <p><b>La rotación borra las capacitaciones:</b> tiendas que cumplían en junio ya aparecen sin la capacitación en el seguimiento de septiembre porque la gente capacitada se fue. Ese costo de repetir capacitaciones aún no está en el modelo de costo.</p>`;
 } catch (e) { console.warn('sso', e); }
 
-// ── 5. referencia de industria (plantilla viva del indicador de rotación) ─────
+// ── 6. referencia de industria (plantilla viva del indicador de rotación) ─────
 try {
   const cierre = (rotacion?.acumulado ?? []).filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
   const plantilla = cierre?.fin;
