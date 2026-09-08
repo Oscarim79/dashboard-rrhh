@@ -86,6 +86,18 @@ try {
   }
 } catch (e) { console.warn('cultura', e); }
 
+// ── Conclusión: una sola línea con cifras vivas (Comercial, últimos 12 meses) ──
+try {
+  if (salidas?.ult12m?.n) {
+    const U = salidas.ult12m;
+    const TEMP = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES'];
+    const temp = TEMP.reduce((s, k) => s + (U.rango[k] ?? 0), 0);
+    const sal = (U.subMotivo?.SALARIO ?? 0) + (U.subMotivo?.['POR SALARIO'] ?? 0);
+    const cli = ['CLIMA LABORAL', 'MAL AMBIENTE', 'MAL TRATO', 'MALA ACTITUD'].reduce((s, k) => s + (U.subMotivo?.[k] ?? 0), 0);
+    q('conclusion-dato').innerHTML = `En los últimos 12 meses, <b>${pct(sal + cli, U.n)}%</b> de las salidas comerciales fue por salario (${pct(sal, U.n)}%) o por clima y actitud (${pct(cli, U.n)}%), y <b>${pct(temp, U.n)}%</b> ocurrió antes de los seis meses. Las propuestas se dirigen a eso:`;
+  }
+} catch (e) { console.warn('conclusion', e); }
+
 // ── 5. SSO (cifras del informe, en propuesta-datos.js → documento) ────────────
 try {
   q('sso').innerHTML = `
