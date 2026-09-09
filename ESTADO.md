@@ -75,8 +75,12 @@ pipeline lee la columna SUPERVISOR O JEFE (18 supervisores) y publica solo conte
 en la comparativa son un cambio de criterio de captura: de enero a agosto de 2025 nadie usó "salario" ni
 "clima laboral" (se usaba "descuentos", "bajo rendimiento", "mala actitud"…); desde septiembre de 2025
 casi todo es salario/clima. Las 17 salidas con motivo vago ("voluntaria"/"no confirmado") están en
-`.data/revision-motivos-2026-09-09.xlsx` (local, gitignoreado) con la nota y un sub-motivo sugerido;
-Oscar debe corregirlas en el sheet. Fila 475 del sheet tiene fecha de baja futura (17/11/2026).
+`.data/revision-motivos-2026-09-09.xlsx` (local, gitignoreado). **Hecho el mismo día:** Oscar las
+clasificó (con Claude para Chrome escribió las 17 celdas de la columna P y corrigió J475 → 17/07/2026);
+el pipeline las leyó (17/17) y el sitio se republicó con `gh workflow run actualizar.yml`. Ya no queda
+ninguna salida con motivo "voluntaria"/"no confirmado". Motivos nuevos en el registro: HIGIENE PERSONAL y
+DEUDAS. Aviso de Claude para Chrome: la validación de datos (lista) de la columna P está desactualizada
+(marca en rojo valores que sí se usan, como HORARIOS o SALARIO); es cosmético, el valor sí queda guardado.
 
 **Sin avisos de confiabilidad en el sitio (Oscar, 2026-09-09):** se quitaron la frase bajo la barra de
 período ("los datos más finos y confiables son los de los últimos 12 meses…") y el "Ojo al comparar" de
