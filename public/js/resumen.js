@@ -5,7 +5,7 @@
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -47,6 +47,24 @@ function pintar(depto, periodo) {
   document.getElementById('sub-titulo').textContent =
     `Resumen ejecutivo · ${etiquetaDepto(depto)} · ${etiP} · calibrado con los datos reales de vacantes`;
   document.getElementById('h-costo').textContent = `Costo de rotación · ${etiP}`;
+
+  // ── tarjetas por región / supervisor (Oscar, 2026-09-09) ──
+  // tarjetas para los supervisores con al menos 3 salidas; los demás se resumen en una línea
+  const todosSups = Object.entries(D.porSupervisor ?? {}).filter(([, s]) => s.n);
+  const sups = todosSups.filter(([, s]) => s.n >= 3).slice(0, 8);
+  const otrosSups = todosSups.filter(([n]) => !sups.some(([m]) => m === n));
+  const plural = (n, uno, varios) => `${fmtNum(n)} ${n === 1 ? uno : varios}`;
+  document.getElementById('h-regiones').textContent = `Por región · supervisor · ${etiP}`;
+  document.getElementById('tarjetas-sup').innerHTML = sups.length ? sups.map(([nombre, s]) => {
+    const top = Object.entries(s.motivos ?? {})[0];
+    const pTemp = s.n ? Math.round((s.tempranas / s.n) * 100) : 0;
+    return `<a class="tarjeta tarjeta-sup" href="./mapa.html#sup=${encodeURIComponent(nombre)}" style="--c:${COLOR_SUPERVISOR[nombre] ?? '#9AA5A0'}">
+      <div class="tsup-nombre"><i></i>${nombre}</div>
+      <div class="tsup-cifras"><b>${fmtNum(s.n)}</b> salidas · <b class="${pTemp >= 50 ? 'rojo' : ''}">${pTemp}%</b> antes de 6 meses</div>
+      <div class="tsup-det">${plural(s.renuncia, 'renuncia', 'renuncias')} · ${plural(s.despido, 'despido', 'despidos')}${top ? ` · motivo principal: ${aplicarDesglose({ [top[0]]: 1 }, null).items[0]?.eti ?? top[0]} (${top[1]})` : ''}</div>
+      <div class="tsup-link">Ver en el mapa →</div>
+    </a>`;
+  }).join('') + (otrosSups.length ? `<p class="sub tsup-otros">Con menos de 3 salidas en el período: ${otrosSups.map(([n, s]) => `${n} (${s.n})`).join(', ')}.</p>` : '') : '<p class="sub">Sin salidas con supervisor registrado en este período.</p>';
 
   // ── costo del período ──────────────────────────────────────────────────────
   // salidas reales del período (vacantes solicitadas en el período) × costo por salida

@@ -48,7 +48,9 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   ahora). `scripts/exportar_tiendas.mjs` genera el Excel desde el JSON.
 - `public/mapa.html`: mapa por departamentos (contornos en `public/geo/mapa-gt.json`, generados por
   `scripts/generar_mapa.mjs`) coloreado por supervisor, con un punto por tienda; el pipeline publica
-  `public/data/tiendas.json` para alimentarlo. Colores por supervisor en `COLOR` de pag-mapa.js.
+  `public/data/tiendas.json` para alimentarlo. Colores por supervisor en `COLOR_SUPERVISOR` (comun.js).
+  El mapa tiene semáforo por tienda, línea de tiempo mes a mes, comparación del supervisor con sus pares
+  y costo estimado (mismo cálculo que el Resumen). El Resumen enlaza al mapa con `mapa.html#sup=Nombre`.
 
 ## Modelo de costo — valores de control
 

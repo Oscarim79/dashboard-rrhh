@@ -418,3 +418,7 @@ export function activarDetalles() {
   });
   document.addEventListener('focusin', (e) => { if (e.target.classList?.contains('con-detalle')) mostrar(e.target); });
 }
+
+// Colores por supervisor de región (mapa y tarjetas del Resumen). Nombres tal como los publica el
+// pipeline desde la columna SUPERVISOR O JEFE. Un supervisor nuevo sin color aquí sale en gris.
+export const COLOR_SUPERVISOR = { 'Alejandro Zelada': '#0B7A55', 'Diana Mendez': '#B5741A', 'Luisa De Leon': '#46615A', 'Myra Santos': '#7B4FA6', 'Sergio Corado': '#2F6DB5' };

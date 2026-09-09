@@ -53,6 +53,20 @@
   Finanzas (minfin-bi/Mapas-TopoJSON-Guatemala; se descarga a .data/geo/). El pipeline publica
   `public/data/tiendas.json` (subconjunto público del registro) para el mapa. Enlace "Mapa" en el menú
   de todas las páginas.
+- **Extras del mapa (Oscar dijo "hazlo" a las cinco ideas, misma tarde):**
+  - *Semáforo:* botón "Color: Semáforo" pinta cada tienda verde/ámbar/rojo según sus salidas frente al
+    promedio de las tiendas de su mismo tipo en el período (≤75% verde, ≥125% rojo).
+  - *Línea de tiempo:* "▶ Reproducir mes a mes" recorre los meses con dato (0.9 s por mes) y un
+    deslizador permite pararse en un mes; "Volver al período" regresa al selector.
+  - *Comparación con pares:* la ficha del supervisor muestra, bajo cada cifra, la diferencia contra el
+    promedio de los otros supervisores de región (salidas, % renuncias en neutro, % antes de 6 meses).
+  - *Costo:* botón "Tamaño del punto: Costo estimado"; cada ficha muestra el costo = salidas × costo por
+    salida de su tipo, con el mismo cálculo del Resumen (modelo del Simulador, días reales de vacante
+    del período por tipo y mezcla renuncia/despido del período). Tienda sin tipo se asume B.
+  - *Tarjetas por región en el Resumen:* sección "Por región · supervisor" bajo las 6 cifras: una tarjeta
+    por supervisor con ≥3 salidas en el período (salidas, % antes de 6 meses, renuncias/despidos, motivo
+    principal) que enlaza a `mapa.html#sup=Nombre` (el mapa abre con ese supervisor seleccionado).
+    Colores compartidos en `COLOR_SUPERVISOR` (comun.js).
 
 ## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 

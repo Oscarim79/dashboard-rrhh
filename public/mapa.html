@@ -28,11 +28,24 @@
   <p class="alcance" id="alcance"></p>
   <p class="sub" id="periodo-eval" style="font-weight:600"></p>
 
+  <div class="tarjeta mapa-controles">
+    <div class="ctrl-grupo"><span class="ctrl-eti">Color</span>
+      <button type="button" data-modo-color="supervisor" class="primario">Por supervisor</button>
+      <button type="button" data-modo-color="semaforo">Semáforo</button></div>
+    <div class="ctrl-grupo"><span class="ctrl-eti">Tamaño del punto</span>
+      <button type="button" data-modo-tamano="salidas" class="primario">Salidas</button>
+      <button type="button" data-modo-tamano="costo">Costo estimado</button></div>
+    <div class="ctrl-grupo ctrl-anim"><span class="ctrl-eti">Línea de tiempo</span>
+      <button type="button" id="anim-play">▶ Reproducir mes a mes</button>
+      <input type="range" id="anim-mes" min="0" max="0" value="0" aria-label="Mes">
+      <span id="anim-eti" class="anim-eti"></span>
+      <button type="button" id="anim-stop" class="secundario">Volver al período</button></div>
+  </div>
   <div class="leyenda-sup" id="leyenda"></div>
 
   <div class="mapa-layout">
     <div class="tarjeta mapa-tarjeta"><div id="mapa" class="mapa-cont"></div>
-      <p class="pie">Contornos: Ministerio de Finanzas de Guatemala. Ubicación de tiendas: centro del municipio (INE), no la dirección exacta. Departamentos en gris: sin tiendas.</p>
+      <p class="pie">Semáforo: cada tienda frente al promedio de las tiendas de su tipo. Costo: modelo del Simulador. Contornos: Ministerio de Finanzas de Guatemala. Ubicación de tiendas: centro del municipio (INE), no la dirección exacta. Departamentos en gris: sin tiendas.</p>
     </div>
     <div class="tarjeta mapa-panel" id="panel"></div>
   </div>
