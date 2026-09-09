@@ -575,6 +575,25 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
    tienda Abi Q — dedazo para que Oscar corrija en el sheet (el dashboard la muestra tal cual).
    Nota: Abi Q Chiquimula tiene DOS vacantes abiertas (Jefe agencia y Asesor ventas), no es error.
 
+## Preguntas pendientes para Abi Q y Friotec (Oscar las pidió al cierre del 2026-09-09)
+
+**Abi Q — costo por salida (Simulador):** salario del vendedor nuevo (primeros meses) y del vendedor promedio
+que sale · salario del jefe de tienda · ¿hay comodín/coordinadora de RRHH que cubra sus tiendas? · meses de
+curva de aprendizaje y productividad durante la curva · gastos de reclutamiento y contratación si difieren
+(kit, polígrafo, viáticos, pauta) · % de impacto en ventas por vendedor faltante (Americana usa 15%).
+**Abi Q — tiendas:** venta mensual típica de Cayalá, Oakland, Pradera Concepción, Chiquimula y Online (para
+confirmar AA/A/B/C) · dotación típica por tienda (vendedores, jefe, asistente) · ¿Abi Q Online tiene personal
+propio? · ¿Abi Q Chiquimula comparte personal con Chiquimula Centro?
+**Abi Q — plantilla y registro:** ¿los 20 del corporativo con marca "A2K, ABIQ" van a Americana, se reparten
+o quedan aparte? · ¿qué marca llevan oficinas, CEDI y logística en ALTAS/SALIDAS/BASE (hoy AMERICANA)? ·
+¿la plantilla actual de Abi Q son de verdad 17 personas (BASE DE DATOS GENERAL)?
+**Friotec:** ¿sigue operando y con cuánta gente en Chiquimula y Puerto Barrios? (BASE: 1 activo · ALTAS: 4 ·
+SALIDAS: 2, no cuadran) · ¿su personal está con marca FRIOTEC o como AMERICANA en las pestañas? · ¿es parte
+de Comercial y tiene supervisor propio (hoy Myra y Sergio)? · ¿se mide aparte o se suma a Americana? Si
+aparte: ventas típicas y salarios.
+**Ambas:** ¿el "total empresa" del CEO debe incluir las tres marcas? · criterio único para el personal
+compartido, aplicado igual en ALTAS, SALIDAS y BASE.
+
 ## Cómo retomar
 
 Abrir `D:\Proyectos\DASHBOARD RRHH` y preguntar "¿en qué nos quedamos?". Comandos útiles:
