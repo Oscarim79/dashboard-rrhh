@@ -1,7 +1,7 @@
 {
-  "actualizado": "2026-09-03",
+  "actualizado": "2026-09-09",
   "fuente": "TIPO DE TIENDAS A Y B.xlsx (clasificación de Oscar, agosto 2026, con marcas A2K/ABIQ/FRIOTEC). Tipos por venta mensual: AA arriba de Q1M, A entre Q500k y Q1M, B entre Q300k y Q500k, C abajo de Q300k.",
-  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada).",
+  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada). 2026-09-09: se agregan supervisor (archivo AGENCIAS POR REGION de Oscar), departamento, municipio y coordenadas (centroides INE censo 2018) para el mapa; el registro maestro pasa a vivir en el Google Sheet \"Registro de tiendas\" y este archivo debe seguirlo.",
   "tiendas": [
     {
       "nombre": "Jocotán",
@@ -10,7 +10,13 @@
       "activa": true,
       "alias": [
         "JOCOTAN"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Chiquimula",
+      "municipio": "Jocotán",
+      "lat": 14.81927,
+      "lon": -89.3896,
+      "fuenteCoord": "INE censo 2018, cabecera \"Jocotan\""
     },
     {
       "nombre": "Quezaltepeque Central",
@@ -21,7 +27,13 @@
         "QUEZALTEPEQUE CENTRAL",
         "QUEZALTEPEQUE",
         "CENTRAL"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Chiquimula",
+      "municipio": "Quezaltepeque",
+      "lat": 14.63564,
+      "lon": -89.4428,
+      "fuenteCoord": "INE censo 2018, cabecera \"Quezaltepeque\""
     },
     {
       "nombre": "Gualán",
@@ -30,7 +42,13 @@
       "activa": true,
       "alias": [
         "GUALAN"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Zacapa",
+      "municipio": "Gualán",
+      "lat": 15.11328,
+      "lon": -89.36157,
+      "fuenteCoord": "INE censo 2018, cabecera \"Gualan\""
     },
     {
       "nombre": "Esquipulas",
@@ -39,7 +57,13 @@
       "activa": true,
       "alias": [
         "ESQUIPULAS"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Chiquimula",
+      "municipio": "Esquipulas",
+      "lat": 14.56557,
+      "lon": -89.35128,
+      "fuenteCoord": "INE censo 2018, cabecera \"Esquipulas\""
     },
     {
       "nombre": "Pradera Chiquimula",
@@ -49,7 +73,14 @@
       "alias": [
         "PRADERA CHIQUIMULA",
         "CHIQUIMULA PRADERA"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": "Chiquimula",
+      "municipio": "Chiquimula",
+      "lat": 14.79442,
+      "lon": -89.54527,
+      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\"",
+      "observacion": "En el archivo de regiones no aparece con este nombre; \"PRADERA 2\" (región Myra) probablemente es esta tienda. Confirmar."
     },
     {
       "nombre": "Pradera Zacapa",
@@ -58,7 +89,13 @@
       "activa": true,
       "alias": [
         "PRADERA ZACAPA"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Zacapa",
+      "municipio": "Zacapa",
+      "lat": 14.96887,
+      "lon": -89.53548,
+      "fuenteCoord": "INE censo 2018, cabecera \"Zacapa\""
     },
     {
       "nombre": "Morales Izabal",
@@ -68,7 +105,13 @@
       "alias": [
         "MORALES IZABAL",
         "MORALES"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Izabal",
+      "municipio": "Morales",
+      "lat": 15.47598,
+      "lon": -88.82624,
+      "fuenteCoord": "INE censo 2018, cabecera \"Morales\""
     },
     {
       "nombre": "Jalapa",
@@ -77,7 +120,13 @@
       "activa": true,
       "alias": [
         "JALAPA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jalapa",
+      "municipio": "Jalapa",
+      "lat": 14.63476,
+      "lon": -89.99118,
+      "fuenteCoord": "INE censo 2018, cabecera \"Jalapa\""
     },
     {
       "nombre": "Concepción Las Minas",
@@ -87,7 +136,13 @@
       "alias": [
         "CONCEPCION LAS MINAS",
         "CLM"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Chiquimula",
+      "municipio": "Concepción Las Minas",
+      "lat": 14.52175,
+      "lon": -89.45616,
+      "fuenteCoord": "INE censo 2018, cabecera \"Concepcion Las Minas\""
     },
     {
       "nombre": "Chiquimula Centro",
@@ -97,7 +152,13 @@
       "alias": [
         "CHIQUIMULA CENTRO",
         "CHIQUI CENTRO"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Chiquimula",
+      "municipio": "Chiquimula",
+      "lat": 14.79442,
+      "lon": -89.54527,
+      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
     },
     {
       "nombre": "Quezaltepeque 2",
@@ -108,7 +169,13 @@
         "QUEZALTEPEQUE 2",
         "PEQUE 2",
         "PEQUE2"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Chiquimula",
+      "municipio": "Quezaltepeque",
+      "lat": 14.63564,
+      "lon": -89.4428,
+      "fuenteCoord": "INE censo 2018, cabecera \"Quezaltepeque\""
     },
     {
       "nombre": "Pradera Escuintla",
@@ -117,7 +184,13 @@
       "activa": true,
       "alias": [
         "PRADERA ESCUINTLA"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Escuintla",
+      "municipio": "Escuintla",
+      "lat": 14.30032,
+      "lon": -90.78574,
+      "fuenteCoord": "INE censo 2018, cabecera \"Escuintla\""
     },
     {
       "nombre": "Pradera Puerto Barrios",
@@ -128,7 +201,13 @@
         "PRADERA PUERTO BARRIOS",
         "BARRIOS PRADERA",
         "PRADERA BARRIOS"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Izabal",
+      "municipio": "Puerto Barrios",
+      "lat": 15.72828,
+      "lon": -88.59282,
+      "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
     },
     {
       "nombre": "San Luis Jilotepeque",
@@ -137,7 +216,13 @@
       "activa": true,
       "alias": [
         "SAN LUIS JILOTEPEQUE"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Jalapa",
+      "municipio": "San Luis Jilotepeque",
+      "lat": 14.64462,
+      "lon": -89.72936,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Luis Jilotepeque\""
     },
     {
       "nombre": "Progreso Jutiapa",
@@ -146,7 +231,13 @@
       "activa": true,
       "alias": [
         "PROGRESO JUTIAPA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jutiapa",
+      "municipio": "El Progreso",
+      "lat": 14.35438,
+      "lon": -89.84753,
+      "fuenteCoord": "INE censo 2018, cabecera \"El Progreso\""
     },
     {
       "nombre": "San Luis Petén",
@@ -155,7 +246,13 @@
       "activa": true,
       "alias": [
         "SAN LUIS PETEN"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Petén",
+      "municipio": "San Luis",
+      "lat": 16.20028,
+      "lon": -89.44393,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Luis\""
     },
     {
       "nombre": "Guastatoya",
@@ -164,7 +261,13 @@
       "activa": true,
       "alias": [
         "GUASTATOYA"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "El Progreso",
+      "municipio": "Guastatoya",
+      "lat": 14.8533,
+      "lon": -90.06996,
+      "fuenteCoord": "INE censo 2018, cabecera \"Guastatoya\""
     },
     {
       "nombre": "Amates",
@@ -174,7 +277,13 @@
       "alias": [
         "AMATES",
         "LOS AMATES"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Izabal",
+      "municipio": "Los Amates",
+      "lat": 15.25509,
+      "lon": -89.09514,
+      "fuenteCoord": "INE censo 2018, cabecera \"Los Amates\""
     },
     {
       "nombre": "Agua Blanca",
@@ -183,7 +292,13 @@
       "activa": true,
       "alias": [
         "AGUA BLANCA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jutiapa",
+      "municipio": "Agua Blanca",
+      "lat": 14.4964,
+      "lon": -89.65649,
+      "fuenteCoord": "INE censo 2018, cabecera \"Agua Blanca\""
     },
     {
       "nombre": "Teculután",
@@ -192,7 +307,13 @@
       "activa": true,
       "alias": [
         "TECULUTAN"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Zacapa",
+      "municipio": "Teculután",
+      "lat": 14.99109,
+      "lon": -89.71912,
+      "fuenteCoord": "INE censo 2018, cabecera \"Teculutan\""
     },
     {
       "nombre": "Ipala",
@@ -201,7 +322,13 @@
       "activa": true,
       "alias": [
         "IPALA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Chiquimula",
+      "municipio": "Ipala",
+      "lat": 14.61601,
+      "lon": -89.62168,
+      "fuenteCoord": "INE censo 2018, cabecera \"Ipala\""
     },
     {
       "nombre": "Carchá",
@@ -211,7 +338,13 @@
       "alias": [
         "CARCHA",
         "SAN PEDRO CARCHA"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Alta Verapaz",
+      "municipio": "San Pedro Carchá",
+      "lat": 15.47846,
+      "lon": -90.31028,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Pedro Carcha\""
     },
     {
       "nombre": "Zacapa Centro",
@@ -221,7 +354,13 @@
       "alias": [
         "ZACAPA CENTRO",
         "ZACAPA"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Zacapa",
+      "municipio": "Zacapa",
+      "lat": 14.96887,
+      "lon": -89.53548,
+      "fuenteCoord": "INE censo 2018, cabecera \"Zacapa\""
     },
     {
       "nombre": "Tactic",
@@ -230,7 +369,13 @@
       "activa": true,
       "alias": [
         "TACTIC"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Alta Verapaz",
+      "municipio": "Tactic",
+      "lat": 15.31965,
+      "lon": -90.35261,
+      "fuenteCoord": "INE censo 2018, cabecera \"Tactic\""
     },
     {
       "nombre": "Poptún Petén",
@@ -240,7 +385,13 @@
       "alias": [
         "POPTUN PETEN",
         "POPTUN"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Petén",
+      "municipio": "Poptún",
+      "lat": 16.3362,
+      "lon": -89.43217,
+      "fuenteCoord": "INE censo 2018, cabecera \"Poptun\""
     },
     {
       "nombre": "San Benito Petén",
@@ -250,7 +401,13 @@
       "alias": [
         "SAN BENITO PETEN",
         "SAN BENITO"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Petén",
+      "municipio": "San Benito",
+      "lat": 16.92262,
+      "lon": -89.9169,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Benito\""
     },
     {
       "nombre": "Monjas Jalapa",
@@ -260,7 +417,13 @@
       "alias": [
         "MONJAS JALAPA",
         "MONJAS"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jalapa",
+      "municipio": "Monjas",
+      "lat": 14.50467,
+      "lon": -89.87319,
+      "fuenteCoord": "INE censo 2018, cabecera \"Monjas\""
     },
     {
       "nombre": "Santa Catarina Mita",
@@ -269,7 +432,14 @@
       "activa": true,
       "alias": [
         "SANTA CATARINA MITA"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": "Jutiapa",
+      "municipio": "Santa Catarina Mita",
+      "lat": 14.44862,
+      "lon": -89.74371,
+      "fuenteCoord": "INE censo 2018, cabecera \"Santa Catarina Mita\"",
+      "observacion": "No aparece en el archivo de regiones: sin supervisor asignado."
     },
     {
       "nombre": "Jutiapa",
@@ -278,7 +448,13 @@
       "activa": true,
       "alias": [
         "JUTIAPA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jutiapa",
+      "municipio": "Jutiapa",
+      "lat": 14.29255,
+      "lon": -89.89583,
+      "fuenteCoord": "INE censo 2018, cabecera \"Jutiapa\""
     },
     {
       "nombre": "Salamá",
@@ -287,7 +463,13 @@
       "activa": true,
       "alias": [
         "SALAMA"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Baja Verapaz",
+      "municipio": "Salamá",
+      "lat": 15.10078,
+      "lon": -90.31747,
+      "fuenteCoord": "INE censo 2018, cabecera \"Salama\""
     },
     {
       "nombre": "Mazatenango",
@@ -296,7 +478,13 @@
       "activa": true,
       "alias": [
         "MAZATENANGO"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Suchitepéquez",
+      "municipio": "Mazatenango",
+      "lat": 14.53252,
+      "lon": -91.50543,
+      "fuenteCoord": "INE censo 2018, cabecera \"Mazatenango\""
     },
     {
       "nombre": "Cobán",
@@ -305,7 +493,13 @@
       "activa": true,
       "alias": [
         "COBAN"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Alta Verapaz",
+      "municipio": "Cobán",
+      "lat": 15.46836,
+      "lon": -90.36909,
+      "fuenteCoord": "INE censo 2018, cabecera \"Coban\""
     },
     {
       "nombre": "Puerto Barrios Centro",
@@ -317,7 +511,13 @@
         "BARRIOS CENTRO",
         "PUERTO BARRIOS",
         "BARRIOS"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Izabal",
+      "municipio": "Puerto Barrios",
+      "lat": 15.72828,
+      "lon": -88.59282,
+      "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
     },
     {
       "nombre": "Escuintla Centro",
@@ -327,7 +527,13 @@
       "alias": [
         "ESCUINTLA CENTRO",
         "ESCUINTLA"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Escuintla",
+      "municipio": "Escuintla",
+      "lat": 14.30032,
+      "lon": -90.78574,
+      "fuenteCoord": "INE censo 2018, cabecera \"Escuintla\""
     },
     {
       "nombre": "Morazán",
@@ -336,7 +542,13 @@
       "activa": true,
       "alias": [
         "MORAZAN"
-      ]
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "El Progreso",
+      "municipio": "Morazán",
+      "lat": 14.93244,
+      "lon": -90.14555,
+      "fuenteCoord": "INE censo 2018, cabecera \"Morazan\""
     },
     {
       "nombre": "Sanarate",
@@ -345,7 +557,13 @@
       "activa": true,
       "alias": [
         "SANARATE"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "El Progreso",
+      "municipio": "Sanarate",
+      "lat": 14.78667,
+      "lon": -90.19815,
+      "fuenteCoord": "INE censo 2018, cabecera \"Sanarate\""
     },
     {
       "nombre": "Asunción Mita",
@@ -354,7 +572,13 @@
       "activa": true,
       "alias": [
         "ASUNCION MITA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jutiapa",
+      "municipio": "Asunción Mita",
+      "lat": 14.33213,
+      "lon": -89.71092,
+      "fuenteCoord": "INE censo 2018, cabecera \"Asuncion Mita\""
     },
     {
       "nombre": "San Pedro Pinula",
@@ -364,7 +588,13 @@
       "alias": [
         "SAN PEDRO PINULA",
         "PINULA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jalapa",
+      "municipio": "San Pedro Pinula",
+      "lat": 14.664,
+      "lon": -89.85564,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Pedro Pinula\""
     },
     {
       "nombre": "Chimaltenango",
@@ -373,7 +603,13 @@
       "activa": true,
       "alias": [
         "CHIMALTENANGO"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Chimaltenango",
+      "municipio": "Chimaltenango",
+      "lat": 14.66241,
+      "lon": -90.82093,
+      "fuenteCoord": "INE censo 2018, cabecera \"Chimaltenango\""
     },
     {
       "nombre": "Santa Lucía Cotzumalguapa",
@@ -383,7 +619,13 @@
       "alias": [
         "SANTA LUCIA COTZUMALGUAPA",
         "SANTA LUCIA COTZ"
-      ]
+      ],
+      "supervisor": "Alejandro Zelada",
+      "departamento": "Escuintla",
+      "municipio": "Santa Lucía Cotzumalguapa",
+      "lat": 14.32998,
+      "lon": -91.02572,
+      "fuenteCoord": "INE censo 2018, cabecera \"Santa Lucia Cotzumalguapa\""
     },
     {
       "nombre": "Jalpatagua",
@@ -392,7 +634,13 @@
       "activa": true,
       "alias": [
         "JALPATAGUA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Jutiapa",
+      "municipio": "Jalpatagua",
+      "lat": 14.13815,
+      "lon": -90.01236,
+      "fuenteCoord": "INE censo 2018, cabecera \"Jalpatagua\""
     },
     {
       "nombre": "Santa Elena Petén",
@@ -401,7 +649,14 @@
       "activa": true,
       "alias": [
         "SANTA ELENA PETEN"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Petén",
+      "municipio": "Flores",
+      "lat": 16.92929,
+      "lon": -89.89176,
+      "fuenteCoord": "INE censo 2018, cabecera \"Flores\"",
+      "observacion": "Santa Elena pertenece al municipio de Flores."
     },
     {
       "nombre": "Online",
@@ -411,7 +666,12 @@
       "alias": [
         "ONLINE",
         "VIRTUAL"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": null,
+      "municipio": null,
+      "lat": null,
+      "lon": null
     },
     {
       "nombre": "Friotec",
@@ -420,7 +680,13 @@
       "activa": true,
       "alias": [
         "FRIOTEC"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": "Chiquimula",
+      "municipio": "Chiquimula",
+      "lat": 14.79442,
+      "lon": -89.54527,
+      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
     },
     {
       "nombre": "Friotec Barrios",
@@ -429,7 +695,13 @@
       "activa": true,
       "alias": [
         "FRIOTEC BARRIOS"
-      ]
+      ],
+      "supervisor": "Sergio Corado",
+      "departamento": "Izabal",
+      "municipio": "Puerto Barrios",
+      "lat": 15.72828,
+      "lon": -88.59282,
+      "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
     },
     {
       "nombre": "Catocha",
@@ -438,7 +710,13 @@
       "activa": false,
       "alias": [
         "CATOCHA"
-      ]
+      ],
+      "supervisor": "Myra Santos",
+      "departamento": null,
+      "municipio": null,
+      "lat": null,
+      "lon": null,
+      "observacion": "Cerrada. Ubicación por confirmar (no se encontró municipio)."
     },
     {
       "nombre": "Petapa",
@@ -447,7 +725,13 @@
       "activa": false,
       "alias": [
         "PETAPA"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": "Guatemala",
+      "municipio": "San Miguel Petapa",
+      "lat": 14.49734,
+      "lon": -90.55895,
+      "fuenteCoord": "INE censo 2018, cabecera \"San Miguel Petapa\""
     },
     {
       "nombre": "Pradera 2 *",
@@ -457,7 +741,13 @@
       "alias": [
         "PRADERA 2"
       ],
-      "nota": "* No se sabe a cuál Pradera se refiere; clasificada A porque todas las Pradera son A (Oscar, 2026-09-03)."
+      "nota": "* No se sabe a cuál Pradera se refiere; clasificada A porque todas las Pradera son A (Oscar, 2026-09-03).",
+      "supervisor": "Myra Santos",
+      "departamento": null,
+      "municipio": null,
+      "lat": null,
+      "lon": null,
+      "observacion": "Nombre tal como aparece en el sheet; probablemente es la misma Pradera Chiquimula. Confirmar y unificar."
     },
     {
       "nombre": "Zona 9",
@@ -466,7 +756,13 @@
       "activa": false,
       "alias": [
         "ZONA 9"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": "Guatemala",
+      "municipio": "Guatemala",
+      "lat": 14.62219,
+      "lon": -90.50711,
+      "fuenteCoord": "INE censo 2018, promedio de 22 poblados"
     },
     {
       "nombre": "Oakland Mall",
@@ -478,7 +774,13 @@
         "OAKLAND MALL",
         "ABIQ OAKLAND",
         "ABIQ OAKLAND MALL"
-      ]
+      ],
+      "supervisor": "Diana Mendez",
+      "departamento": "Guatemala",
+      "municipio": "Guatemala",
+      "lat": 14.62219,
+      "lon": -90.50711,
+      "fuenteCoord": "INE censo 2018, promedio de 22 poblados"
     },
     {
       "nombre": "Abi Q Cayalá",
@@ -489,7 +791,13 @@
         "ABIQ CAYALA",
         "ABIQ",
         "CAYALA"
-      ]
+      ],
+      "supervisor": "Diana Mendez",
+      "departamento": "Guatemala",
+      "municipio": "Guatemala",
+      "lat": 14.62219,
+      "lon": -90.50711,
+      "fuenteCoord": "INE censo 2018, promedio de 22 poblados"
     },
     {
       "nombre": "Abi Q Chiquimula",
@@ -498,7 +806,13 @@
       "activa": true,
       "alias": [
         "ABIQ CHIQUIMULA"
-      ]
+      ],
+      "supervisor": "Diana Mendez",
+      "departamento": "Chiquimula",
+      "municipio": "Chiquimula",
+      "lat": 14.79442,
+      "lon": -89.54527,
+      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
     },
     {
       "nombre": "Abi Q Pradera Concepción",
@@ -510,7 +824,14 @@
         "PRADERA CSV",
         "ABIQ PRADERA CONCEPCION",
         "PRADERA CONCEPCION"
-      ]
+      ],
+      "supervisor": "Diana Mendez",
+      "departamento": "Guatemala",
+      "municipio": "Santa Catarina Pinula",
+      "lat": 14.57035,
+      "lon": -90.49887,
+      "fuenteCoord": "INE censo 2018, cabecera \"Santa Catarina Pinula\"",
+      "observacion": "Ubicación aproximada (centro comercial Pradera Concepción, carretera a El Salvador)."
     },
     {
       "nombre": "Abi Q Online",
@@ -519,7 +840,29 @@
       "activa": true,
       "alias": [
         "ABIQ ONLINE"
-      ]
+      ],
+      "supervisor": null,
+      "departamento": null,
+      "municipio": null,
+      "lat": null,
+      "lon": null
+    },
+    {
+      "nombre": "Santa Cruz",
+      "tipo": null,
+      "marca": "Americana",
+      "activa": true,
+      "alias": [
+        "SANTA CRUZ",
+        "SANTA CRUZ VERAPAZ"
+      ],
+      "supervisor": "Luisa De Leon",
+      "departamento": "Alta Verapaz",
+      "municipio": "Santa Cruz Verapaz",
+      "lat": 15.3736,
+      "lon": -90.43061,
+      "fuenteCoord": "INE censo 2018, cabecera \"Santa Cruz Verapaz\"",
+      "observacion": "NUEVA TIENDA APERTURA 3 DE OCTUBRE. Tipo (AA/A/B/C) por definir. Se asumió Santa Cruz Verapaz (Alta Verapaz) por la región de Luisa: confirmar."
     }
   ],
   "noTiendas": [

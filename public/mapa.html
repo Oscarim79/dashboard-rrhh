@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mapa — Dashboard RRHH Corporación Americana</title>
+<link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+<header class="cabecera">
+  <button id="btn-menu" aria-label="Abrir menú">☰</button>
+  <div class="marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+</header>
+<nav id="menu">
+  <div class="marca menu-marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
+  <a href="./index.html">Resumen</a>
+  <a href="./vacantes.html">Vacantes</a>
+  <a href="./salidas.html">Salidas</a>
+  <a href="./mapa.html">Mapa</a>
+  <a href="./rotacion.html">Rotación</a>
+  <a href="./simulador.html">Simulador</a>
+  <a href="./propuesta.html">Propuesta</a>
+</nav>
+<div id="velo"></div>
+<main>
+  <h1>Mapa de tiendas y regiones</h1>
+  <p class="sub">Cada color es un supervisor de región. Toca un departamento, una tienda o un supervisor para ver su información. El tamaño de cada punto es la cantidad de salidas de esa tienda en el período.</p>
+  <p class="alcance" id="alcance"></p>
+  <p class="sub" id="periodo-eval" style="font-weight:600"></p>
+
+  <div class="leyenda-sup" id="leyenda"></div>
+
+  <div class="mapa-layout">
+    <div class="tarjeta mapa-tarjeta"><div id="mapa" class="mapa-cont"></div>
+      <p class="pie">Contornos: Ministerio de Finanzas de Guatemala. Ubicación de tiendas: centro del municipio (INE), no la dirección exacta. Departamentos en gris: sin tiendas.</p>
+    </div>
+    <div class="tarjeta mapa-panel" id="panel"></div>
+  </div>
+</main>
+<footer></footer>
+<script type="module" src="js/pag-mapa.js"></script>
+</body>
+</html>

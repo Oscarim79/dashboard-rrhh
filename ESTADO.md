@@ -28,6 +28,32 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## ✅ HECHO 2026-09-09 (tarde): registro de tiendas en Google Sheets y página Mapa
+
+- **Registro de tiendas (maestro):** Google Sheet "Registro de tiendas — Corporación Americana" en el
+  Drive de Oscar (https://docs.google.com/spreadsheets/d/1a6psVSdytSwfIwIrYA75SDTSIa38e_rPQR6pB-Y7HnU/edit).
+  Une la clasificación AA/A/B/C (config/tiendas.json) con el archivo "AGENCIAS POR REGION.xlsx" de Oscar
+  (supervisor por tienda: Alejandro Zelada, Diana Mendez, Luisa De Leon, Myra Santos, Sergio Corado) y la
+  ubicación (departamento, municipio y centroide del municipio según el INE, censo 2018). Columnas:
+  Tienda · Marca · Tipo · Estado · Supervisor · Departamento · Municipio · Lat · Lon · Nombres en el Sheet
+  de RRHH · Observaciones. `config/tiendas.json` ahora lleva esos mismos campos por tienda y es lo que
+  usa el sitio; `node scripts/exportar_tiendas.mjs` regenera el Excel (.data/registro-tiendas.xlsx) desde
+  el JSON. **Por ahora el flujo es manual:** si Oscar cambia algo en el Sheet, hay que reflejarlo en
+  config/tiendas.json (pendiente: que el pipeline lea el Sheet de tiendas directamente).
+  Pendientes que Oscar debe confirmar en el Sheet: "Pradera 2 *" vs "Pradera Chiquimula" (parecen la misma
+  tienda; hoy "Pradera 2" cuenta con Myra y "Pradera Chiquimula" sin supervisor); Santa Catarina Mita sin
+  supervisor; Santa Cruz (tienda nueva, abre 3 de octubre, se asumió Santa Cruz Verapaz, tipo por definir);
+  Catocha (cerrada) sin ubicación; Abi Q Pradera Concepción ubicada de forma aproximada.
+- **Página Mapa (public/mapa.html, js/pag-mapa.js):** Guatemala por departamentos coloreada por el
+  supervisor con más tiendas en cada uno; un punto por tienda (tamaño = salidas en el período). Tocar un
+  departamento, una tienda o un chip de supervisor abre su ficha en el panel (supervisor: salidas,
+  renuncias, despidos, % antes de 6 meses, top 3 motivos y sus tiendas; tienda: salidas, tipo, marca,
+  ubicación). Respeta el selector de período; siempre muestra el área Comercial. Contornos:
+  `public/geo/mapa-gt.json` generado por `scripts/generar_mapa.mjs` desde el TopoJSON del Ministerio de
+  Finanzas (minfin-bi/Mapas-TopoJSON-Guatemala; se descarga a .data/geo/). El pipeline publica
+  `public/data/tiendas.json` (subconjunto público del registro) para el mapa. Enlace "Mapa" en el menú
+  de todas las páginas.
+
 ## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 
 Las dos cosas que el CEO pidió el 2026-09-08 ya están en la página **Salidas** (publicadas y verificadas en vivo):

@@ -40,6 +40,16 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    patrones de DPI de 13 dígitos y teléfonos de 8 dígitos). Si detecta algo: aborta sin publicar.
 4. Los xlsx descargados van a `.data/` (gitignoreado), nunca al repo.
 
+## Registro de tiendas y mapa (2026-09-09)
+
+- El registro maestro de tiendas es el Google Sheet "Registro de tiendas — Corporación Americana" (Drive
+  de Oscar). `config/tiendas.json` lo espeja y lleva por tienda: tipo, marca, activa, alias, supervisor,
+  departamento, municipio, lat/lon (centroide INE). Cambios del Sheet → editar el JSON (flujo manual por
+  ahora). `scripts/exportar_tiendas.mjs` genera el Excel desde el JSON.
+- `public/mapa.html`: mapa por departamentos (contornos en `public/geo/mapa-gt.json`, generados por
+  `scripts/generar_mapa.mjs`) coloreado por supervisor, con un punto por tienda; el pipeline publica
+  `public/data/tiendas.json` para alimentarlo. Colores por supervisor en `COLOR` de pag-mapa.js.
+
 ## Modelo de costo — valores de control
 
 Con los parámetros por defecto de la especificación, el simulador DEBE reproducir:

@@ -783,7 +783,14 @@ function buscarFugas(valor, ruta, hallazgos) {
     if (RE_TEL.test(valor)) hallazgos.push(`posible teléfono (8 dígitos) en ${ruta}`);
   }
 }
+// Registro de tiendas para el mapa (config/tiendas.json): solo tipo, marca, supervisor y ubicación.
+const tiendasJson = {
+  actualizado: TIENDAS_CFG.actualizado,
+  tiendas: TIENDAS_CFG.tiendas.map((t) => ({ nombre: t.nombre, tipo: t.tipo ?? null, marca: t.marca, activa: !!t.activa, supervisor: t.supervisor ?? null,
+    departamento: t.departamento ?? null, municipio: t.municipio ?? null, lat: t.lat ?? null, lon: t.lon ?? null, observacion: t.observacion ?? null })),
+};
 const hallazgos = [];
+buscarFugas(tiendasJson, 'tiendas', hallazgos);
 buscarFugas(vacantesJson, 'vacantes', hallazgos);
 buscarFugas(rotacionJson, 'rotacion', hallazgos);
 buscarFugas(metaJson, 'meta', hallazgos);
@@ -803,6 +810,7 @@ writeFileSync(path.join(outDir, 'rotacion.json'), JSON.stringify(rotacionJson));
 writeFileSync(path.join(outDir, 'salidas.json'), JSON.stringify(salidasJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'integracion.json'), JSON.stringify(integracionJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(metaJson, null, 2));
+writeFileSync(path.join(outDir, 'tiendas.json'), JSON.stringify(tiendasJson));
 if (calidad.length) {
   console.log('\nAvisos de calidad (van a meta.json; no se muestran en el sitio):');
   for (const a of calidad) console.log(`  ${a.tipo === 'error' ? '✖' : '•'} ${a.mensaje}`);
