@@ -27,6 +27,15 @@ if (!salidasTodo.total) {
   const ORDEN_RANGO = ['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES', 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES', 'DE 1 A 2 ANOS', 'DE 2 A 5 ANOS', 'MAS DE 5 ANOS', 'MAS DE UN ANO'];
   const ETI_RANGO = { 'MENOS 1 MES': 'Menos de 1 mes', 'DE 1 A 2 MESES': '1 a 2 meses', 'DE 2 A 4 MESES': '2 a 4 meses', 'DE 4 A 6 MESES': '4 a 6 meses', 'DE 6 A 8 MESES': '6 a 8 meses', 'DE 8 A 10 MESES': '8 a 10 meses', 'DE 10 A 12 MESES': '10 a 12 meses', 'DE 1 A 2 ANOS': '1 a 2 años', 'DE 2 A 5 ANOS': '2 a 5 años', 'MAS DE 5 ANOS': 'Más de 5 años', 'MAS DE UN ANO': 'Más de un año (sin detalle de años)' };
   const RANGOS_PRIMER_ANO = [...RANGOS_TEMPRANOS, 'DE 6 A 8 MESES', 'DE 8 A 10 MESES', 'DE 10 A 12 MESES'];
+  // El pipeline unifica sinónimos antes de contar (mal ambiente/mal trato → clima laboral, etc.);
+  // se dice en el pie de cada gráfica de motivos con lo que de verdad se unificó en el registro.
+  const nombreSub = (k) => (aplicarDesglose({ [k]: 1 }, null).items[0]?.eti ?? k);
+  const notaUnificados = (() => {
+    const g = Object.entries(salidasTodo.agrupacionesSubMotivo ?? {});
+    if (!g.length) return '';
+    return 'Motivos que significan lo mismo se cuentan juntos: ' + g.map(([dest, src]) =>
+      `${nombreSub(dest)} incluye lo registrado como ${Object.keys(src).map((s) => `"${s.toLowerCase()}"`).join(' y ')}`).join('; ') + '.';
+  })();
 
   function pintar(depto, periodo) {
     const salidas = salidasDe(salidasTodo, depto);
@@ -112,7 +121,7 @@ if (!salidasTodo.total) {
       { formato: fmtNum }) : '<p class="sub">Sin motivos registrados.</p>';
     document.getElementById('submotivo-nota').innerHTML = conReparto
       ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
-      : `Cada motivo por separado, tal como lo registra RRHH. ${des.notaAgrupaciones} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
+      : `Cada motivo por separado, tal como lo registra RRHH. ${notaUnificados} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
 
     // ── los que se van antes de 6 meses: POR QUÉ (pedido del CEO, 2026-09-08) ──
     // El pipeline cruza razón/sub-motivo con antigüedad menor a 6 meses (solo conteos, n≥3).
@@ -124,10 +133,10 @@ if (!salidasTodo.total) {
       ? `${fmtNum(TP.n)} de las ${fmtNum(D.n)} salidas de ${etiP} (${pctTemprano}%) fueron de personas con menos de 6 meses en la empresa: ${partesRazon.join(', ')}. Estos son sus motivos:`
       : `Sin salidas antes de 6 meses en ${etiP}.`;
     document.getElementById('tempranas').innerHTML = desT.items.length ? barrasH(
-      desT.items.slice(0, 12).map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#B5741A' })),
+      desT.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#B5741A' })),
       { formato: fmtNum }) : '';
     document.getElementById('tempranas-nota').innerHTML = TP.n
-      ? `Solo cuenta a quienes salieron con menos de 6 meses de antigüedad; los motivos son los que RRHH registró para cada salida. ${desT.notaAgrupaciones} La barra gris son salidas marcadas solo como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`
+      ? `Solo cuenta a quienes salieron con menos de 6 meses de antigüedad; los motivos son los que RRHH registró para cada salida, todos por separado, sin agrupar en "Otros". ${notaUnificados} La barra gris son salidas marcadas solo como "voluntaria", sin detalle.`
       : '';
 
     // ── agencia (top 12) ──
@@ -236,9 +245,9 @@ if (!salidasTodo.total) {
       <div class="tarjeta"><h3>Antigüedad al momento de salir</h3>${tablaComp(filasDim(A, B, A.rango, B.rango, (k) => ETI_RANGO[k] ?? titulo(k), ORDEN_RANGO), etiA, etiB)}</div>
       <div class="tarjeta"><h3>Razón de salida</h3>${tablaComp(filasDim(A, B, A.razon, B.razon), etiA, etiB)}</div>
       <div class="tarjeta"><h3>Motivos de salida</h3>${tablaComp(filasDim(A, B, aMapa(aplicarDesglose(A.subMotivo, null).items), aMapa(aplicarDesglose(B.subMotivo, null).items), (k) => k), etiA, etiB)}
-        <p class="pie">Motivos con menos de 3 casos en el tramo van en "Otros". "${SIN_DETALLE}" son renuncias sin motivo registrado.</p></div>
+        <p class="pie">Motivos con menos de 3 casos en el tramo van en "Otros". ${notaUnificados} "${SIN_DETALLE}" son renuncias sin motivo registrado.</p></div>
       <div class="tarjeta"><h3>Los que se van antes de 6 meses, ¿por qué?</h3>${tablaComp(filasDim(A.tempranas ?? { n: 0 }, B.tempranas ?? { n: 0 }, aMapa(aplicarDesglose(A.tempranas?.subMotivo, null).items), aMapa(aplicarDesglose(B.tempranas?.subMotivo, null).items), (k) => k), etiA, etiB)}
-        <p class="pie">Solo salidas con menos de 6 meses de antigüedad: ${fmtNum(A.tempranas?.n ?? 0)} en ${tramoCorto} ${a} y ${fmtNum(B.tempranas?.n ?? 0)} en ${tramoCorto} ${b}. El porcentaje es sobre ese grupo.</p></div>
+        <p class="pie">Solo salidas con menos de 6 meses de antigüedad: ${fmtNum(A.tempranas?.n ?? 0)} en ${tramoCorto} ${a} y ${fmtNum(B.tempranas?.n ?? 0)} en ${tramoCorto} ${b}. Todos los motivos por separado, sin agrupar en "Otros". El porcentaje es sobre ese grupo.</p></div>
       <div class="tarjeta"><h3>Por agencia / tienda (las 12 con más salidas)</h3>${tablaComp(filasDim(A, B, A.agencia, B.agencia, (k) => { const [n, t] = k.split('·'); return t ? `${n} (${t})` : titulo(n); }).slice(0, 12), etiA, etiB)}</div>
       ${depto === 'comercial' ? '' : `<div class="tarjeta"><h3>Por área de la empresa</h3>${tablaComp(filasDim(A, B, A.area, B.area, (k) => NOMBRE_AREA[k] ?? titulo(k)), etiA, etiB)}</div>`}
       <div class="tarjeta"><h3>Por marca</h3>${tablaComp(filasDim(A, B, A.marca, B.marca, (k) => k), etiA, etiB)}</div>

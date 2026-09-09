@@ -55,6 +55,15 @@ Las dos cosas que el CEO pidió el 2026-09-08 ya están en la página **Salidas*
    existieran, es que en la primera mitad de 2025 los motivos se capturaban distinto ("descuentos",
    "otros"); de ahí la advertencia de confiabilidad.
 
+**Ajuste de Oscar (2026-09-09, tarde):** en el cruce "antes de 6 meses" se muestran TODOS los motivos,
+sin agrupar en "Otros" (el CEO quiere ver el detalle); sigue siendo solo conteos. Además el pipeline
+unifica sinónimos antes de contar, en todas las vistas (`SUB_ALIAS`): por salario → salario; mal
+ambiente y mal trato → clima laboral; horarios extendidos → horarios; descuentos en salario →
+descuentos. Antes la regla n≥3 partía esos sinónimos (p. ej. "mal trato" con 1 caso caía en Otros en
+vez de sumar a clima laboral). Lo unificado se publica en `salidas.json → agrupacionesSubMotivo` y se
+dice en el pie de cada gráfica de motivos. La gráfica general "Motivos de salida" SÍ conserva la regla
+de 3 casos → Otros (Oscar no pidió cambiarla).
+
 Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
 último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).
 

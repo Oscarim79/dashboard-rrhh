@@ -109,6 +109,10 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   6 meses, n≥3 → OTROS) y el bloque `acumuladoAnio[año][mes]` = desglose de enero a ese mes. Los cortes
   acumulados se calculan en el pipeline (no sumando meses en el navegador) para que la regla n≥3 se
   aplique sobre el tramo completo. La comparativa vive al final de Salidas con controles propios.
+  **Excepción (Oscar, 2026-09-09):** en el cruce `tempranas` se publican TODOS los motivos (sin agrupar
+  en OTROS) porque el CEO quiere ver el detalle. Además el pipeline unifica sinónimos antes de contar
+  (`SUB_ALIAS`: por salario → salario; mal ambiente/mal trato → clima laboral; horarios extendidos →
+  horarios; descuentos en salario → descuentos) y publica lo unificado en `agrupacionesSubMotivo`.
 
 ## Reglas de trabajo
 

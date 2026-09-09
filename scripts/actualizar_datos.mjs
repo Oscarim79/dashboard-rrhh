@@ -466,6 +466,16 @@ if (!sal) {
   // La misma área aparece con varias grafías en el sheet; se unifican para no contarlas aparte.
   const AREA_ALIAS = { 'COBROS Y CREDITOS': 'CREDITOS Y COBROS', 'COBROS': 'CREDITOS Y COBROS' };
   const MARCA_EMPRESA = { ABIQ: 'Abi Q', AMERICANA: 'Americana', FRIOTEC: 'Friotec' };
+  // Sub-motivos que significan lo mismo se unifican ANTES de contar (Oscar, 2026-09-09): si no,
+  // la regla n≥3 → OTROS los partía (p. ej. "mal trato" con 1 caso se perdía en OTROS en vez de
+  // sumar a clima laboral). Lo que se unificó se publica en `agrupacionesSubMotivo` para decirlo en el sitio.
+  const SUB_ALIAS = {
+    'POR SALARIO': 'SALARIO',
+    'MAL AMBIENTE': 'CLIMA LABORAL', 'MAL TRATO': 'CLIMA LABORAL',
+    'HORARIOS EXTENDIDOS': 'HORARIOS',
+    'DESCUENTOS EN SALARIO': 'DESCUENTOS',
+  };
+  const agrupacionesSubMotivo = {};
   let diasLabMalos = 0, sinRazon = 0, masDeUnAnoSinDias = 0;
   const bajasFuturas = {}; // mes → cuántas bajas tienen fecha posterior a hoy (error de captura)
   const hoyISO = hoy.toISOString().slice(0, 10);
@@ -487,12 +497,17 @@ if (!sal) {
     const { resuelto } = resolverLugar(f[IS.agencia], MARCA_EMPRESA[marcaCruda] ?? '');
     const razon = norm(f[IS.razon]) || null;
     if (!razon) sinRazon++;
+    const subCrudo = norm(f[IS.sub]);
+    if (SUB_ALIAS[subCrudo]) {
+      agrupacionesSubMotivo[SUB_ALIAS[subCrudo]] ??= {};
+      agrupacionesSubMotivo[SUB_ALIAS[subCrudo]][subCrudo] = (agrupacionesSubMotivo[SUB_ALIAS[subCrudo]][subCrudo] ?? 0) + 1;
+    }
     let diasLab = numOnull(f[IS.diasLab]);
     if (diasLab != null && (diasLab < 0 || diasLab > 20000)) { diasLabMalos++; diasLab = null; }
     regs.push({
       ym: baja.slice(0, 7), anio: baja.slice(0, 4),
       razon: razon ?? '(SIN RAZON)',
-      sub: norm(f[IS.sub]) || '(SIN SUBMOTIVO)',
+      sub: SUB_ALIAS[subCrudo] ?? (subCrudo || '(SIN SUBMOTIVO)'),
       genero: norm(f[IS.genero]) || '(SIN DATO)',
       area: AREA_ALIAS[norm(f[IS.area])] ?? (norm(f[IS.area]) || '(SIN AREA)'),
       marca: MARCA_EMPRESA[marcaCruda] ?? (String(f[IS.marca] ?? '').trim() || '(SIN MARCA)'),
@@ -531,15 +546,17 @@ if (!sal) {
     return c;
   };
   // Pedido del CEO (2026-09-08): POR QUÉ se van los que salen antes de los 6 meses. Cruce
-  // razón/sub-motivo × antigüedad temprana, solo conteos con la misma regla n≥3 → OTROS.
+  // razón/sub-motivo × antigüedad temprana, solo conteos. Decisión de Oscar (2026-09-09): en este
+  // cruce se publican TODOS los motivos (sin agrupar en OTROS) porque el CEO quiere ver el detalle;
+  // siguen siendo conteos sin nombres ni supervisores.
   const RANGOS_TEMPRANOS = new Set(['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES']);
   const tempranas = (arr) => {
     const t = arr.filter((r) => RANGOS_TEMPRANOS.has(r.rango));
     return {
       n: t.length,
-      razon: cuenta(t, (r) => r.razon, 3),
-      subMotivo: cuenta(t, (r) => r.sub, 3),
-      subMotivoRenuncias: cuenta(t.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub, 3),
+      razon: cuenta(t, (r) => r.razon),
+      subMotivo: cuenta(t, (r) => r.sub),
+      subMotivoRenuncias: cuenta(t.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub),
       rango: cuenta(t, (r) => r.rango),
     };
   };
@@ -605,6 +622,8 @@ if (!sal) {
   const regsComercial = regs.filter((r) => r.area === 'COMERCIAL');
   salidasJson = {
     generado: hoy.toISOString(),
+    // qué etiquetas del registro se unificaron bajo cada motivo (solo etiquetas y conteos)
+    agrupacionesSubMotivo,
     ...bloqueSalidas(regs),
     // Selector General / Comercial del sitio: mismo desglose, solo el área COMERCIAL
     // (columna AREA LAB de la pestaña).
