@@ -44,6 +44,13 @@
   tienda; hoy "Pradera 2" cuenta con Myra y "Pradera Chiquimula" sin supervisor); Santa Catarina Mita sin
   supervisor; Santa Cruz (tienda nueva, abre 3 de octubre, se asumió Santa Cruz Verapaz, tipo por definir);
   Catocha (cerrada) sin ubicación; Abi Q Pradera Concepción ubicada de forma aproximada.
+  **Resuelto por Oscar en el Sheet (2026-09-09, noche) y aplicado a config/tiendas.json:** Pradera 2 = Pradera
+  Chiquimula (región Myra; alias PRADERA 2 unificado, sus 4 salidas ya cuentan ahí); Catocha = Santa Catarina
+  Mita (nombre popular; activa, tipo C, región Myra, alias CATOCHA, 8 salidas); Abi Q Online → Diana Mendez;
+  Online → "Online Americana" (Luisa De Leon). Además alias SANTA ELENA para Santa Elena Petén (una vacante
+  quedaba sin clasificar). Ya no hay tiendas activas sin supervisor. Quedan 53 tiendas. En el Sheet siguen dos
+  observaciones viejas (en Pradera Chiquimula y Santa Catarina Mita) que Oscar puede borrar; el Sheet ya no
+  trae columnas de latitud/longitud (las coordenadas viven en config/tiendas.json).
 - **Página Mapa (public/mapa.html, js/pag-mapa.js):** Guatemala por departamentos coloreada por el
   supervisor con más tiendas en cada uno; un punto por tienda (tamaño = salidas en el período). Tocar un
   departamento, una tienda o un chip de supervisor abre su ficha en el panel (supervisor: salidas,

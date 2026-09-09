@@ -1,7 +1,7 @@
 {
   "actualizado": "2026-09-09",
   "fuente": "TIPO DE TIENDAS A Y B.xlsx (clasificación de Oscar, agosto 2026, con marcas A2K/ABIQ/FRIOTEC). Tipos por venta mensual: AA arriba de Q1M, A entre Q500k y Q1M, B entre Q300k y Q500k, C abajo de Q300k.",
-  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada). 2026-09-09: se agregan supervisor (archivo AGENCIAS POR REGION de Oscar), departamento, municipio y coordenadas (centroides INE censo 2018) para el mapa; el registro maestro pasa a vivir en el Google Sheet \"Registro de tiendas\" y este archivo debe seguirlo.",
+  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada). 2026-09-09: se agregan supervisor (archivo AGENCIAS POR REGION de Oscar), departamento, municipio y coordenadas (centroides INE censo 2018) para el mapa; el registro maestro pasa a vivir en el Google Sheet \"Registro de tiendas\" y este archivo debe seguirlo. Afinado por Oscar en el Sheet el 2026-09-09: Pradera 2 = Pradera Chiquimula (Myra); Catocha = Santa Catarina Mita (activa, tipo C, Myra); Abi Q Online → Diana; Online → \"Online Americana\" (Luisa).",
   "tiendas": [
     {
       "nombre": "Jocotán",
@@ -72,15 +72,15 @@
       "activa": true,
       "alias": [
         "PRADERA CHIQUIMULA",
-        "CHIQUIMULA PRADERA"
+        "CHIQUIMULA PRADERA",
+        "PRADERA 2"
       ],
-      "supervisor": null,
+      "supervisor": "Myra Santos",
       "departamento": "Chiquimula",
       "municipio": "Chiquimula",
       "lat": 14.79442,
       "lon": -89.54527,
-      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\"",
-      "observacion": "En el archivo de regiones no aparece con este nombre; \"PRADERA 2\" (región Myra) probablemente es esta tienda. Confirmar."
+      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
     },
     {
       "nombre": "Pradera Zacapa",
@@ -427,19 +427,20 @@
     },
     {
       "nombre": "Santa Catarina Mita",
-      "tipo": "B",
+      "tipo": "C",
       "marca": "Americana",
       "activa": true,
       "alias": [
-        "SANTA CATARINA MITA"
+        "SANTA CATARINA MITA",
+        "CATOCHA"
       ],
-      "supervisor": null,
+      "supervisor": "Myra Santos",
       "departamento": "Jutiapa",
       "municipio": "Santa Catarina Mita",
       "lat": 14.44862,
       "lon": -89.74371,
       "fuenteCoord": "INE censo 2018, cabecera \"Santa Catarina Mita\"",
-      "observacion": "No aparece en el archivo de regiones: sin supervisor asignado."
+      "observacion": "En el registro de RRHH aparece como \"Catocha\" (nombre popular de Santa Catarina Mita). Unificada por Oscar el 2026-09-09."
     },
     {
       "nombre": "Jutiapa",
@@ -648,7 +649,8 @@
       "marca": "Americana",
       "activa": true,
       "alias": [
-        "SANTA ELENA PETEN"
+        "SANTA ELENA PETEN",
+        "SANTA ELENA"
       ],
       "supervisor": "Sergio Corado",
       "departamento": "Petén",
@@ -659,7 +661,7 @@
       "observacion": "Santa Elena pertenece al municipio de Flores."
     },
     {
-      "nombre": "Online",
+      "nombre": "Online Americana",
       "tipo": "C",
       "marca": "Americana",
       "activa": true,
@@ -667,7 +669,7 @@
         "ONLINE",
         "VIRTUAL"
       ],
-      "supervisor": null,
+      "supervisor": "Luisa De Leon",
       "departamento": null,
       "municipio": null,
       "lat": null,
@@ -704,21 +706,6 @@
       "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
     },
     {
-      "nombre": "Catocha",
-      "tipo": "C",
-      "marca": "Americana",
-      "activa": false,
-      "alias": [
-        "CATOCHA"
-      ],
-      "supervisor": "Myra Santos",
-      "departamento": null,
-      "municipio": null,
-      "lat": null,
-      "lon": null,
-      "observacion": "Cerrada. Ubicación por confirmar (no se encontró municipio)."
-    },
-    {
       "nombre": "Petapa",
       "tipo": "C",
       "marca": "Americana",
@@ -732,22 +719,6 @@
       "lat": 14.49734,
       "lon": -90.55895,
       "fuenteCoord": "INE censo 2018, cabecera \"San Miguel Petapa\""
-    },
-    {
-      "nombre": "Pradera 2 *",
-      "tipo": "A",
-      "marca": "Americana",
-      "activa": true,
-      "alias": [
-        "PRADERA 2"
-      ],
-      "nota": "* No se sabe a cuál Pradera se refiere; clasificada A porque todas las Pradera son A (Oscar, 2026-09-03).",
-      "supervisor": "Myra Santos",
-      "departamento": null,
-      "municipio": null,
-      "lat": null,
-      "lon": null,
-      "observacion": "Nombre tal como aparece en el sheet; probablemente es la misma Pradera Chiquimula. Confirmar y unificar."
     },
     {
       "nombre": "Zona 9",
@@ -841,7 +812,7 @@
       "alias": [
         "ABIQ ONLINE"
       ],
-      "supervisor": null,
+      "supervisor": "Diana Mendez",
       "departamento": null,
       "municipio": null,
       "lat": null,
