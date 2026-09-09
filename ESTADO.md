@@ -82,8 +82,16 @@
   controles. Con una marca elegida, el mapa solo dibuja sus tiendas y TODAS las cifras (chips, tabla general,
   fichas de supervisor y departamento, semáforo, motivos, costo) se recalculan sumando `porAgencia` de esas
   tiendas (sin filtro, el supervisor usa la columna supervisor del registro). Razón de Oscar: Abi Q y Friotec
-  son otros negocios y sus costos y motivos no deben mezclarse con Americana. Pendiente si lo quiere: llevar
-  el filtro por marca a Salidas y Resumen (requiere que el pipeline publique bloques por marca).
+  son otros negocios y sus costos y motivos no deben mezclarse con Americana.
+- **Filtro por marca en TODO el sitio (Oscar, 2026-09-09, noche):** el pipeline publica
+  `salidas.json → porMarca.{americana,abiq,friotec}` (bloque completo por marca; el JSON quedó en ~810 KB) y
+  la barra de período de todas las páginas lleva un desplegable "Marca: todas / Americana / Abi Q / Friotec"
+  (se recuerda en localStorage `dashboard-rrhh:marca`, admite `?marca=`). Con una marca elegida:
+  `salidasDe` devuelve el bloque de la marca y `vacantesDe` filtra las filas por empresa; el selector
+  General/Comercial deja de aplicar (la nota de alcance lo dice) y las etiquetas dicen "marca X". Rotación
+  no distingue marca (muestra el área completa y lo avisa); en el Resumen la cifra "% de la plantilla" se
+  sustituye por el conteo (no hay plantilla por marca). La Propuesta no lleva el filtro (Comercial completo).
+  Los botones de marca del Mapa quedan ligados al mismo filtro global.
 
 ## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 

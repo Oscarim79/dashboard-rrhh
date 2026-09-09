@@ -5,7 +5,7 @@
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -123,7 +123,10 @@ function pintar(depto, periodo) {
       .filter((r) => r.area === areaRot && r.fin != null && (!hastaYm || `${r.anio}-${String(r.mesNum).padStart(2, '0')}` <= hastaYm))
       .sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
     const salidas12 = salidasCosteadas + salidasSinTipo + salidasNoTienda;
-    if (cierre && cierre.fin > 0 && salidas12 > 0) {
+    if (marcaActual() !== 'todas') {
+      // con una marca elegida no se conoce su plantilla (el indicador de rotación no distingue marca): solo el conteo
+      if (salidas12 > 0) tiles.push(kpi(fmtNum(salidas12), `renuncias y despidos en ${etiquetaMarca()} · ${etiP}`, 'sin % de plantilla: el indicador de rotación mensual no distingue marca'));
+    } else if (cierre && cierre.fin > 0 && salidas12 > 0) {
       const pct = Math.round((salidas12 / cierre.fin) * 100);
       tiles.push(kpi(`${pct}%`, `de la plantilla ${esCom ? 'comercial' : 'de toda la empresa'} se reemplazó · ${etiP}`,
         `${fmtNum(salidas12)} renuncias y despidos (registro de salidas) · ${fmtNum(cierre.fin)} colaboradores al cierre de ${MES_CORTO[cierre.mesNum - 1]} ${cierre.anio}`,

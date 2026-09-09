@@ -4,7 +4,7 @@
 // Selector de período: los KPI se leen al último mes del período; las gráficas
 // muestran los meses del período (un mes concreto se muestra con su año de contexto).
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, notaAlcance,
-  pintarSelectorPeriodo, etiquetaPeriodo, rangoPeriodo, mesesDelPeriodo, aniosYMeses, MES_CORTO, fmtYm } from './comun.js';
+  pintarSelectorPeriodo, etiquetaPeriodo, rangoPeriodo, mesesDelPeriodo, aniosYMeses, MES_CORTO, fmtYm, marcaActual, etiquetaMarca } from './comun.js';
 import { barrasH, columnas, lineas, leyenda } from './graficas.js';
 import { fmtPct } from './modelo.js';
 
@@ -27,7 +27,9 @@ function pintar(depto, periodo) {
   const rango = rangoPeriodo(periodo, generado);
   const desdeYm = rango.desde ? rango.desde.slice(0, 7) : null, hastaYm = rango.hasta ? rango.hasta.slice(0, 7) : null;
   const enRango = (r) => (!desdeYm || ymDe(r) >= desdeYm) && (!hastaYm || ymDe(r) <= hastaYm);
-  document.getElementById('alcance').innerHTML = notaAlcance(depto);
+  document.getElementById('alcance').innerHTML = marcaActual() !== 'todas'
+    ? `El indicador de rotación mensual no distingue marca: aquí se muestra ${esCom ? 'el área comercial' : 'toda la empresa'} completa, no solo ${etiquetaMarca()}.`
+    : notaAlcance(depto);
 
   // ── KPIs: al último mes con dato dentro del período ──────────────────────
   const enPeriodo = serie.filter(enRango).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum);

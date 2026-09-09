@@ -670,6 +670,10 @@ if (!sal) {
   };
   const hoyYm = hoyISO.slice(0, 7);
   const regsComercial = regs.filter((r) => r.area === 'COMERCIAL');
+  // Filtro por marca en todo el sitio (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios y no
+  // deben mezclarse con Americana. Un bloque completo por marca (columna MARCA de la pestaña).
+  const CLAVE_MARCA = { Americana: 'americana', 'Abi Q': 'abiq', Friotec: 'friotec' };
+  const porMarca = Object.fromEntries(Object.entries(CLAVE_MARCA).map(([eti, clave]) => [clave, bloqueSalidas(regs.filter((r) => r.marca === eti))]));
   salidasJson = {
     generado: hoy.toISOString(),
     // qué etiquetas del registro se unificaron bajo cada motivo (solo etiquetas y conteos)
@@ -678,6 +682,7 @@ if (!sal) {
     // Selector General / Comercial del sitio: mismo desglose, solo el área COMERCIAL
     // (columna AREA LAB de la pestaña).
     porDepartamento: { comercial: bloqueSalidas(regsComercial) },
+    porMarca,
   };
   console.log(`Salidas: ${regs.length} en total, ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} ${diasLabMalos === 1 ? 'salida tiene' : 'salidas tienen'} días laborados imposibles (negativos o enormes); se ${diasLabMalos === 1 ? 'excluye' : 'excluyen'} de la antigüedad.` });

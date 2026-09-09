@@ -70,8 +70,9 @@ export function departamentoActual() {
   return 'comercial';
 }
 
-export const etiquetaDepto = (d) => (d === 'comercial' ? 'departamento Comercial' : 'toda la empresa');
-export const etiquetaDeptoCorta = (d) => (d === 'comercial' ? 'Comercial' : 'General');
+// Con una marca elegida (ver marcaActual más abajo), la etiqueta del alcance es la marca.
+export const etiquetaDepto = (d) => (marcaActual() !== 'todas' ? `marca ${MARCAS[marcaActual()]}` : d === 'comercial' ? 'departamento Comercial' : 'toda la empresa');
+export const etiquetaDeptoCorta = (d) => (marcaActual() !== 'todas' ? MARCAS[marcaActual()] : d === 'comercial' ? 'Comercial' : 'General');
 
 // Pinta el selector en la cabecera (móvil) y en el menú lateral (escritorio) y
 // llama a onCambio(depto) cada vez que el usuario cambia la opción.
@@ -101,17 +102,49 @@ export function pintarSelectorDepto(onCambio) {
   return actual;
 }
 
+// ── Filtro global por marca (Oscar, 2026-09-09) ──────────────────────────────
+// Abi Q y Friotec son otros negocios: sus costos y motivos no deben mezclarse con Americana.
+// Se recuerda en el navegador y admite ?marca=americana|abiq|friotec|todas en la URL. Cuando hay
+// una marca elegida, salidas y vacantes se filtran por ella (y el alcance General/Comercial deja de
+// importar: casi todo lo de una marca es de tiendas, es decir, Comercial).
+export const MARCAS = { todas: 'Todas las marcas', americana: 'Americana', abiq: 'Abi Q', friotec: 'Friotec' };
+const CLAVE_MARCA = 'dashboard-rrhh:marca';
+export function marcaActual() {
+  try {
+    const url = new URLSearchParams(location.search).get('marca');
+    if (url && url in MARCAS) { localStorage.setItem(CLAVE_MARCA, url); return url; }
+    const v = localStorage.getItem(CLAVE_MARCA);
+    if (v && v in MARCAS) return v;
+  } catch { /* sin almacenamiento */ }
+  return 'todas';
+}
+export function guardarMarca(m) {
+  try { localStorage.setItem(CLAVE_MARCA, m in MARCAS ? m : 'todas'); } catch { /* sin almacenamiento */ }
+  document.querySelectorAll('.sel-marca').forEach((s) => { s.value = m; s.classList.toggle('primario', m !== 'todas'); });
+}
+export const etiquetaMarca = (m = marcaActual()) => MARCAS[m] ?? MARCAS.todas;
+
 // Vista de vacantes.json según el departamento elegido: mismas claves, distinto alcance.
 // Si el JSON es viejo y no trae el desglose, se muestra General y se avisa en consola.
+// Con una marca elegida, se filtran las filas por la empresa/marca de la vacante (las páginas
+// re-agregan en el navegador con agregarVacantes).
 export function vacantesDe(vacantes, depto) {
+  const marca = marcaActual();
+  if (marca !== 'todas') return { ...vacantes, filas: vacantes.filas.filter((r) => (r.empresa ?? r.marca) === MARCAS[marca]) };
   if (depto !== 'comercial') return vacantes;
   const agg = vacantes.porDepartamento?.comercial;
   if (!agg) { console.warn('vacantes.json sin desglose por departamento; se muestra General'); return vacantes; }
   return { ...vacantes, agregados: agg, filas: vacantes.filas.filter((r) => r.departamento === 'COMERCIAL') };
 }
 
-// Idem para salidas.json (total, ult12m, porMes, porAnio, captura).
+// Idem para salidas.json (total, ult12m, porMes, porAnio, captura). Con marca: bloque porMarca.
 export function salidasDe(salidas, depto) {
+  const marca = marcaActual();
+  if (marca !== 'todas') {
+    const m = salidas?.porMarca?.[marca];
+    if (m) return { ...salidas, ...m };
+    console.warn('salidas.json sin bloque por marca; se ignora el filtro de marca');
+  }
   if (depto !== 'comercial') return salidas;
   const s = salidas?.porDepartamento?.comercial;
   if (!s) { console.warn('salidas.json sin desglose por departamento; se muestra General'); return salidas; }
@@ -120,6 +153,8 @@ export function salidasDe(salidas, depto) {
 
 // Pie de datos: recuerda al lector qué alcance está viendo.
 export function notaAlcance(depto) {
+  const marca = marcaActual();
+  if (marca !== 'todas') return `Viendo solo la marca <b>${MARCAS[marca]}</b> (todas sus tiendas y puestos). Con una marca elegida, el selector General/Comercial no aplica. Cambia a "Todas las marcas" en la barra de período para ver el conjunto.`;
   return depto === 'comercial'
     ? 'Viendo solo el <b>departamento Comercial</b> (tiendas). Cambia a "General" arriba para ver toda la empresa.'
     : 'Viendo <b>toda la empresa</b>. Cambia a "Comercial" arriba para ver solo el departamento comercial.';
@@ -179,7 +214,7 @@ export function mesesDelPeriodo(p, mesesDisponibles, generado) {
 // Opciones extra: `contenedor` (elemento donde pintar la barra, en vez de bajo la nota de
 // alcance) y `guardar: false` (barra local: no lee ni escribe la memoria global; arranca en
 // `inicial`, por defecto 'todo').
-export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = null, guardar = true, inicial = 'todo', notaRegistro = null }, onCambio) {
+export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = null, guardar = true, inicial = 'todo', notaRegistro = null, marca = true }, onCambio) {
   let actual = guardar ? periodoActual() : inicial;
   const anioActual = anioDe(generado);
   // Desde cuándo hay datos (pregunta que le hicieron a Oscar, 2026-09-08): se muestra bajo la barra.
@@ -202,6 +237,9 @@ export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = nul
       <option value="">Un mes…</option>
       ${mesesOrd.map((ym) => `<option value="m:${ym}" ${`m:${ym}` === actual ? 'selected' : ''}>${fmtYm(ym)}</option>`).join('')}
     </select>
+    ${marca ? `<select class="sel-marca ${marcaActual() !== 'todas' ? 'primario' : ''}" aria-label="Marca">
+      ${Object.entries(MARCAS).map(([k, eti]) => `<option value="${k}" ${k === marcaActual() ? 'selected' : ''}>${k === 'todas' ? 'Marca: todas' : eti}</option>`).join('')}
+    </select>` : ''}
     ${nota ? `<span class="barra-periodo-nota">${nota}</span>` : ''}
   </div>`;
   let barra;
@@ -226,6 +264,9 @@ export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = nul
   };
   barra.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => elegir(b.dataset.periodo)));
   barra.querySelector('.sel-mes').addEventListener('change', (e) => { if (e.target.value) elegir(e.target.value); });
+  // marca: se guarda globalmente y se vuelve a pintar la página con el período actual
+  barra.querySelector('.sel-marca')?.addEventListener('change', (e) => { guardarMarca(e.target.value); onCambio?.(actualPeriodo()); });
+  const actualPeriodo = () => barra.querySelector('button.primario')?.dataset.periodo ?? barra.querySelector('.sel-mes').value ?? actual;
   marcar(actual);
   return actual;
 }

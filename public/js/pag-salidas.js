@@ -285,7 +285,7 @@ if (!salidasTodo.total) {
 
   let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); });
   let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado },
-    (p) => { periodo = p; pintar(depto, periodo); });
+    (p) => { periodo = p; pintar(depto, periodo); pintarComparativa(depto); }); // también al cambiar la marca
   pintar(depto, periodo);
   pintarComparativa(depto);
   activarDetalles();

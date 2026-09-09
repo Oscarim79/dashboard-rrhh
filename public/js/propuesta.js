@@ -19,7 +19,8 @@ if (solo === 'capacitador') document.body.classList.add('solo-capacitador');
 // ── datos vivos del tablero ───────────────────────────────────────────────────
 const carga = (f) => fetch(`data/${f}`, { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const [salidasTodo, rotacion, meta] = await Promise.all([carga('salidas.json'), carga('rotacion.json'), carga('meta.json')]);
-const salidas = salidasTodo ? salidasDe(salidasTodo, 'comercial') : null;
+// La propuesta es del Comercial completo: no aplica el filtro global de marca.
+const salidas = salidasTodo ? { ...salidasTodo, ...(salidasTodo.porDepartamento?.comercial ?? {}) } : null;
 const DOC = DATOS.documento;
 
 // ── 1.3 permanencia (Comercial, cifras vivas) ─────────────────────────────────
@@ -63,7 +64,7 @@ try {
   };
   if (salidas?.total) {
     const inicial = pintarSelectorPeriodo(
-      { ...aniosYMeses({ salidas }), generado: salidas.generado, contenedor: q('razones-periodo'), guardar: false, inicial: 'todo' },
+      { ...aniosYMeses({ salidas }), generado: salidas.generado, contenedor: q('razones-periodo'), guardar: false, inicial: 'todo', marca: false },
       pintarRazones);
     pintarRazones(inicial);
   }

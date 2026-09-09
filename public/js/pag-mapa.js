@@ -7,7 +7,7 @@
 // mes, comparación del supervisor con sus pares, costo estimado, zoom y arrastre del mapa.
 import { pintarPie, marcarNavActiva, fmtNum, salidasDe, vacantesDe, pintarSelectorDepto, pintarSelectorPeriodo,
   dimsSalidas, etiquetaPeriodo, aniosYMeses, aplicarDesglose, fmtYm, fmtYmCorto, COLOR_SUPERVISOR,
-  vacantesEnPeriodo, agregarVacantes, diasCalibrados } from './comun.js';
+  vacantesEnPeriodo, agregarVacantes, diasCalibrados, MARCAS as MARCAS_GLOBAL, marcaActual, guardarMarca } from './comun.js';
 import { costoMezcla, VENTAS_TIPO, PARAMS_DEFECTO, fmtQ } from './modelo.js';
 
 marcarNavActiva();
@@ -42,7 +42,9 @@ const ubicadasTodas = todasTiendas.filter((t) => t.lat != null);
 const MARCAS = [...new Set(todasTiendas.map((t) => t.marca).filter(Boolean))].sort();
 // Filtro por marca (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios; sus costos y motivos
 // no se mezclan con Americana. 'todas' = sin filtro. Las listas de abajo se recalculan al filtrar.
-let marca = 'todas';
+// Ligado al filtro global del sitio (comun.js): aquí se guarda por su etiqueta ('Abi Q'), allá por clave ('abiq').
+const claveMarca = (eti) => Object.entries(MARCAS_GLOBAL).find(([, e]) => e === eti)?.[0] ?? 'todas';
+let marca = MARCAS_GLOBAL[marcaActual()] && marcaActual() !== 'todas' ? MARCAS_GLOBAL[marcaActual()] : 'todas';
 let tiendas = todasTiendas, ubicadas = ubicadasTodas, porDepto = {}, supervisores = [];
 function aplicarFiltroMarca() {
   tiendas = marca === 'todas' ? todasTiendas : todasTiendas.filter((t) => t.marca === marca);
@@ -75,7 +77,7 @@ let vista = { ...VISTA_INICIAL };
 const zoomActual = () => VISTA_INICIAL.w / vista.w;
 
 // ── estado ──
-const salidas = salidasDe(salidasTodo, 'comercial');
+let salidas = salidasDe(salidasTodo, 'comercial'); // se recalcula al cambiar la marca (bloque porMarca)
 const hoyYm = salidas.generado.slice(0, 7);
 const mesesConDato = Object.keys(salidas.porMes ?? {}).filter((ym) => ym <= hoyYm).sort();
 let periodo = 'todo';           // selector global
@@ -370,6 +372,7 @@ function seleccionar(sel) {
 }
 function refrescar() {
   aplicarFiltroMarca();
+  salidas = salidasDe(salidasTodo, 'comercial');
   if (seleccion?.tipo === 'tienda' && !tiendas.some((t) => t.nombre === seleccion.clave)) seleccion = null;
   if (seleccion?.tipo === 'sup' && seleccion.clave && !supervisores.includes(seleccion.clave)) seleccion = null;
   D = dimsSalidas(salidas, periodoVigente());
@@ -409,7 +412,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#panel-cerrar')) return seleccionar(null);
   const mc = e.target.closest('[data-modo-color]'); if (mc) { modoColor = mc.dataset.modoColor; if (modoColor === 'semaforo' && seleccion?.tipo === 'sup') seleccion = null; return refrescar(); }
   const mt = e.target.closest('[data-modo-tamano]'); if (mt) { modoTamano = mt.dataset.modoTamano; return refrescar(); }
-  const mm = e.target.closest('[data-marca]'); if (mm) { marca = mm.dataset.marca; return refrescar(); }
+  const mm = e.target.closest('[data-marca]'); if (mm) { marca = mm.dataset.marca; guardarMarca(claveMarca(marca)); return refrescar(); }
   if (e.target.closest('#anim-play')) return anim.timer ? detenerAnim(false) : iniciarAnim();
   if (e.target.closest('#anim-stop')) return detenerAnim(true);
   if (e.target.closest('#zoom-mas')) return zoom(1.5);
@@ -423,7 +426,7 @@ document.getElementById('anim-mes').addEventListener('input', (e) => {
   refrescar();
 });
 
-periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado }, (p) => { periodo = p; if (anim.activa) detenerAnim(true); else refrescar(); });
+periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado, marca: false }, (p) => { periodo = p; if (anim.activa) detenerAnim(true); else refrescar(); });
 // #sup=Nombre (desde las tarjetas del Resumen) preselecciona un supervisor. Va en el # y no en ?
 // porque algunos servidores recortan la parte "?" al redirigir.
 const supUrl = new URLSearchParams(location.hash.replace(/^#/, '')).get('sup') ?? new URLSearchParams(location.search).get('sup');

@@ -373,3 +373,6 @@ button.secundario { background: none; border-color: transparent; color: var(--ti
 .mot em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
 .mot em small { font-weight: 400; color: var(--tinta-suave); margin-left: 4px; font-size: 12px; }
 @media (max-width: 899px) { .mapa-panel { font-size: 16px; } .mot { font-size: 15.5px; } .mapa-panel .tabla-mapa td, .mapa-panel .tabla-mapa th { font-size: 15px; } }
+
+.barra-periodo .sel-marca { margin-left: auto; }
+.barra-periodo .sel-marca.primario { background: var(--ambar); border-color: var(--ambar); color: #fff; font-weight: 600; }
