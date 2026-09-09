@@ -314,7 +314,7 @@ export function aniosYMeses({ vacantes, salidas, rotacion } = {}) {
 
 // Desglose de salidas.json para un período (ya con el alcance General/Comercial aplicado).
 const DIMS_VACIAS = () => ({ n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, genero: {}, area: {}, marca: {}, agencia: {}, rango: {}, diasLab: { n: 0, mediana: null, promedio: null },
-  tempranas: { n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, rango: {} } });
+  tempranas: { n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, rango: {} }, porSupervisor: {} });
 export const DIMS_SALIDAS_VACIAS = DIMS_VACIAS;
 export function dimsSalidas(salidas, p) {
   if (!salidas?.total) return DIMS_VACIAS();

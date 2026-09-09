@@ -28,7 +28,11 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    La pestaña ALTAS y la BASE DE DATOS GENERAL se ignoran por completo. Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
    (razón, sub-motivo, género, área, marca, agencia, rangos de antigüedad) — jamás filas
-   individuales, y nunca el desglose por supervisor (el sitio es público).
+   individuales. **Cambio (Oscar, 2026-09-09, pedido del CEO):** el desglose de salidas **por supervisor
+   o jefe, con nombre**, SÍ se publica (`porSupervisor` en cada desglose de salidas.json: bajas,
+   renuncias, despidos y antes de 6 meses por supervisor). Oscar lo decidió sabiendo que el sitio es
+   público y tras la advertencia de que son personas identificables; 'SUPERVISOR' salió de la lista
+   anti-fugas. De los colaboradores que salieron sigue sin publicarse nada individual.
    Segunda excepción (Oscar, 2026-09-07): la pestaña CONTROL DE INTEGRACIÓN (llamadas de
    seguimiento a nuevos) se lee SOLO para contar, por año y departamento, cuántos tienen cada
    llamada marcada (`public/data/integracion.json`). Nombres y respuestas jamás se leen.

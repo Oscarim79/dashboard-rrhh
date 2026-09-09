@@ -65,6 +65,19 @@ dice en el pie de cada gráfica de motivos. Después Oscar pidió lo mismo para 
 "Motivos de salida": desde 2026-09-09 NINGUNA vista de motivos agrupa en "Otros" (se quitó la regla
 n≥3 del pipeline para sub-motivos; la razón renuncia/despido sí la conserva).
 
+**Por supervisor (Oscar, 2026-09-09, pedido del CEO):** sección nueva "Por supervisor o jefe" en Salidas
+(tabla: bajas, renuncias, despidos, antes de 6 meses por supervisor, con nombre; respeta los selectores)
+y tabla equivalente en la comparativa. Se le advirtió a Oscar que son personas identificables en un sitio
+público y se le ofreció publicarlo con contraseña o con códigos; eligió **abierto con nombres**. El
+pipeline lee la columna SUPERVISOR O JEFE (18 supervisores) y publica solo conteos por supervisor.
+
+**Revisión de motivos "en cero" (2026-09-09):** ninguna salida tiene sub-motivo vacío. Los ceros de 2025
+en la comparativa son un cambio de criterio de captura: de enero a agosto de 2025 nadie usó "salario" ni
+"clima laboral" (se usaba "descuentos", "bajo rendimiento", "mala actitud"…); desde septiembre de 2025
+casi todo es salario/clima. Las 17 salidas con motivo vago ("voluntaria"/"no confirmado") están en
+`.data/revision-motivos-2026-09-09.xlsx` (local, gitignoreado) con la nota y un sub-motivo sugerido;
+Oscar debe corregirlas en el sheet. Fila 475 del sheet tiene fecha de baja futura (17/11/2026).
+
 Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
 último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).
 

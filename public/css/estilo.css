@@ -259,3 +259,12 @@ footer {
 .delta.mas { color: var(--ambar); }
 .delta.menos { color: var(--verde); }
 .delta.igual { color: var(--tinta-suave); }
+
+/* ── tabla por supervisor (Salidas) ── */
+.tabla-sup { table-layout: fixed; }
+.tabla-sup th:first-child { width: 32%; }
+.tabla-sup td, .tabla-sup th { padding: 6px 4px; font-size: 13px; }
+.tabla-sup td:first-child { overflow-wrap: anywhere; }
+.tabla-sup td.n { white-space: nowrap; }
+.tabla-sup th { white-space: normal; font-size: 11.5px; }
+.tabla-sup .pct { font-size: 11px; color: var(--tinta-suave); margin-left: 3px; }

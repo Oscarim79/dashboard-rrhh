@@ -70,10 +70,10 @@ if (!salidasTodo.total) {
       <div class="kpi"><div class="kpi-valor">${fmtNum(T.n)}</div><div class="kpi-eti">salidas registradas en total</div><div class="kpi-nota">${rangoTotal}</div></div>`;
 
     if (!D.n) {
-      for (const id of ['por-mes', 'antiguedad', 'razon', 'submotivo', 'tempranas', 'agencia', 'area', 'marca', 'genero']) {
+      for (const id of ['por-mes', 'antiguedad', 'razon', 'submotivo', 'tempranas', 'agencia', 'area', 'marca', 'genero', 'supervisor']) {
         document.getElementById(id).innerHTML = `<p class="sub">Sin salidas registradas en ${etiP} con este alcance.</p>`;
       }
-      for (const id of ['mes-nota', 'antiguedad-nota', 'submotivo-nota', 'tempranas-nota', 'tempranas-resumen']) document.getElementById(id).textContent = '';
+      for (const id of ['mes-nota', 'antiguedad-nota', 'submotivo-nota', 'tempranas-nota', 'tempranas-resumen', 'supervisor-nota']) document.getElementById(id).textContent = '';
       return;
     }
 
@@ -153,6 +153,16 @@ if (!salidasTodo.total) {
     document.getElementById('marca').innerHTML = barrasH(
       Object.entries(D.marca).map(([k, v]) => ({ eti: k, valor: v, color: '#8FA69B' })),
       { formato: fmtNum });
+
+    // ── por supervisor o jefe (decisión de Oscar 2026-09-09, pedido del CEO) ──
+    document.getElementById('h-supervisor').textContent = `Por supervisor o jefe · ${etiP}`;
+    const sups = Object.entries(D.porSupervisor ?? {});
+    document.getElementById('supervisor').innerHTML = sups.length ? `<div class="tabla-scroll"><table class="tabla-sup">
+      <thead><tr><th>Supervisor</th><th class="n">Bajas</th><th class="n">Renuncia</th><th class="n">Despido</th><th class="n">&lt; 6 meses</th></tr></thead>
+      <tbody>${sups.map(([nombre, s]) => `<tr><td>${nombre}</td><td class="n"><b>${fmtNum(s.n)}</b></td><td class="n">${fmtNum(s.renuncia)}</td><td class="n">${fmtNum(s.despido)}</td><td class="n">${fmtNum(s.tempranas)}<span class="pct">${s.n ? Math.round((s.tempranas / s.n) * 100) : 0}%</span></td></tr>`).join('')}</tbody>
+      </table></div>` : '<p class="sub">Sin dato de supervisor.</p>';
+    document.getElementById('supervisor-nota').textContent =
+      `Salidas del equipo de cada supervisor o jefe en ${etiP}, según la columna "supervisor o jefe" del registro de RRHH. "< 6 meses" = cuántas de esas salidas tenían menos de 6 meses en la empresa (y qué parte de las bajas de ese equipo representan). Bajas que no son renuncia ni despido (no confirmados, temporales) cuentan en el total pero no en esas dos columnas.`;
 
     // ── género ──
     document.getElementById('genero').innerHTML = barrasH(
@@ -251,6 +261,8 @@ if (!salidasTodo.total) {
       <div class="tarjeta"><h3>Por agencia / tienda (las 12 con más salidas)</h3>${tablaComp(filasDim(A, B, A.agencia, B.agencia, (k) => { const [n, t] = k.split('·'); return t ? `${n} (${t})` : titulo(n); }).slice(0, 12), etiA, etiB)}</div>
       ${depto === 'comercial' ? '' : `<div class="tarjeta"><h3>Por área de la empresa</h3>${tablaComp(filasDim(A, B, A.area, B.area, (k) => NOMBRE_AREA[k] ?? titulo(k)), etiA, etiB)}</div>`}
       <div class="tarjeta"><h3>Por marca</h3>${tablaComp(filasDim(A, B, A.marca, B.marca, (k) => k), etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Por supervisor o jefe</h3>${tablaComp(filasDim(A, B, Object.fromEntries(Object.entries(A.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), Object.fromEntries(Object.entries(B.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), (k) => k), etiA, etiB)}
+        <p class="pie">Bajas del equipo de cada supervisor en cada tramo; el porcentaje es su parte del total del tramo.</p></div>
       <div class="tarjeta"><h3>Por género</h3>${tablaComp(filasDim(A, B, A.genero, B.genero), etiA, etiB)}</div>`;
     for (const [id, clave] of [['comp-a', 'a'], ['comp-b', 'b'], ['comp-mm', 'mm']]) {
       cont.querySelector(`#${id}`).addEventListener('change', (e) => {

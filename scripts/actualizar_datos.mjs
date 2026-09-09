@@ -462,6 +462,20 @@ if (!sal) {
     agencia: colIdx(HS, 'AGENCIA'), rango: colIdx(HS, 'RANGO', 'MES'), diasLab: colIdx(HS, 'DIAS', 'LAB'),
     // texto libre con la razón detallada: SOLO se registra si está escrito o no (nunca el texto)
     razonLibre: colIdx(HS, 'RAZON', 'SALIDA'),
+    // Supervisor o jefe: se publica el desglose de salidas por supervisor CON NOMBRE por decisión
+    // de Oscar (2026-09-09, pedido del CEO), tomada sabiendo que el sitio es público. Solo conteos
+    // por supervisor; de los colaboradores que salieron sigue sin publicarse nada individual.
+    supervisor: colIdx(HS, 'SUPERVISOR'),
+  };
+  // Un mismo supervisor puede venir con distinta grafía: se agrupa por nombre normalizado y se
+  // muestra con la primera grafía vista, en mayúscula inicial por palabra.
+  const supervisorVisto = new Map();
+  const nombreSupervisor = (v) => {
+    const limpio = String(v ?? '').replace(/\s+/g, ' ').trim();
+    if (!limpio) return '(sin supervisor registrado)';
+    const clave = norm(limpio);
+    if (!supervisorVisto.has(clave)) supervisorVisto.set(clave, limpio.toLowerCase().replace(/(^|[\s-])(\S)/g, (m, sep, c) => sep + c.toUpperCase()));
+    return supervisorVisto.get(clave);
   };
   // La misma área aparece con varias grafías en el sheet; se unifican para no contarlas aparte.
   const AREA_ALIAS = { 'COBROS Y CREDITOS': 'CREDITOS Y COBROS', 'COBROS': 'CREDITOS Y COBROS' };
@@ -517,6 +531,7 @@ if (!sal) {
       rango: partirMasDeUnAno(norm(f[IS.rango]) || '(SIN RANGO)', diasLab),
       diasLab,
       tieneRazonLibre: IS.razonLibre >= 0 && !!norm(f[IS.razonLibre]),
+      supervisor: IS.supervisor >= 0 ? nombreSupervisor(f[IS.supervisor]) : '(sin supervisor registrado)',
     });
   }
   const corte12m = hace12mISO.slice(0, 7);
@@ -560,6 +575,18 @@ if (!sal) {
       rango: cuenta(t, (r) => r.rango),
     };
   };
+  // Desglose por supervisor (decisión de Oscar 2026-09-09): por cada supervisor, cuántas salidas,
+  // cuántas renuncias/despidos y cuántas antes de los 6 meses. Solo conteos.
+  const porSupervisor = (arr) => {
+    const c = {};
+    for (const r of arr) {
+      const s = (c[r.supervisor] ??= { n: 0, renuncia: 0, despido: 0, otros: 0, tempranas: 0 });
+      s.n++;
+      s[r.razon === 'RENUNCIA' ? 'renuncia' : r.razon === 'DESPIDO' ? 'despido' : 'otros']++;
+      if (RANGOS_TEMPRANOS.has(r.rango)) s.tempranas++;
+    }
+    return Object.fromEntries(Object.entries(c).sort((a, b) => b[1].n - a[1].n));
+  };
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
     porTipoTienda: porTipoTienda(arr),
@@ -576,6 +603,7 @@ if (!sal) {
     rango: cuenta(arr, (r) => r.rango),
     diasLab: stats(arr.map((r) => r.diasLab).filter((d) => d != null)),
     tempranas: tempranas(arr),
+    porSupervisor: porSupervisor(arr),
     n: arr.length,
   });
   // porAnio lleva el desglose completo de cada año (misma forma que "total"),
@@ -719,7 +747,8 @@ const metaJson = {
 // Términos prohibidos como palabras completas (así "Benito" no dispara "NIT").
 const RE_PROHIBIDOS = [
   'NOMBRE DEL CANDIDATO', 'A QUIEN REEMPLAZA', 'NOMBRE JEFE DIRECTO', 'QUIEN SOLICITO',
-  'ENTREVISTADOR', 'DPI', 'TELEFONO', 'CELULAR', 'SUELDO', 'SUPERVISOR', 'NIT',
+  // 'SUPERVISOR' salió de la lista el 2026-09-09: Oscar decidió publicar el desglose por supervisor.
+  'ENTREVISTADOR', 'DPI', 'TELEFONO', 'CELULAR', 'SUELDO', 'NIT',
   'CORREO', 'EMAIL', 'DIRECCION', 'CONYUGUE', 'CONTACTO DE EMERGENCIA',
 ].map((t) => ({ t, re: new RegExp(`\\b${t}\\b`) }));
 // Valores legítimos que contienen un término prohibido pero no son datos personales:
