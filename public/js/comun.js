@@ -107,7 +107,11 @@ export function pintarSelectorDepto(onCambio) {
 // Se recuerda en el navegador y admite ?marca=americana|abiq|friotec|todas en la URL. Cuando hay
 // una marca elegida, salidas y vacantes se filtran por ella (y el alcance General/Comercial deja de
 // importar: casi todo lo de una marca es de tiendas, es decir, Comercial).
-export const MARCAS = { todas: 'Todas las marcas', americana: 'Americana', abiq: 'Abi Q', friotec: 'Friotec' };
+// Friotec queda fuera del sitio por ahora (Oscar, 2026-09-09): 2 tiendas y 1 persona activa, sus
+// fuentes no cuadran. Sus datos siguen en los JSON; para reactivarla basta con volver a ponerla aquí
+// y quitarla de MARCAS_OCULTAS.
+export const MARCAS = { todas: 'Todas las marcas', americana: 'Americana', abiq: 'Abi Q' };
+export const MARCAS_OCULTAS = ['Friotec'];
 const CLAVE_MARCA = 'dashboard-rrhh:marca';
 export function marcaActual() {
   try {

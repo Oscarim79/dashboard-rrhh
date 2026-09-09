@@ -43,6 +43,10 @@
 - **Resultado por marca (acumulado a agosto 2026):** Americana 46.2% (244 activos), Abi Q 62.9% (17 activos,
   11 bajas), Friotec 200% con 1 persona (plantilla demasiado pequeña; las fuentes no cuadran: ALTAS 4, SALIDAS 2,
   BASE 1). Los 20 del corporativo con marca "A2K, ABIQ" se cuentan en Americana.
+- **Friotec fuera por ahora (Oscar, 2026-09-09, cierre):** no aparece en el desplegable de marca, ni en el mapa
+  (sus 2 tiendas se ocultan), ni en la tabla de rotación por marca. Los datos siguen en los JSON (`porMarca.friotec`,
+  `calculado.series.friotec`); para reactivarla: `MARCAS` y `MARCAS_OCULTAS` en comun.js y la lista de
+  `pintarMarcas` en pag-rotacion.js.
 - **Sitio:** Rotación tiene la tabla "Rotación por marca (calculada)" y, con una marca elegida, todo (KPIs y
   gráficas) usa la serie calculada de esa marca. El Resumen recupera el "% de la plantilla reemplazada" con
   marca usando esa plantilla.
@@ -532,6 +536,22 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   1 jefe de tienda + 1 asistente. Sustenta el 15% de impacto en ventas del simulador: un vendedor
   menos = 20–33% de la capacidad de venta, así que 15% asume que el equipo cubre buena parte.
 
+## Qué sigue (cierre del 2026-09-09, en orden de prioridad)
+
+1. **Validar el indicador calculado** un par de meses contra el manual (tabla "Indicador manual vs.
+   calculado" en Rotación). Preguntar al jefe de RRHH por las bajas de ene-feb 2026 que no contó (manual 8 y
+   22; SALIDAS 12 y 26). Cuando cuadre, dejar de llenar la pestaña manual.
+2. **Decidir qué hacer con los 20 del corporativo con marca "A2K, ABIQ"** (hoy cuentan en Americana).
+3. **Modelo de costo propio para Abi Q** en el Simulador: faltan sus salarios (vendedor nuevo, vendedor que
+   sale, jefe de tienda) y si su curva de aprendizaje es distinta. Hoy Abi Q se costea con parámetros de Americana.
+4. **Friotec** queda fuera del sitio hasta que sus fuentes cuadren (ALTAS 4 · SALIDAS 2 · BASE 1 activo).
+5. **Sheet "Registro de tiendas":** borrar las dos observaciones viejas (Pradera Chiquimula, Santa Catarina
+   Mita); confirmar que Santa Catarina Mita ("Catocha") está activa; Santa Cruz abre el 3 de octubre (tipo por
+   definir). Pendiente de largo plazo: que el pipeline lea ese Sheet en vez de config/tiendas.json.
+6. **Textos de los globos de motivos** (propuesta-datos.js → detalleMotivos): solo hay Clima laboral, Salario y
+   Horarios; Oscar puede dar frases para los demás motivos.
+7. Archivo suelto `AGENTS.md` (copia vieja de CLAUDE.md creada por alguna herramienta): borrar o commitear.
+
 ## Pendientes (no bloquean nada)
 
 - (2026-09-08) Sheet: agosto 2026 en DATA INDICADOR ROTACION aún no tiene data (Oscar: la data va
@@ -559,5 +579,9 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
 
 Abrir `D:\Proyectos\DASHBOARD RRHH` y preguntar "¿en qué nos quedamos?". Comandos útiles:
 `npm run actualizar` (regenerar datos con el .env local), `node scripts/validar_modelo.mjs`
-(controles del modelo), `npx --yes http-server public -p 4173` (ver el sitio local).
-Para cambios: editar → commit → push (el push despliega solo).
+(controles del modelo), `node scripts/exportar_tiendas.mjs` (Excel del registro de tiendas),
+`node scripts/generar_mapa.mjs` (contornos del mapa), `npx --yes serve -l 4173 public` (sitio local;
+ojo: `serve` recorta la parte "?" de las URL, por eso los enlaces internos usan "#").
+Para cambios: editar → commit → push (el push despliega solo; `gh workflow run actualizar.yml` publica
+sin esperar a las 6:00). Último cierre: 2026-09-09, sesión larga (comparativa, supervisores, mapa, marcas,
+rotación calculada).

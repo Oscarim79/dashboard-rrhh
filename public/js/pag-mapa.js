@@ -7,7 +7,7 @@
 // mes, comparación del supervisor con sus pares, costo estimado, zoom y arrastre del mapa.
 import { pintarPie, marcarNavActiva, fmtNum, salidasDe, vacantesDe, pintarSelectorDepto, pintarSelectorPeriodo,
   dimsSalidas, etiquetaPeriodo, aniosYMeses, aplicarDesglose, fmtYm, fmtYmCorto, COLOR_SUPERVISOR,
-  vacantesEnPeriodo, agregarVacantes, diasCalibrados, MARCAS as MARCAS_GLOBAL, marcaActual, guardarMarca } from './comun.js';
+  vacantesEnPeriodo, agregarVacantes, diasCalibrados, MARCAS as MARCAS_GLOBAL, MARCAS_OCULTAS, marcaActual, guardarMarca } from './comun.js';
 import { costoMezcla, VENTAS_TIPO, PARAMS_DEFECTO, fmtQ } from './modelo.js';
 
 marcarNavActiva();
@@ -37,7 +37,7 @@ const px = (lon) => (lon - P.lon0) * P.s;
 const py = (lat) => (P.lat1 - lat) * P.s / P.cosMid;
 const [, , W, H] = mapa.viewBox;
 
-const todasTiendas = registro.tiendas.filter((t) => t.activa);
+const todasTiendas = registro.tiendas.filter((t) => t.activa && !MARCAS_OCULTAS.includes(t.marca));
 const ubicadasTodas = todasTiendas.filter((t) => t.lat != null);
 const MARCAS = [...new Set(todasTiendas.map((t) => t.marca).filter(Boolean))].sort();
 // Filtro por marca (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios; sus costos y motivos

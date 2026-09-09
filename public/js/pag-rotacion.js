@@ -145,7 +145,7 @@ function pintarMarcas(rango) {
   const el = document.getElementById('tabla-marcas'), nota = document.getElementById('marcas-nota');
   if (!CALC) { el.innerHTML = '<p class="sub">El pipeline aún no publica el indicador calculado.</p>'; nota.textContent = ''; return; }
   const hastaYm = rango.hasta ? rango.hasta.slice(0, 7) : null;
-  const filas = ['total', 'comercial', 'americana', 'abiq', 'friotec'].map((e) => {
+  const filas = ['total', 'comercial', 'americana', 'abiq'].map((e) => { // friotec fuera por ahora (Oscar, 2026-09-09)
     const s = (CALC.series[e] ?? []).filter((r) => !r.parcial && (!hastaYm || r.ym <= hastaYm));
     const u = s.at(-1); if (!u) return null;
     const delAnio = s.filter((r) => r.anio === u.anio);
