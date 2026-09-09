@@ -27,7 +27,7 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    `¿A QUIEN REEMPLAZA?`, jefes directos, solicitantes, entrevistadores, DPI, teléfonos, sueldos.
    La pestaña ALTAS y la BASE DE DATOS GENERAL se ignoran por completo. Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
-   (razón, sub-motivo n≥3, género, área, marca, agencia, rangos de antigüedad) — jamás filas
+   (razón, sub-motivo, género, área, marca, agencia, rangos de antigüedad) — jamás filas
    individuales, y nunca el desglose por supervisor (el sitio es público).
    Segunda excepción (Oscar, 2026-09-07): la pestaña CONTROL DE INTEGRACIÓN (llamadas de
    seguimiento a nuevos) se lee SOLO para contar, por año y departamento, cuántos tienen cada
@@ -109,8 +109,9 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   6 meses, n≥3 → OTROS) y el bloque `acumuladoAnio[año][mes]` = desglose de enero a ese mes. Los cortes
   acumulados se calculan en el pipeline (no sumando meses en el navegador) para que la regla n≥3 se
   aplique sobre el tramo completo. La comparativa vive al final de Salidas con controles propios.
-  **Excepción (Oscar, 2026-09-09):** en el cruce `tempranas` se publican TODOS los motivos (sin agrupar
-  en OTROS) porque el CEO quiere ver el detalle. Además el pipeline unifica sinónimos antes de contar
+  **Decisión de Oscar (2026-09-09):** los sub-motivos se publican TODOS por separado, en todas las
+  vistas (se quitó la regla "menos de 3 casos → OTROS" que regía desde 2026-08-31) porque el CEO quiere
+  ver el detalle; siguen siendo conteos sin nombres. Además el pipeline unifica sinónimos antes de contar
   (`SUB_ALIAS`: por salario → salario; mal ambiente/mal trato → clima laboral; horarios extendidos →
   horarios; descuentos en salario → descuentos) y publica lo unificado en `agrupacionesSubMotivo`.
 

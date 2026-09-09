@@ -110,18 +110,18 @@ if (!salidasTodo.total) {
       Object.entries(D.razon).map(([k, v]) => ({ eti: titulo(k), valor: v, color: COLOR_RAZON[k] ?? '#8FA69B' })),
       { formato: fmtNum });
 
-    // ── motivos (top 12) — cada uno por separado (pedido del CEO, 2026-09-07) ──
+    // ── motivos — todos, cada uno por separado (CEO 2026-09-07; sin "Otros" desde 2026-09-09) ──
     // En Comercial · todo el registro, las renuncias "voluntarias" se reparten con el
     // desglose que RRHH cargó en propuesta-datos.js (salario, mejor oportunidad, clima
     // laboral, descuentos). En los demás cortes no hay reparto: se muestra la barra gris.
     const conReparto = depto === 'comercial' && periodo === 'todo' && Object.keys(DATOS.desgloseVoluntaria?.casos ?? {}).length > 0;
     const des = aplicarDesglose(D.subMotivo, conReparto ? DATOS.desgloseVoluntaria : null);
     document.getElementById('submotivo').innerHTML = des.items.length ? barrasH(
-      des.items.slice(0, 12).map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A' })),
+      des.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A' })),
       { formato: fmtNum }) : '<p class="sub">Sin motivos registrados.</p>';
     document.getElementById('submotivo-nota').innerHTML = conReparto
-      ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
-      : `Cada motivo por separado, tal como lo registra RRHH. ${notaUnificados} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
+      ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). ${notaUnificados}`
+      : `Todos los motivos por separado, tal como los registra RRHH, sin agrupar en "Otros". ${notaUnificados} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle.`;
 
     // ── los que se van antes de 6 meses: POR QUÉ (pedido del CEO, 2026-09-08) ──
     // El pipeline cruza razón/sub-motivo con antigüedad menor a 6 meses (solo conteos, n≥3).
@@ -245,7 +245,7 @@ if (!salidasTodo.total) {
       <div class="tarjeta"><h3>Antigüedad al momento de salir</h3>${tablaComp(filasDim(A, B, A.rango, B.rango, (k) => ETI_RANGO[k] ?? titulo(k), ORDEN_RANGO), etiA, etiB)}</div>
       <div class="tarjeta"><h3>Razón de salida</h3>${tablaComp(filasDim(A, B, A.razon, B.razon), etiA, etiB)}</div>
       <div class="tarjeta"><h3>Motivos de salida</h3>${tablaComp(filasDim(A, B, aMapa(aplicarDesglose(A.subMotivo, null).items), aMapa(aplicarDesglose(B.subMotivo, null).items), (k) => k), etiA, etiB)}
-        <p class="pie">Motivos con menos de 3 casos en el tramo van en "Otros". ${notaUnificados} "${SIN_DETALLE}" son renuncias sin motivo registrado.</p></div>
+        <p class="pie">Todos los motivos por separado, sin agrupar en "Otros". ${notaUnificados} "${SIN_DETALLE}" son renuncias sin motivo registrado.</p></div>
       <div class="tarjeta"><h3>Los que se van antes de 6 meses, ¿por qué?</h3>${tablaComp(filasDim(A.tempranas ?? { n: 0 }, B.tempranas ?? { n: 0 }, aMapa(aplicarDesglose(A.tempranas?.subMotivo, null).items), aMapa(aplicarDesglose(B.tempranas?.subMotivo, null).items), (k) => k), etiA, etiB)}
         <p class="pie">Solo salidas con menos de 6 meses de antigüedad: ${fmtNum(A.tempranas?.n ?? 0)} en ${tramoCorto} ${a} y ${fmtNum(B.tempranas?.n ?? 0)} en ${tramoCorto} ${b}. Todos los motivos por separado, sin agrupar en "Otros". El porcentaje es sobre ese grupo.</p></div>
       <div class="tarjeta"><h3>Por agencia / tienda (las 12 con más salidas)</h3>${tablaComp(filasDim(A, B, A.agencia, B.agencia, (k) => { const [n, t] = k.split('·'); return t ? `${n} (${t})` : titulo(n); }).slice(0, 12), etiA, etiB)}</div>

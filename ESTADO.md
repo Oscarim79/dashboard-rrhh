@@ -61,8 +61,9 @@ unifica sinónimos antes de contar, en todas las vistas (`SUB_ALIAS`): por salar
 ambiente y mal trato → clima laboral; horarios extendidos → horarios; descuentos en salario →
 descuentos. Antes la regla n≥3 partía esos sinónimos (p. ej. "mal trato" con 1 caso caía en Otros en
 vez de sumar a clima laboral). Lo unificado se publica en `salidas.json → agrupacionesSubMotivo` y se
-dice en el pie de cada gráfica de motivos. La gráfica general "Motivos de salida" SÍ conserva la regla
-de 3 casos → Otros (Oscar no pidió cambiarla).
+dice en el pie de cada gráfica de motivos. Después Oscar pidió lo mismo para la gráfica general
+"Motivos de salida": desde 2026-09-09 NINGUNA vista de motivos agrupa en "Otros" (se quitó la regla
+n≥3 del pipeline para sub-motivos; la razón renuncia/despido sí la conserva).
 
 Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
 último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).

@@ -564,9 +564,11 @@ if (!sal) {
     razon: cuenta(arr, (r) => r.razon, 3),
     porTipoTienda: porTipoTienda(arr),
     sinTipoOrigen: cuenta(arr.filter((r) => r.esTienda !== false && !r.tipoTienda && ['RENUNCIA', 'DESPIDO'].includes(r.razon)), (r) => `${r.agencia}${r.esTienda === null ? ' — nombre no reconocido en el archivo de tiendas' : ' (sin tipo)'}`),
-    subMotivo: cuenta(arr, (r) => r.sub, 3),
+    // Motivos: TODOS por separado (Oscar, 2026-09-09; antes se agrupaban los de menos de 3 casos en
+    // OTROS). Siguen siendo conteos sin nombres; los sinónimos ya vienen unificados por SUB_ALIAS.
+    subMotivo: cuenta(arr, (r) => r.sub),
     // solo renuncias: para hablar de "por qué se va la gente" sin mezclar despidos
-    subMotivoRenuncias: cuenta(arr.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub, 3),
+    subMotivoRenuncias: cuenta(arr.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub),
     genero: cuenta(arr, (r) => r.genero),
     area: cuenta(arr, (r) => r.area),
     marca: cuenta(arr, (r) => r.marca),
