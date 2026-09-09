@@ -78,6 +78,12 @@
     los cortes acumulados de la comparativa para no engordar el JSON, que quedó en ~490 KB). Las fichas de
     tienda, departamento y supervisor muestran barras de motivos; se quitó el texto que decía que el detalle
     por tienda no se publicaba (decisión de Oscar: es justo lo que el CEO quiere ver).
+- **Filtro por marca en el mapa (Oscar, 2026-09-09):** botones Todas · Abi Q · Americana · Friotec en los
+  controles. Con una marca elegida, el mapa solo dibuja sus tiendas y TODAS las cifras (chips, tabla general,
+  fichas de supervisor y departamento, semáforo, motivos, costo) se recalculan sumando `porAgencia` de esas
+  tiendas (sin filtro, el supervisor usa la columna supervisor del registro). Razón de Oscar: Abi Q y Friotec
+  son otros negocios y sus costos y motivos no deben mezclarse con Americana. Pendiente si lo quiere: llevar
+  el filtro por marca a Salidas y Resumen (requiere que el pipeline publique bloques por marca).
 
 ## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 

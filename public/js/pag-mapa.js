@@ -37,18 +37,28 @@ const px = (lon) => (lon - P.lon0) * P.s;
 const py = (lat) => (P.lat1 - lat) * P.s / P.cosMid;
 const [, , W, H] = mapa.viewBox;
 
-const tiendas = registro.tiendas.filter((t) => t.activa);
-const ubicadas = tiendas.filter((t) => t.lat != null);
+const todasTiendas = registro.tiendas.filter((t) => t.activa);
+const ubicadasTodas = todasTiendas.filter((t) => t.lat != null);
+const MARCAS = [...new Set(todasTiendas.map((t) => t.marca).filter(Boolean))].sort();
+// Filtro por marca (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios; sus costos y motivos
+// no se mezclan con Americana. 'todas' = sin filtro. Las listas de abajo se recalculan al filtrar.
+let marca = 'todas';
+let tiendas = todasTiendas, ubicadas = ubicadasTodas, porDepto = {}, supervisores = [];
+function aplicarFiltroMarca() {
+  tiendas = marca === 'todas' ? todasTiendas : todasTiendas.filter((t) => t.marca === marca);
+  ubicadas = tiendas.filter((t) => t.lat != null);
+  porDepto = {};
+  for (const t of ubicadas) (porDepto[t.departamento] ??= []).push(t);
+  supervisores = [...new Set(tiendas.map((t) => t.supervisor).filter(Boolean))].sort();
+}
 // varias tiendas en el mismo municipio comparten coordenada: se reparten en un circulito
 const porCoord = {};
-for (const t of ubicadas) (porCoord[`${t.lat},${t.lon}`] ??= []).push(t);
+for (const t of ubicadasTodas) (porCoord[`${t.lat},${t.lon}`] ??= []).push(t);
 for (const grupo of Object.values(porCoord)) grupo.forEach((t, i) => {
   const ang = grupo.length > 1 ? (i / grupo.length) * Math.PI * 2 - Math.PI / 2 : 0, rad = grupo.length > 1 ? 13 : 0;
   t.x = px(t.lon) + Math.cos(ang) * rad; t.y = py(t.lat) + Math.sin(ang) * rad;
 });
-const porDepto = {};
-for (const t of ubicadas) (porDepto[t.departamento] ??= []).push(t);
-const supervisores = [...new Set(tiendas.map((t) => t.supervisor).filter(Boolean))].sort();
+aplicarFiltroMarca();
 const dominante = (lista) => {
   const c = {};
   for (const t of lista) if (t.supervisor) c[t.supervisor] = (c[t.supervisor] ?? 0) + 1;
@@ -57,7 +67,7 @@ const dominante = (lista) => {
 
 // ── encuadre: el mapa arranca recortado a la zona donde hay tiendas (así se ve más grande) ──
 const MARGEN = 70;
-const bb = ubicadas.reduce((b, t) => ({ x0: Math.min(b.x0, t.x), y0: Math.min(b.y0, t.y), x1: Math.max(b.x1, t.x), y1: Math.max(b.y1, t.y) }), { x0: W, y0: H, x1: 0, y1: 0 });
+const bb = ubicadasTodas.reduce((b, t) => ({ x0: Math.min(b.x0, t.x), y0: Math.min(b.y0, t.y), x1: Math.max(b.x1, t.x), y1: Math.max(b.y1, t.y) }), { x0: W, y0: H, x1: 0, y1: 0 });
 const VISTA_INICIAL = { x: Math.max(0, bb.x0 - MARGEN), y: Math.max(0, bb.y0 - MARGEN), w: 0, h: 0 };
 VISTA_INICIAL.w = Math.min(W, bb.x1 + MARGEN) - VISTA_INICIAL.x;
 VISTA_INICIAL.h = Math.min(H, bb.y1 + MARGEN) - VISTA_INICIAL.y;
@@ -113,6 +123,15 @@ function calcularCostos() {
   }
 }
 const costoTienda = (t) => bajasTienda(t.nombre) * (costoPorTipo[t.tipo] ?? costoPorTipo.B);
+// Cifras de un supervisor: sin filtro, las del registro de salidas (columna supervisor); con filtro
+// de marca, la suma de sus tiendas de esa marca (así Abi Q no se mezcla con Americana).
+const statsSup = (sup) => {
+  if (marca === 'todas') return D.porSupervisor?.[sup] ?? null;
+  const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup);
+  const agg = sumarTiendas(lista);
+  return agg.n ? agg : null;
+};
+const etiMarca = () => (marca === 'todas' ? '' : ` · ${marca}`);
 const costoLista = (lista) => lista.reduce((s, t) => s + costoTienda(t), 0);
 
 // ── semáforo: cada tienda frente al promedio de las tiendas de su mismo tipo en el período ──
@@ -185,12 +204,15 @@ function pintarMapa() {
       const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup);
       if (!lista.length) return '';
       const activo = sel?.tipo === 'sup' && sel.clave === sup;
-      return `<button type="button" class="chip-sup${activo ? ' activo' : ''}" data-sup="${esc(sup ?? '')}" style="--c:${colorSup(sup)}"><i></i><b>${esc(sup ?? SIN_SUP)}</b><span>${lista.length} ${lista.length === 1 ? 'tienda' : 'tiendas'} · ${fmtNum(D.porSupervisor?.[sup]?.n ?? bajasLista(lista))} salidas</span></button>`;
+      return `<button type="button" class="chip-sup${activo ? ' activo' : ''}" data-sup="${esc(sup ?? '')}" style="--c:${colorSup(sup)}"><i></i><b>${esc(sup ?? SIN_SUP)}</b><span>${lista.length} ${lista.length === 1 ? 'tienda' : 'tiendas'} · ${fmtNum(statsSup(sup)?.n ?? bajasLista(lista))} salidas</span></button>`;
     }).join('');
   }
   // controles de vista
   document.querySelectorAll('[data-modo-color]').forEach((b) => b.classList.toggle('primario', b.dataset.modoColor === modoColor));
   document.querySelectorAll('[data-modo-tamano]').forEach((b) => b.classList.toggle('primario', b.dataset.modoTamano === modoTamano));
+  const cm = document.getElementById('ctrl-marca');
+  if (!cm.querySelector('[data-marca]')) cm.insertAdjacentHTML('beforeend', ['todas', ...MARCAS].map((m) => `<button type="button" data-marca="${esc(m)}">${m === 'todas' ? 'Todas' : esc(m)}</button>`).join(''));
+  cm.querySelectorAll('[data-marca]').forEach((b) => b.classList.toggle('primario', b.dataset.marca === marca));
   const btn = document.getElementById('anim-play');
   btn.textContent = anim.activa && anim.timer ? '⏸ Pausar' : '▶ Reproducir mes a mes';
   const sl = document.getElementById('anim-mes');
@@ -274,22 +296,25 @@ function pintarPanel() {
   const el = document.getElementById('panel');
   const cerrar = '<button type="button" class="cerrar" id="panel-cerrar" aria-label="Volver al resumen">✕</button>';
   if (!seleccion) {
-    el.innerHTML = `<h3>Todas las regiones · ${etiP}</h3>
-      <p class="sub">${tiendas.length} tiendas activas, ${supervisores.length} supervisores de región. Toca un supervisor, un departamento o un punto del mapa para ver sus números y por qué se ha ido su gente.</p>
+    const aggGen = sumarTiendas(tiendas);
+    const motivosGen = marca === 'todas' ? D.subMotivo : aggGen.motivos;
+    const nGen = marca === 'todas' ? D.n : aggGen.n;
+    el.innerHTML = `<h3>Todas las regiones${etiMarca()} · ${etiP}</h3>
+      <p class="sub">${tiendas.length} tiendas activas${marca === 'todas' ? '' : ` de ${marca}`}, ${plural(supervisores.length, 'supervisor', 'supervisores')} de región. Toca un supervisor, un departamento o un punto del mapa para ver sus números y por qué se ha ido su gente.</p>
       <table class="tabla-mapa"><thead><tr><th>Supervisor</th><th class="n">Tiendas</th><th class="n">Salidas</th><th class="n">&lt; 6 m</th><th class="n">Costo est.</th></tr></thead><tbody>${[...supervisores, null].map((sup) => {
         const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup); if (!lista.length) return '';
-        const ps = D.porSupervisor?.[sup] ?? null;
+        const ps = statsSup(sup);
         return `<tr><td><button type="button" class="enlace" data-ir-sup="${esc(sup ?? '')}"><i class="punto" style="background:${colorSup(sup)}"></i>${esc(sup ?? SIN_SUP)}</button></td><td class="n">${lista.length}</td><td class="n">${fmtNum(ps?.n ?? bajasLista(lista))}</td><td class="n">${ps ? `${pct(ps.tempranas, ps.n)}%` : '—'}</td><td class="n">${fmtQ(costoLista(lista))}</td></tr>`;
       }).join('')}</tbody></table>
-      ${motivosHtml(D.subMotivo, D.n, `Por qué se ha ido la gente · todas las tiendas · ${etiP}`)}
-      <p class="pie">"Salidas" y "&lt; 6 m" por supervisor vienen del registro de salidas (columna supervisor); "Tiendas" y el costo, del registro de tiendas (salidas por agencia). Pueden no cuadrar exactamente porque una salida se cuenta por su supervisor, no por la tienda.</p>${notaCosto()}`;
+      ${motivosHtml(motivosGen, nGen, `Por qué se ha ido la gente · ${marca === 'todas' ? 'todas las tiendas' : `tiendas ${marca}`} · ${etiP}`)}
+      <p class="pie">${marca === 'todas' ? '"Salidas" y "&lt; 6 m" por supervisor vienen del registro de salidas (columna supervisor); "Tiendas" y el costo, del registro de tiendas (salidas por agencia). Pueden no cuadrar exactamente porque una salida se cuenta por su supervisor, no por la tienda.' : `Con el filtro de marca, todas las cifras son la suma de las tiendas ${marca} de cada supervisor (columna agencia del registro de salidas).`}</p>${notaCosto()}`;
   } else if (seleccion.tipo === 'sup') {
     const sup = seleccion.clave || null;
     const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup);
-    const ps = D.porSupervisor?.[sup];
+    const ps = statsSup(sup);
     const deptos = [...new Set(lista.map((t) => t.departamento).filter(Boolean))].sort();
     // comparación con los otros supervisores de región (promedio simple de los que tienen salidas)
-    const pares = supervisores.filter((s) => s !== sup).map((s) => D.porSupervisor?.[s]).filter((p) => p?.n);
+    const pares = supervisores.filter((s) => s !== sup).map((s) => statsSup(s)).filter((p) => p?.n);
     const promN = pares.length ? pares.reduce((a, p) => a + p.n, 0) / pares.length : null;
     const promT = pares.length ? pares.reduce((a, p) => a + pct(p.tempranas, p.n), 0) / pares.length : null;
     const promR = pares.length ? pares.reduce((a, p) => a + pct(p.renuncia, p.n), 0) / pares.length : null;
@@ -300,8 +325,8 @@ function pintarPanel() {
       const clase = neutro ? 'igual' : ((inverso ? d < 0 : d > 0) ? 'mas' : 'menos');
       return `<span class="delta ${clase}">${d > 0 ? '+' : '−'}${Math.abs(d)}${unidad} vs. promedio</span>`;
     };
-    el.innerHTML = `${cerrar}<h3><i class="punto grande" style="background:${colorSup(sup)}"></i>${esc(sup ?? SIN_SUP)}</h3>
-      <p class="sub">${lista.length} tiendas en ${deptos.length ? deptos.join(', ') : 'ubicación por definir'}.</p>
+    el.innerHTML = `${cerrar}<h3><i class="punto grande" style="background:${colorSup(sup)}"></i>${esc(sup ?? SIN_SUP)}${etiMarca()}</h3>
+      <p class="sub">${lista.length} tiendas${marca === 'todas' ? '' : ` ${marca}`} en ${deptos.length ? deptos.join(', ') : 'ubicación por definir'}.${marca === 'todas' ? '' : ' Cifras sumadas de esas tiendas.'}</p>
       ${ps ? `<div class="kpis kpis-panel">
         <div class="kpi"><div class="kpi-valor">${fmtNum(ps.n)}</div><div class="kpi-eti">salidas · ${etiP}</div><div class="kpi-nota">${comparar(ps.n, promN)}</div></div>
         <div class="kpi"><div class="kpi-valor">${pct(ps.renuncia, ps.n)}%</div><div class="kpi-eti">renuncias (${fmtNum(ps.renuncia)}) · despidos ${fmtNum(ps.despido)}</div><div class="kpi-nota">${comparar(pct(ps.renuncia, ps.n), promR, { unidad: ' pts', neutro: true })}</div></div>
@@ -315,7 +340,7 @@ function pintarPanel() {
     const lista = porDepto[seleccion.clave] ?? [];
     const sups = [...new Set(lista.map((t) => t.supervisor ?? null))];
     const agg = sumarTiendas(lista);
-    el.innerHTML = `${cerrar}<h3>${esc(seleccion.clave)}</h3>
+    el.innerHTML = `${cerrar}<h3>${esc(seleccion.clave)}${etiMarca()}</h3>
       <p class="sub">${plural(lista.length, 'tienda', 'tiendas')} · costo estimado ${fmtQ(costoLista(lista))} · ${sups.length === 1 ? 'supervisor' : `${sups.length} supervisores`}: ${sups.map((s) => `<button type="button" class="enlace" data-ir-sup="${esc(s ?? '')}"><i class="punto" style="background:${colorSup(s)}"></i>${esc(s ?? SIN_SUP)}</button>`).join(', ')}.</p>
       ${kpisRD(agg, etiP)}
       ${motivosHtml(agg.motivos, agg.n, `Por qué se ha ido la gente en ${esc(seleccion.clave)} · ${etiP}`)}
@@ -344,6 +369,9 @@ function seleccionar(sel) {
   if (sel && window.innerWidth < 900) document.getElementById('panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function refrescar() {
+  aplicarFiltroMarca();
+  if (seleccion?.tipo === 'tienda' && !tiendas.some((t) => t.nombre === seleccion.clave)) seleccion = null;
+  if (seleccion?.tipo === 'sup' && seleccion.clave && !supervisores.includes(seleccion.clave)) seleccion = null;
   D = dimsSalidas(salidas, periodoVigente());
   calcularCostos();
   calcularSemaforo();
@@ -381,6 +409,7 @@ document.addEventListener('click', (e) => {
   if (e.target.closest('#panel-cerrar')) return seleccionar(null);
   const mc = e.target.closest('[data-modo-color]'); if (mc) { modoColor = mc.dataset.modoColor; if (modoColor === 'semaforo' && seleccion?.tipo === 'sup') seleccion = null; return refrescar(); }
   const mt = e.target.closest('[data-modo-tamano]'); if (mt) { modoTamano = mt.dataset.modoTamano; return refrescar(); }
+  const mm = e.target.closest('[data-marca]'); if (mm) { marca = mm.dataset.marca; return refrescar(); }
   if (e.target.closest('#anim-play')) return anim.timer ? detenerAnim(false) : iniciarAnim();
   if (e.target.closest('#anim-stop')) return detenerAnim(true);
   if (e.target.closest('#zoom-mas')) return zoom(1.5);
