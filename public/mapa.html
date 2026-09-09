@@ -6,7 +6,7 @@
 <title>Mapa — Dashboard RRHH Corporación Americana</title>
 <link rel="stylesheet" href="css/estilo.css">
 </head>
-<body>
+<body class="pagina-mapa">
 <header class="cabecera">
   <button id="btn-menu" aria-label="Abrir menú">☰</button>
   <div class="marca">DASHBOARD RRHH<span>CORPORACIÓN AMERICANA</span></div>
@@ -24,7 +24,7 @@
 <div id="velo"></div>
 <main>
   <h1>Mapa de tiendas y regiones</h1>
-  <p class="sub">Cada color es un supervisor de región. Toca un departamento, una tienda o un supervisor para ver su información. El tamaño de cada punto es la cantidad de salidas de esa tienda en el período.</p>
+  <p class="sub">Cada color es un supervisor de región. Toca un departamento, una tienda o un supervisor para ver sus números y por qué se ha ido su gente. El tamaño de cada punto son las salidas de esa tienda en el período. Acerca el mapa con los botones + y −, con dos dedos en el teléfono o con Ctrl y la rueda del ratón; arrástralo para moverlo.</p>
   <p class="alcance" id="alcance"></p>
   <p class="sub" id="periodo-eval" style="font-weight:600"></p>
 
@@ -44,7 +44,15 @@
   <div class="leyenda-sup" id="leyenda"></div>
 
   <div class="mapa-layout">
-    <div class="tarjeta mapa-tarjeta"><div id="mapa" class="mapa-cont"></div>
+    <div class="tarjeta mapa-tarjeta">
+      <div class="zoom-botones">
+        <button type="button" id="zoom-mas" aria-label="Acercar" title="Acercar">+</button>
+        <button type="button" id="zoom-menos" aria-label="Alejar" title="Alejar">−</button>
+        <button type="button" id="zoom-inicio" aria-label="Vista inicial" title="Vista inicial">⟲</button>
+        <button type="button" id="zoom-todo" aria-label="Todo el país" title="Todo el país">GT</button>
+        <span id="zoom-eti" class="zoom-eti"></span>
+      </div>
+      <div id="mapa" class="mapa-cont"></div>
       <p class="pie">Semáforo: cada tienda frente al promedio de las tiendas de su tipo. Costo: modelo del Simulador. Contornos: Ministerio de Finanzas de Guatemala. Ubicación de tiendas: centro del municipio (INE), no la dirección exacta. Departamentos en gris: sin tiendas.</p>
     </div>
     <div class="tarjeta mapa-panel" id="panel"></div>

@@ -67,6 +67,17 @@
     por supervisor con ≥3 salidas en el período (salidas, % antes de 6 meses, renuncias/despidos, motivo
     principal) que enlaza a `mapa.html#sup=Nombre` (el mapa abre con ese supervisor seleccionado).
     Colores compartidos en `COLOR_SUPERVISOR` (comun.js).
+- **Mapa más grande y con motivos (Oscar, 2026-09-09, noche):**
+  - En pantalla grande la página Mapa lleva el **menú arriba** (barra horizontal, clase `pagina-mapa` en el
+    body) y ocupa hasta 1480 px de ancho; el mapa **arranca recortado a la zona con tiendas** y tiene
+    **zoom** (+ / − / ⟲ vista inicial / GT todo el país, Ctrl+rueda, pellizco en el teléfono) y arrastre.
+    Etiquetas y puntos se dibujan con tamaño constante en píxeles (`escalaPx`), así en el teléfono no
+    salen diminutos.
+  - **Por qué se ha ido la gente, por tienda y por departamento:** el pipeline publica `porAgencia` en cada
+    desglose de salidas.json (n, renuncia, despido, tempranas y TODOS los motivos por agencia; se omite en
+    los cortes acumulados de la comparativa para no engordar el JSON, que quedó en ~490 KB). Las fichas de
+    tienda, departamento y supervisor muestran barras de motivos; se quitó el texto que decía que el detalle
+    por tienda no se publicaba (decisión de Oscar: es justo lo que el CEO quiere ver).
 
 ## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 

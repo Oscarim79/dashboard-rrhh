@@ -334,3 +334,42 @@ button.secundario { background: none; border-color: transparent; color: var(--ti
 .tsup-det { font-size: 12.5px; color: var(--tinta-suave); margin-top: 4px; line-height: 1.4; }
 .tsup-link { font-size: 12.5px; color: var(--verde); font-weight: 600; margin-top: 8px; }
 .tsup-otros { grid-column: 1 / -1; margin: 0; font-size: 12.5px; }
+
+/* ── página Mapa: menú arriba y ancho completo en pantalla grande ── */
+@media (min-width: 900px) {
+  .pagina-mapa { padding-left: 0; }
+  .pagina-mapa nav#menu { position: sticky; top: 0; bottom: auto; width: 100%; height: auto; flex-direction: row; align-items: center; flex-wrap: wrap; padding: 0 14px; gap: 2px; }
+  .pagina-mapa nav#menu .menu-marca { padding: 10px 18px 10px 4px; margin: 0 8px 0 0; border-bottom: none; border-right: 1px solid rgba(255, 255, 255, 0.14); }
+  .pagina-mapa nav#menu .menu-depto { display: none; }
+  .pagina-mapa nav#menu a { padding: 14px 14px; border-left: none; border-bottom: 3px solid transparent; }
+  .pagina-mapa nav#menu a.activo { border-bottom-color: var(--verde); background: none; }
+  .pagina-mapa main { max-width: 1480px; padding: 16px 22px 40px; }
+  .pagina-mapa .mapa-layout { grid-template-columns: 5fr 3fr; gap: 16px; }
+}
+.mapa-tarjeta { position: relative; padding: 8px; }
+.mapa-tarjeta .pie { padding: 0 6px 4px; }
+.mapa-cont svg { width: 100%; height: auto; display: block; }
+@media (max-width: 899px) { .mapa-cont svg { min-height: 78vw; } }
+.zoom-botones { position: absolute; top: 12px; right: 12px; z-index: 5; display: flex; flex-direction: column; gap: 4px; align-items: center; }
+.zoom-botones button { width: 38px; height: 38px; padding: 0; font-size: 20px; font-weight: 700; border-radius: 8px; background: var(--tarjeta); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); }
+.zoom-botones #zoom-todo { font-size: 12px; letter-spacing: 0.04em; }
+.zoom-eti { font-size: 11.5px; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+/* ficha: texto más grande, sobre todo en teléfono */
+.mapa-panel { font-size: 15px; }
+.mapa-panel h3 { font-size: 19px; }
+.mapa-panel .sub { font-size: 14.5px; }
+.mapa-panel .tabla-mapa td, .mapa-panel .tabla-mapa th { font-size: 14.5px; padding: 8px 6px; }
+.mapa-panel .kpi-valor { font-size: 26px; }
+.mapa-panel .kpi-eti { font-size: 13px; }
+.mapa-panel .kpi-nota { font-size: 12.5px; }
+.mapa-panel h4 { font-size: 13.5px; margin: 16px 0 8px; }
+.mapa-panel .pie { font-size: 12.5px; }
+/* barras de motivos (por qué se ha ido la gente) */
+.motivos { display: grid; gap: 6px; }
+.mot { display: grid; grid-template-columns: minmax(110px, 38%) 1fr 64px; align-items: center; gap: 8px; font-size: 14.5px; }
+.mot span { overflow-wrap: anywhere; }
+.mot i { display: block; height: 16px; background: #EEECE6; border-radius: 4px; overflow: hidden; }
+.mot i b { display: block; height: 100%; background: var(--ambar); border-radius: 4px; }
+.mot em { font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
+.mot em small { font-weight: 400; color: var(--tinta-suave); margin-left: 4px; font-size: 12px; }
+@media (max-width: 899px) { .mapa-panel { font-size: 16px; } .mot { font-size: 15.5px; } .mapa-panel .tabla-mapa td, .mapa-panel .tabla-mapa th { font-size: 15px; } }

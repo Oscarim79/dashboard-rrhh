@@ -590,6 +590,20 @@ if (!sal) {
     for (const s of Object.values(c)) s.motivos = Object.fromEntries(Object.entries(s.motivos).sort((a, b) => b[1] - a[1]).slice(0, 5));
     return Object.fromEntries(Object.entries(c).sort((a, b) => b[1].n - a[1].n));
   };
+  // Por agencia/tienda (Oscar, 2026-09-09: el CEO quiere ver POR QUÉ se va la gente de cada
+  // tienda y región): salidas, renuncias, despidos, antes de 6 meses y todos los motivos. Solo conteos.
+  const porAgencia = (arr) => {
+    const c = {};
+    for (const r of arr) {
+      const s = (c[r.agencia] ??= { n: 0, renuncia: 0, despido: 0, otros: 0, tempranas: 0, motivos: {} });
+      s.n++;
+      s[r.razon === 'RENUNCIA' ? 'renuncia' : r.razon === 'DESPIDO' ? 'despido' : 'otros']++;
+      if (RANGOS_TEMPRANOS.has(r.rango)) s.tempranas++;
+      if (!r.sub.startsWith('(')) s.motivos[r.sub] = (s.motivos[r.sub] ?? 0) + 1;
+    }
+    for (const s of Object.values(c)) s.motivos = Object.fromEntries(Object.entries(s.motivos).sort((a, b) => b[1] - a[1]));
+    return Object.fromEntries(Object.entries(c).sort((a, b) => b[1].n - a[1].n));
+  };
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
     porTipoTienda: porTipoTienda(arr),
@@ -607,8 +621,11 @@ if (!sal) {
     diasLab: stats(arr.map((r) => r.diasLab).filter((d) => d != null)),
     tempranas: tempranas(arr),
     porSupervisor: porSupervisor(arr),
+    porAgencia: porAgencia(arr),
     n: arr.length,
   });
+  // los cortes acumulados (comparativa) no necesitan el detalle por agencia: se quita para no engordar el JSON
+  const sinAgencia = (d) => { const { porAgencia: _omitido, ...resto } = d; return resto; };
   // porAnio lleva el desglose completo de cada año (misma forma que "total"),
   // para que la página pueda filtrar por año; la regla de privacidad (agrupar
   // valores con menos de 3 casos en OTROS) se aplica dentro de cada año.
@@ -647,7 +664,7 @@ if (!sal) {
       acumuladoAnio: Object.fromEntries(anios.map((a) => {
         const ultimoMes = Math.max(...arr.filter((r) => r.anio === a && r.ym <= hoyYm).map((r) => +r.ym.slice(5, 7)), 0);
         const meses = Array.from({ length: ultimoMes }, (_, i) => String(i + 1).padStart(2, '0'));
-        return [a, Object.fromEntries(meses.map((mm) => [mm, dims(arr.filter((r) => r.anio === a && r.ym <= `${a}-${mm}`))]))];
+        return [a, Object.fromEntries(meses.map((mm) => [mm, sinAgencia(dims(arr.filter((r) => r.anio === a && r.ym <= `${a}-${mm}`)))]))];
       })),
     };
   };

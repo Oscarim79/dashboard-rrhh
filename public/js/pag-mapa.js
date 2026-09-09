@@ -1,9 +1,10 @@
 // Página Mapa: Guatemala por departamentos, coloreada por supervisor de región, con una
 // tienda por punto. Datos: public/geo/mapa-gt.json (contornos), data/tiendas.json (registro de
-// tiendas: tipo, supervisor, ubicación) y data/salidas.json (salidas del área Comercial en el
-// período elegido). Al tocar un departamento, una tienda o un supervisor se muestra su ficha.
-// Extras (Oscar, 2026-09-09): semáforo por tienda, línea de tiempo mes a mes, comparación del
-// supervisor con sus pares y costo estimado de la rotación (modelo del Simulador).
+// tiendas: tipo, supervisor, ubicación), data/salidas.json (salidas del área Comercial en el
+// período elegido) y data/vacantes.json (días reales de vacante para el costo).
+// Al tocar un departamento, una tienda o un supervisor se muestra su ficha con números y, sobre
+// todo, POR QUÉ se ha ido la gente (motivos). Extras: semáforo por tienda, línea de tiempo mes a
+// mes, comparación del supervisor con sus pares, costo estimado, zoom y arrastre del mapa.
 import { pintarPie, marcarNavActiva, fmtNum, salidasDe, vacantesDe, pintarSelectorDepto, pintarSelectorPeriodo,
   dimsSalidas, etiquetaPeriodo, aniosYMeses, aplicarDesglose, fmtYm, fmtYmCorto, COLOR_SUPERVISOR,
   vacantesEnPeriodo, agregarVacantes, diasCalibrados } from './comun.js';
@@ -29,6 +30,7 @@ const SEMAFORO = { verde: '#0B7A55', ambar: '#D99A2B', rojo: '#A33B2E' };
 const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 const nombreSub = (k) => aplicarDesglose({ [k]: 1 }, null).items[0]?.eti ?? k;
 const pct = (v, n) => (n ? Math.round((v / n) * 100) : 0);
+const plural = (n, uno, varios) => `${fmtNum(n)} ${n === 1 ? uno : varios}`;
 
 const P = mapa.proyeccion;
 const px = (lon) => (lon - P.lon0) * P.s;
@@ -41,7 +43,7 @@ const ubicadas = tiendas.filter((t) => t.lat != null);
 const porCoord = {};
 for (const t of ubicadas) (porCoord[`${t.lat},${t.lon}`] ??= []).push(t);
 for (const grupo of Object.values(porCoord)) grupo.forEach((t, i) => {
-  const ang = grupo.length > 1 ? (i / grupo.length) * Math.PI * 2 - Math.PI / 2 : 0, rad = grupo.length > 1 ? 11 : 0;
+  const ang = grupo.length > 1 ? (i / grupo.length) * Math.PI * 2 - Math.PI / 2 : 0, rad = grupo.length > 1 ? 13 : 0;
   t.x = px(t.lon) + Math.cos(ang) * rad; t.y = py(t.lat) + Math.sin(ang) * rad;
 });
 const porDepto = {};
@@ -52,6 +54,15 @@ const dominante = (lista) => {
   for (const t of lista) if (t.supervisor) c[t.supervisor] = (c[t.supervisor] ?? 0) + 1;
   return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] ?? null;
 };
+
+// ── encuadre: el mapa arranca recortado a la zona donde hay tiendas (así se ve más grande) ──
+const MARGEN = 70;
+const bb = ubicadas.reduce((b, t) => ({ x0: Math.min(b.x0, t.x), y0: Math.min(b.y0, t.y), x1: Math.max(b.x1, t.x), y1: Math.max(b.y1, t.y) }), { x0: W, y0: H, x1: 0, y1: 0 });
+const VISTA_INICIAL = { x: Math.max(0, bb.x0 - MARGEN), y: Math.max(0, bb.y0 - MARGEN), w: 0, h: 0 };
+VISTA_INICIAL.w = Math.min(W, bb.x1 + MARGEN) - VISTA_INICIAL.x;
+VISTA_INICIAL.h = Math.min(H, bb.y1 + MARGEN) - VISTA_INICIAL.y;
+let vista = { ...VISTA_INICIAL };
+const zoomActual = () => VISTA_INICIAL.w / vista.w;
 
 // ── estado ──
 const salidas = salidasDe(salidasTodo, 'comercial');
@@ -67,10 +78,24 @@ let D = null;                   // desglose de salidas del período (o del mes a
 const periodoVigente = () => (anim.activa ? `m:${mesesConDato[anim.indice]}` : periodo);
 const etiVigente = () => (anim.activa ? fmtYm(mesesConDato[anim.indice]) : etiquetaPeriodo(periodo, salidas.generado));
 
-// ── salidas y costo por tienda ──
-const bajasTienda = (nombre) => Object.entries(D.agencia ?? {}).filter(([k]) => k.split('·')[0] === nombre).reduce((s, [, v]) => s + v, 0);
+// ── salidas, motivos y costo por tienda ──
+// porAgencia (pipeline): por tienda, n / renuncia / despido / tempranas / motivos, según la columna
+// agencia del registro de salidas. Las tiendas del registro de tiendas se buscan por su nombre.
+const datosTienda = (nombre) => D.porAgencia?.[nombre] ?? null;
+const bajasTienda = (nombre) => datosTienda(nombre)?.n ?? 0;
 const bajasLista = (lista) => lista.reduce((s, t) => s + bajasTienda(t.nombre), 0);
 const tipoEti = (t) => (t.tipo ? `tipo ${t.tipo}` : 'tipo por definir');
+// suma de varias tiendas: n, renuncia, despido, tempranas y motivos
+const sumarTiendas = (lista) => {
+  const acc = { n: 0, renuncia: 0, despido: 0, tempranas: 0, motivos: {} };
+  for (const t of lista) {
+    const d = datosTienda(t.nombre); if (!d) continue;
+    acc.n += d.n; acc.renuncia += d.renuncia; acc.despido += d.despido; acc.tempranas += d.tempranas;
+    for (const [k, v] of Object.entries(d.motivos ?? {})) acc.motivos[k] = (acc.motivos[k] ?? 0) + v;
+  }
+  acc.motivos = Object.fromEntries(Object.entries(acc.motivos).sort((a, b) => b[1] - a[1]));
+  return acc;
+};
 // Costo por salida según el tipo de tienda, ponderado con la mezcla renuncia/despido del período.
 // Mismo cálculo que el Resumen: modelo del Simulador con los días reales de vacante del período
 // (mediana del control de vacantes por tipo; si no hay dato, el supuesto del modelo). Tienda sin
@@ -107,12 +132,20 @@ function calcularSemaforo() {
 }
 const colorTienda = (t) => (modoColor === 'semaforo' ? SEMAFORO[semaforo[t.nombre]?.color ?? 'verde'] : colorSup(t.supervisor));
 
+const viewBoxStr = () => `${vista.x.toFixed(1)} ${vista.y.toFixed(1)} ${vista.w.toFixed(1)} ${vista.h.toFixed(1)}`;
+
+// Escala: cuántas unidades del mapa caben en un píxel de pantalla. Con ella las etiquetas y los
+// puntos miden lo mismo en píxeles en el teléfono y en el escritorio (si no, en el teléfono salían
+// diminutos porque el mapa se dibuja a 876 unidades en 320 px).
+const escalaPx = () => { const w = document.getElementById('mapa').clientWidth || 700; return vista.w / w; };
 function pintarMapa() {
   const etiP = etiVigente();
+  const k = escalaPx();
+  const fuenteEti = (13 * k).toFixed(1), rBase = 5.5 * k, rExtra = 13 * k, trazo = (1.6 * k).toFixed(2);
   document.getElementById('periodo-eval').textContent = anim.activa ? `Reproduciendo: ${etiP}.` : `Salidas del período: ${etiP}.`;
   const sel = seleccion;
   const apagadoSup = (s) => sel?.tipo === 'sup' && s !== sel.clave;
-  let s = `<svg viewBox="0 0 ${W} ${H}" class="mapa-svg" role="img" aria-label="Mapa de Guatemala por regiones">`;
+  let s = `<svg viewBox="${viewBoxStr()}" class="mapa-svg" role="img" aria-label="Mapa de Guatemala por regiones">`;
   s += '<g class="deptos">';
   for (const d of mapa.departamentos) {
     const lista = porDepto[d.nombre] ?? [];
@@ -120,22 +153,24 @@ function pintarMapa() {
     const activo = sel?.tipo === 'depto' && sel.clave === d.nombre;
     const apagado = sel?.tipo === 'sup' && !lista.some((t) => t.supervisor === sel.clave);
     const relleno = modoColor === 'semaforo' ? (lista.length ? '#D9D6CE' : '#ECEAE4') : (dom ? colorSup(dom) : '#ECEAE4');
-    s += `<path d="${d.d}" data-depto="${esc(d.nombre)}" fill="${relleno}" fill-opacity="${lista.length && modoColor !== 'semaforo' ? (apagado ? 0.15 : 0.55) : 1}" stroke="#fff" stroke-width="1.6" class="depto${activo ? ' activo' : ''}${lista.length ? ' con-tiendas' : ''}"><title>${esc(d.nombre)}${lista.length ? `: ${lista.length} ${lista.length === 1 ? 'tienda' : 'tiendas'}` : ''}</title></path>`;
+    s += `<path d="${d.d}" data-depto="${esc(d.nombre)}" fill="${relleno}" fill-opacity="${lista.length && modoColor !== 'semaforo' ? (apagado ? 0.15 : 0.55) : 1}" stroke="#fff" stroke-width="${trazo}" class="depto${activo ? ' activo' : ''}${lista.length ? ' con-tiendas' : ''}"><title>${esc(d.nombre)}${lista.length ? `: ${lista.length} ${lista.length === 1 ? 'tienda' : 'tiendas'}` : ''}</title></path>`;
   }
   s += '</g><g class="etiquetas">';
-  for (const d of mapa.departamentos) if (porDepto[d.nombre]) s += `<text x="${d.cx}" y="${d.cy}" text-anchor="middle" font-size="13" font-weight="600" fill="#17251F" pointer-events="none">${esc(d.nombre)}</text>`;
+  for (const d of mapa.departamentos) if (porDepto[d.nombre]) s += `<text x="${d.cx}" y="${d.cy}" text-anchor="middle" font-size="${fuenteEti}" font-weight="700" fill="#17251F" fill-opacity="0.75" pointer-events="none">${esc(d.nombre)}</text>`;
   s += '</g><g class="tiendas">';
   const medida = (t) => (modoTamano === 'costo' ? costoTienda(t) : bajasTienda(t.nombre));
   const maxM = Math.max(1, ...ubicadas.map(medida));
   for (const t of ubicadas) {
     const b = bajasTienda(t.nombre);
-    const r = 5 + Math.sqrt(medida(t) / maxM) * 11;
+    const r = rBase + Math.sqrt(medida(t) / maxM) * rExtra;
     const activo = sel?.tipo === 'tienda' && sel.clave === t.nombre;
     const sem = semaforo[t.nombre];
-    s += `<circle cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorTienda(t)}" fill-opacity="${apagadoSup(t.supervisor) ? 0.25 : 0.92}" stroke="${activo ? '#17251F' : '#fff'}" stroke-width="${activo ? 3 : 1.5}" data-tienda="${esc(t.nombre)}" class="tienda"><title>${esc(t.nombre)} (${tipoEti(t)}) · ${t.supervisor ?? SIN_SUP} · ${fmtNum(b)} ${b === 1 ? 'salida' : 'salidas'} en ${etiP} · ${fmtQ(costoTienda(t))}${sem ? ` · semáforo ${sem.color} (promedio de su tipo: ${sem.prom.toFixed(1)})` : ''}</title></circle>`;
+    s += `<circle cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorTienda(t)}" fill-opacity="${apagadoSup(t.supervisor) ? 0.25 : 0.92}" stroke="${activo ? '#17251F' : '#fff'}" stroke-width="${((activo ? 3.2 : 1.6) * k).toFixed(2)}" data-tienda="${esc(t.nombre)}" class="tienda"><title>${esc(t.nombre)} (${tipoEti(t)}) · ${t.supervisor ?? SIN_SUP} · ${plural(b, 'salida', 'salidas')} en ${etiP} · ${fmtQ(costoTienda(t))}${sem ? ` · semáforo ${sem.color} (promedio de su tipo: ${sem.prom.toFixed(1)})` : ''}</title></circle>`;
   }
   s += '</g></svg>';
   document.getElementById('mapa').innerHTML = s;
+  activarZoomArrastre(document.querySelector('.mapa-svg'));
+  document.getElementById('zoom-eti').textContent = zoomActual() > 1.05 ? `${zoomActual().toFixed(1)}×` : '';
 
   // leyenda: por supervisor (chips que seleccionan) o semáforo (solo informativo)
   const leyenda = document.getElementById('leyenda');
@@ -157,19 +192,82 @@ function pintarMapa() {
   document.querySelectorAll('[data-modo-color]').forEach((b) => b.classList.toggle('primario', b.dataset.modoColor === modoColor));
   document.querySelectorAll('[data-modo-tamano]').forEach((b) => b.classList.toggle('primario', b.dataset.modoTamano === modoTamano));
   const btn = document.getElementById('anim-play');
-  btn.textContent = anim.activa ? '⏸ Pausar' : '▶ Reproducir mes a mes';
+  btn.textContent = anim.activa && anim.timer ? '⏸ Pausar' : '▶ Reproducir mes a mes';
   const sl = document.getElementById('anim-mes');
   sl.max = String(Math.max(0, mesesConDato.length - 1));
   sl.value = String(anim.indice);
   document.getElementById('anim-eti').textContent = mesesConDato.length ? (anim.activa ? fmtYm(mesesConDato[anim.indice]) : `${fmtYmCorto(mesesConDato[0])} → ${fmtYmCorto(mesesConDato.at(-1))}`) : '';
 }
 
+// ── zoom (+ / − / ⟲, rueda con Ctrl, pellizco) y arrastre del mapa ──
+function aplicarVista() {
+  const svg = document.querySelector('.mapa-svg');
+  if (svg) { svg.setAttribute('viewBox', viewBoxStr()); svg.style.touchAction = zoomActual() > 1.05 ? 'none' : 'pan-y'; }
+  document.getElementById('zoom-eti').textContent = zoomActual() > 1.05 ? `${zoomActual().toFixed(1)}×` : '';
+}
+function zoom(factor, cx = vista.x + vista.w / 2, cy = vista.y + vista.h / 2) {
+  const nw = Math.min(W, Math.max(VISTA_INICIAL.w / 8, vista.w / factor)), nh = nw * (VISTA_INICIAL.h / VISTA_INICIAL.w);
+  const kx = (cx - vista.x) / vista.w, ky = (cy - vista.y) / vista.h;
+  vista = { x: cx - kx * nw, y: cy - ky * nh, w: nw, h: nh };
+  limitarVista(); pintarMapa();
+}
+function limitarVista() {
+  vista.x = Math.min(Math.max(vista.x, -vista.w * 0.3), W - vista.w * 0.7);
+  vista.y = Math.min(Math.max(vista.y, -vista.h * 0.3), H - vista.h * 0.7);
+}
+let arrastrando = false; // para no abrir una ficha al soltar tras arrastrar
+function activarZoomArrastre(svg) {
+  if (!svg) return;
+  svg.style.touchAction = zoomActual() > 1.05 ? 'none' : 'pan-y';
+  const punteros = new Map();
+  let inicio = null, distIni = null, vistaIni = null, movido = 0;
+  const aUnidades = (dx, dy) => { const r = svg.getBoundingClientRect(); return [dx * vista.w / r.width, dy * vista.h / r.height]; };
+  svg.addEventListener('pointerdown', (e) => {
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    svg.setPointerCapture(e.pointerId);
+    if (punteros.size === 1) { inicio = { x: e.clientX, y: e.clientY }; vistaIni = { ...vista }; movido = 0; }
+    if (punteros.size === 2) { const [a, b] = [...punteros.values()]; distIni = Math.hypot(a.x - b.x, a.y - b.y); vistaIni = { ...vista }; }
+  });
+  svg.addEventListener('pointermove', (e) => {
+    if (!punteros.has(e.pointerId)) return;
+    punteros.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (punteros.size === 2 && distIni) {
+      const [a, b] = [...punteros.values()];
+      const f = Math.hypot(a.x - b.x, a.y - b.y) / distIni;
+      const nw = Math.min(W, Math.max(VISTA_INICIAL.w / 8, vistaIni.w / f)), nh = nw * (VISTA_INICIAL.h / VISTA_INICIAL.w);
+      vista = { x: vistaIni.x + (vistaIni.w - nw) / 2, y: vistaIni.y + (vistaIni.h - nh) / 2, w: nw, h: nh };
+      limitarVista(); aplicarVista(); movido = 99;
+    } else if (punteros.size === 1 && inicio && (e.pointerType !== 'touch' || zoomActual() > 1.05)) {
+      const [dx, dy] = aUnidades(e.clientX - inicio.x, e.clientY - inicio.y);
+      movido = Math.max(movido, Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y));
+      vista = { ...vista, x: vistaIni.x - dx, y: vistaIni.y - dy };
+      limitarVista(); aplicarVista();
+    }
+  });
+  const soltar = (e) => { punteros.delete(e.pointerId); if (!punteros.size) { inicio = null; distIni = null; arrastrando = movido > 6; if (movido > 6) pintarMapa(); setTimeout(() => { arrastrando = false; }, 0); } };
+  svg.addEventListener('pointerup', soltar); svg.addEventListener('pointercancel', soltar);
+  svg.addEventListener('wheel', (e) => { if (!e.ctrlKey) return; e.preventDefault(); const r = svg.getBoundingClientRect(); zoom(e.deltaY < 0 ? 1.25 : 0.8, vista.x + (e.clientX - r.left) / r.width * vista.w, vista.y + (e.clientY - r.top) / r.height * vista.h); }, { passive: false });
+}
+
+// ── fichas ──
 const semaforoEti = (t) => { const s = semaforo[t.nombre]; return s ? `<i class="punto" style="background:${SEMAFORO[s.color]}" title="Semáforo ${s.color}: promedio de su tipo ${s.prom.toFixed(1)}"></i>` : ''; };
 function listaTiendas(lista) {
   const orden = [...lista].sort((a, b) => bajasTienda(b.nombre) - bajasTienda(a.nombre) || a.nombre.localeCompare(b.nombre));
   return `<table class="tabla-mapa"><thead><tr><th>Tienda</th><th>Tipo</th><th class="n">Salidas</th><th class="n">Costo est.</th></tr></thead><tbody>${orden.map((t) => `<tr><td><button type="button" class="enlace" data-ir-tienda="${esc(t.nombre)}"><i class="punto" style="background:${colorSup(t.supervisor)}"></i>${esc(t.nombre)}</button> ${semaforoEti(t)}</td><td>${t.tipo ?? '—'}</td><td class="n">${fmtNum(bajasTienda(t.nombre))}</td><td class="n">${fmtQ(costoTienda(t))}</td></tr>`).join('')}</tbody></table>`;
 }
-const notaCosto = () => `<p class="pie">Costo estimado = salidas de la tienda × costo por salida de su tipo, con el mismo modelo que el Resumen (días reales de vacante del período: ${Object.entries(diasPorTipo).map(([t, d]) => `${t} ${Math.round(d)} d`).join(' · ')}; mezcla renuncia/despido del período). Es una estimación para comparar, no un dato contable.</p>`;
+// "Por qué se ha ido la gente": barras de motivos (todos los que haya, de mayor a menor)
+function motivosHtml(motivos, total, titulo = 'Por qué se ha ido la gente') {
+  const items = Object.entries(motivos ?? {}).filter(([k]) => !k.startsWith('('));
+  if (!items.length) return `<p class="sub">Sin motivos registrados en este período.</p>`;
+  const max = items[0][1];
+  return `<h4>${titulo}</h4><div class="motivos">${items.map(([k, v]) => `<div class="mot"><span>${esc(nombreSub(k))}</span><i><b style="width:${Math.max(4, (v / max) * 100)}%"></b></i><em>${fmtNum(v)}<small>${pct(v, total)}%</small></em></div>`).join('')}</div>`;
+}
+const notaCosto = () => `<p class="pie">Costo estimado = salidas × costo por salida de su tipo, con el mismo modelo que el Resumen (días reales de vacante del período: ${Object.entries(diasPorTipo).map(([t, d]) => `${t} ${Math.round(d)} d`).join(' · ')}; mezcla renuncia/despido del período). Es una estimación para comparar, no un dato contable.</p>`;
+const kpisRD = (d, etiP) => `<div class="kpis kpis-panel">
+    <div class="kpi"><div class="kpi-valor">${fmtNum(d.n)}</div><div class="kpi-eti">salidas · ${etiP}</div></div>
+    <div class="kpi"><div class="kpi-valor">${fmtNum(d.renuncia)}</div><div class="kpi-eti">renuncias · ${fmtNum(d.despido)} despidos</div></div>
+    <div class="kpi"><div class="kpi-valor ${d.n && d.tempranas / d.n >= 0.5 ? 'rojo' : ''}">${pct(d.tempranas, d.n)}%</div><div class="kpi-eti">se fue antes de 6 meses (${fmtNum(d.tempranas)})</div></div>
+  </div>`;
 
 function pintarPanel() {
   const etiP = etiVigente();
@@ -177,19 +275,19 @@ function pintarPanel() {
   const cerrar = '<button type="button" class="cerrar" id="panel-cerrar" aria-label="Volver al resumen">✕</button>';
   if (!seleccion) {
     el.innerHTML = `<h3>Todas las regiones · ${etiP}</h3>
-      <p class="sub">${tiendas.length} tiendas activas, ${supervisores.length} supervisores de región. Toca un supervisor, un departamento o un punto del mapa.</p>
+      <p class="sub">${tiendas.length} tiendas activas, ${supervisores.length} supervisores de región. Toca un supervisor, un departamento o un punto del mapa para ver sus números y por qué se ha ido su gente.</p>
       <table class="tabla-mapa"><thead><tr><th>Supervisor</th><th class="n">Tiendas</th><th class="n">Salidas</th><th class="n">&lt; 6 m</th><th class="n">Costo est.</th></tr></thead><tbody>${[...supervisores, null].map((sup) => {
         const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup); if (!lista.length) return '';
         const ps = D.porSupervisor?.[sup] ?? null;
         return `<tr><td><button type="button" class="enlace" data-ir-sup="${esc(sup ?? '')}"><i class="punto" style="background:${colorSup(sup)}"></i>${esc(sup ?? SIN_SUP)}</button></td><td class="n">${lista.length}</td><td class="n">${fmtNum(ps?.n ?? bajasLista(lista))}</td><td class="n">${ps ? `${pct(ps.tempranas, ps.n)}%` : '—'}</td><td class="n">${fmtQ(costoLista(lista))}</td></tr>`;
       }).join('')}</tbody></table>
+      ${motivosHtml(D.subMotivo, D.n, `Por qué se ha ido la gente · todas las tiendas · ${etiP}`)}
       <p class="pie">"Salidas" y "&lt; 6 m" por supervisor vienen del registro de salidas (columna supervisor); "Tiendas" y el costo, del registro de tiendas (salidas por agencia). Pueden no cuadrar exactamente porque una salida se cuenta por su supervisor, no por la tienda.</p>${notaCosto()}`;
   } else if (seleccion.tipo === 'sup') {
     const sup = seleccion.clave || null;
     const lista = tiendas.filter((t) => (t.supervisor ?? null) === sup);
     const ps = D.porSupervisor?.[sup];
     const deptos = [...new Set(lista.map((t) => t.departamento).filter(Boolean))].sort();
-    const top = Object.entries(ps?.motivos ?? {}).slice(0, 3);
     // comparación con los otros supervisores de región (promedio simple de los que tienen salidas)
     const pares = supervisores.filter((s) => s !== sup).map((s) => D.porSupervisor?.[s]).filter((p) => p?.n);
     const promN = pares.length ? pares.reduce((a, p) => a + p.n, 0) / pares.length : null;
@@ -211,31 +309,31 @@ function pintarPanel() {
         <div class="kpi"><div class="kpi-valor medio">${fmtQ(costoLista(lista))}</div><div class="kpi-eti">costo estimado de la rotación de sus tiendas</div></div>
       </div>
       ${pares.length ? `<p class="pie">"Promedio" = los otros ${pares.length} supervisores de región en ${etiP}: ${Math.round(promN)} salidas, ${Math.round(promR)}% renuncias, ${Math.round(promT)}% antes de 6 meses. Naranja = peor que el promedio; verde = mejor.</p>` : ''}
-      ${top.length ? `<p class="sub"><b>Por qué se va su gente:</b> ${top.map(([k, v]) => `${nombreSub(k)} ${fmtNum(v)}`).join(' · ')}</p>` : ''}` : `<p class="sub">Sin salidas registradas con este supervisor en ${etiP}.</p>`}
+      ${motivosHtml(ps.motivos, ps.n, `Por qué se ha ido su gente · ${etiP}`)}` : `<p class="sub">Sin salidas registradas con este supervisor en ${etiP}.</p>`}
       <h4>Sus tiendas</h4>${listaTiendas(lista)}${notaCosto()}`;
   } else if (seleccion.tipo === 'depto') {
     const lista = porDepto[seleccion.clave] ?? [];
     const sups = [...new Set(lista.map((t) => t.supervisor ?? null))];
+    const agg = sumarTiendas(lista);
     el.innerHTML = `${cerrar}<h3>${esc(seleccion.clave)}</h3>
-      <p class="sub">${lista.length} ${lista.length === 1 ? 'tienda' : 'tiendas'} · ${fmtNum(bajasLista(lista))} salidas en ${etiP} · costo estimado ${fmtQ(costoLista(lista))} · ${sups.length === 1 ? 'un supervisor' : `${sups.length} supervisores`}: ${sups.map((s) => `<button type="button" class="enlace" data-ir-sup="${esc(s ?? '')}"><i class="punto" style="background:${colorSup(s)}"></i>${esc(s ?? SIN_SUP)}</button>`).join(', ')}.</p>
-      ${lista.length ? listaTiendas(lista) : '<p class="sub">Sin tiendas en este departamento.</p>'}${notaCosto()}`;
+      <p class="sub">${plural(lista.length, 'tienda', 'tiendas')} · costo estimado ${fmtQ(costoLista(lista))} · ${sups.length === 1 ? 'supervisor' : `${sups.length} supervisores`}: ${sups.map((s) => `<button type="button" class="enlace" data-ir-sup="${esc(s ?? '')}"><i class="punto" style="background:${colorSup(s)}"></i>${esc(s ?? SIN_SUP)}</button>`).join(', ')}.</p>
+      ${kpisRD(agg, etiP)}
+      ${motivosHtml(agg.motivos, agg.n, `Por qué se ha ido la gente en ${esc(seleccion.clave)} · ${etiP}`)}
+      <h4>Tiendas</h4>${lista.length ? listaTiendas(lista) : '<p class="sub">Sin tiendas en este departamento.</p>'}${notaCosto()}`;
   } else {
     const t = tiendas.find((x) => x.nombre === seleccion.clave);
-    const b = bajasTienda(t.nombre);
+    const d = datosTienda(t.nombre) ?? { n: 0, renuncia: 0, despido: 0, tempranas: 0, motivos: {} };
     const sem = semaforo[t.nombre];
     el.innerHTML = `${cerrar}<h3><i class="punto grande" style="background:${colorSup(t.supervisor)}"></i>${esc(t.nombre)}</h3>
+      <p class="sub">${esc(t.marca)} · ${tipoEti(t)} · ${esc(t.municipio ?? '—')}${t.departamento ? `, <button type="button" class="enlace" data-ir-depto="${esc(t.departamento)}">${esc(t.departamento)}</button>` : ''} · supervisor <button type="button" class="enlace" data-ir-sup="${esc(t.supervisor ?? '')}">${esc(t.supervisor ?? SIN_SUP)}</button>.</p>
+      ${kpisRD(d, etiP)}
       <div class="kpis kpis-panel">
-        <div class="kpi"><div class="kpi-valor">${fmtNum(b)}</div><div class="kpi-eti">salidas · ${etiP}</div>${sem ? `<div class="kpi-nota"><i class="punto" style="background:${SEMAFORO[sem.color]}"></i>${sem.color === 'verde' ? 'por debajo del' : sem.color === 'rojo' ? 'por encima del' : 'cerca del'} promedio de su tipo (${sem.prom.toFixed(1)})</div>` : ''}</div>
         <div class="kpi"><div class="kpi-valor medio">${fmtQ(costoTienda(t))}</div><div class="kpi-eti">costo estimado de su rotación</div><div class="kpi-nota">${fmtQ(costoPorTipo[t.tipo] ?? costoPorTipo.B)} por salida (${tipoEti(t)}${t.tipo ? '' : ', se asume B'})</div></div>
-        <div class="kpi"><div class="kpi-valor medio">${t.tipo ?? '—'}</div><div class="kpi-eti">tipo de tienda</div></div>
+        ${sem ? `<div class="kpi"><div class="kpi-valor medio" style="color:${SEMAFORO[sem.color]}">${sem.color === 'verde' ? 'Mejor' : sem.color === 'rojo' ? 'Peor' : 'Igual'}</div><div class="kpi-eti">que el promedio de las tiendas tipo ${t.tipo ?? 'B'} (${sem.prom.toFixed(1)} salidas)</div></div>` : ''}
       </div>
-      <table class="tabla-mapa"><tbody>
-        <tr><td>Marca</td><td>${esc(t.marca)}</td></tr>
-        <tr><td>Supervisor</td><td><button type="button" class="enlace" data-ir-sup="${esc(t.supervisor ?? '')}">${esc(t.supervisor ?? SIN_SUP)}</button></td></tr>
-        <tr><td>Ubicación</td><td>${esc(t.municipio ?? '—')}${t.departamento ? `, <button type="button" class="enlace" data-ir-depto="${esc(t.departamento)}">${esc(t.departamento)}</button>` : ''}</td></tr>
-        ${t.observacion ? `<tr><td>Nota</td><td>${esc(t.observacion)}</td></tr>` : ''}
-      </tbody></table>
-      <p class="pie">Salidas de esta tienda según la columna agencia del registro de salidas. El detalle de motivos por tienda no se publica (con pocos casos identificaría personas).</p>${notaCosto()}`;
+      ${motivosHtml(d.motivos, d.n, `Por qué se ha ido la gente de ${esc(t.nombre)} · ${etiP}`)}
+      ${t.observacion ? `<p class="pie">Nota del registro de tiendas: ${esc(t.observacion)}</p>` : ''}
+      <p class="pie">Salidas y motivos de esta tienda según la columna agencia del registro de salidas de RRHH.</p>${notaCosto()}`;
   }
 }
 
@@ -269,12 +367,11 @@ function iniciarAnim() {
 function detenerAnim(volver = true) {
   clearInterval(anim.timer); anim.timer = null;
   if (volver) { anim.activa = false; anim.indice = 0; }
-  else { anim.activa = true; } // pausado en un mes concreto: sigue mostrando ese mes
-  document.getElementById('anim-play').textContent = '▶ Reproducir mes a mes';
   refrescar();
 }
 
 document.addEventListener('click', (e) => {
+  if (arrastrando) return;
   const t = e.target.closest('[data-tienda]'); if (t) return seleccionar({ tipo: 'tienda', clave: t.dataset.tienda });
   const d = e.target.closest('[data-depto]'); if (d) return seleccionar((porDepto[d.dataset.depto] ?? []).length ? { tipo: 'depto', clave: d.dataset.depto } : null);
   const s = e.target.closest('[data-sup]'); if (s) return seleccionar(seleccion?.tipo === 'sup' && seleccion.clave === (s.dataset.sup || null) ? null : { tipo: 'sup', clave: s.dataset.sup || null });
@@ -286,6 +383,10 @@ document.addEventListener('click', (e) => {
   const mt = e.target.closest('[data-modo-tamano]'); if (mt) { modoTamano = mt.dataset.modoTamano; return refrescar(); }
   if (e.target.closest('#anim-play')) return anim.timer ? detenerAnim(false) : iniciarAnim();
   if (e.target.closest('#anim-stop')) return detenerAnim(true);
+  if (e.target.closest('#zoom-mas')) return zoom(1.5);
+  if (e.target.closest('#zoom-menos')) return zoom(1 / 1.5);
+  if (e.target.closest('#zoom-inicio')) { vista = { ...VISTA_INICIAL }; return pintarMapa(); }
+  if (e.target.closest('#zoom-todo')) { vista = { x: 0, y: 0, w: W, h: H }; return pintarMapa(); }
 });
 document.getElementById('anim-mes').addEventListener('input', (e) => {
   clearInterval(anim.timer); anim.timer = null;
@@ -300,3 +401,6 @@ const supUrl = new URLSearchParams(location.hash.replace(/^#/, '')).get('sup') ?
 if (supUrl && supervisores.includes(supUrl)) seleccion = { tipo: 'sup', clave: supUrl };
 refrescar();
 pintarPie(meta);
+// al girar el teléfono o cambiar el ancho, se redibuja con los tamaños correctos
+let tRedibujo = null;
+window.addEventListener('resize', () => { clearTimeout(tRedibujo); tRedibujo = setTimeout(pintarMapa, 150); });

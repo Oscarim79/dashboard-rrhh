@@ -51,6 +51,8 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   `public/data/tiendas.json` para alimentarlo. Colores por supervisor en `COLOR_SUPERVISOR` (comun.js).
   El mapa tiene semáforo por tienda, línea de tiempo mes a mes, comparación del supervisor con sus pares
   y costo estimado (mismo cálculo que el Resumen). El Resumen enlaza al mapa con `mapa.html#sup=Nombre`.
+  Las fichas muestran motivos de salida por tienda/departamento (`porAgencia` en salidas.json; Oscar
+  2026-09-09). En escritorio la página Mapa lleva el menú arriba (`body.pagina-mapa`).
 
 ## Modelo de costo — valores de control
 
