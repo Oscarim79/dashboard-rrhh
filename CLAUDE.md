@@ -105,7 +105,8 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   período (2024 ≈ 64/36, 2026 ≈ 82/18, últimos 12m Comercial ≈ 90/10).
 - **Confiabilidad por fecha (Oscar, 2026-09-08):** el sheet se terminó de estructurar a mediados de 2025;
   antes la captura era menos rigurosa. Los últimos 12 meses son el corte más confiable (por eso es el
-  período por defecto) y la nota bajo la barra de período lo dice en todas las páginas.
+  período por defecto). **Desde 2026-09-09 el sitio NO lo dice** (Oscar lo quitó: el CEO ya lo sabe y no
+  debe verse ante otros gerentes); es contexto interno, no copy.
 - **Días de vacante y plazas abiertas:** control de VACANTES. NO usarlo para contar salidas:
   solo registra las plazas que se abrieron (171 vs 474 bajas en todo el registro).
 - **Comparativa entre años y "antes de 6 meses, por qué" (CEO, 2026-09-08 → hecho 2026-09-09):** cada

@@ -78,6 +78,11 @@ casi todo es salario/clima. Las 17 salidas con motivo vago ("voluntaria"/"no con
 `.data/revision-motivos-2026-09-09.xlsx` (local, gitignoreado) con la nota y un sub-motivo sugerido;
 Oscar debe corregirlas en el sheet. Fila 475 del sheet tiene fecha de baja futura (17/11/2026).
 
+**Sin avisos de confiabilidad en el sitio (Oscar, 2026-09-09):** se quitaron la frase bajo la barra de
+período ("los datos más finos y confiables son los de los últimos 12 meses…") y el "Ojo al comparar" de
+la comparativa. El CEO ya conoce el tema y no debe aparecer cuando se presente a otros gerentes. La nota
+bajo la barra ahora solo dice qué cubre "todo el registro". El hecho sigue documentado aquí y en CLAUDE.md.
+
 Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
 último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).
 

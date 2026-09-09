@@ -224,10 +224,8 @@ if (!salidasTodo.total) {
     const medMeses = (D) => (D.diasLab?.mediana != null ? Math.round((D.diasLab.mediana / 30.4) * 10) / 10 : null);
     const pct = (v, n) => (n ? Math.round((v / n) * 100) : 0);
     const meses = Array.from({ length: +mm }, (_, i) => String(i + 1).padStart(2, '0'));
-    const anioViejo = Math.min(+a, +b);
-    const aviso = anioViejo <= 2025
-      ? `<b>Ojo al comparar:</b> el registro se terminó de estructurar a mediados de 2025 y antes la captura era menos rigurosa, así que parte de la diferencia en motivos y antigüedad puede venir del registro y no de la realidad. `
-      : '';
+    // Sin aviso de confiabilidad (Oscar, 2026-09-09): el CEO ya lo sabe y no debe verse ante otros gerentes.
+    const aviso = '';
     const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
     cont.innerHTML = `
       <div class="tarjeta">
