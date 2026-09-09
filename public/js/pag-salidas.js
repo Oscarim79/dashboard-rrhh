@@ -170,7 +170,7 @@ if (!salidasTodo.total) {
       <tbody>${sups.map(([nombre, s]) => `<tr><td>${nombre}</td><td class="n"><b>${fmtNum(s.n)}</b></td><td class="n">${fmtNum(s.renuncia)}</td><td class="n">${fmtNum(s.despido)}</td><td class="n">${fmtNum(s.tempranas)}<span class="pct">${s.n ? Math.round((s.tempranas / s.n) * 100) : 0}%</span></td></tr>`).join('')}</tbody>
       </table></div>` : '<p class="sub">Sin dato de supervisor.</p>';
     document.getElementById('supervisor-nota').textContent =
-      `Salidas del equipo de cada supervisor o jefe en ${etiP}, según la columna "supervisor o jefe" del registro de RRHH. "< 6 meses" = cuántas de esas salidas tenían menos de 6 meses en la empresa (y qué parte de las bajas de ese equipo representan). Bajas que no son renuncia ni despido (no confirmados, temporales) cuentan en el total pero no en esas dos columnas.`;
+      `Salidas del equipo de cada supervisor o jefe en ${etiP}, según la columna "supervisor o jefe" del registro de RRHH. "< 6 meses" = cuántas de esas salidas tenían menos de 6 meses en la empresa (y qué parte de las bajas de ese equipo representan). Bajas que no son renuncia ni despido (no confirmados, temporales, vacacionistas) cuentan en el total pero no en esas dos columnas.${depto === 'comercial' ? ' Ojo: con el selector en Comercial solo se cuentan las salidas del área Comercial; un supervisor de Logística, Mercadeo o Créditos aparece con pocas o ninguna. Para ver a todos los equipos completos, cambia el selector a General.' : ''}`;
 
     // ── género ──
     document.getElementById('genero').innerHTML = barrasH(
