@@ -24,6 +24,17 @@ export const DATOS = {
     casos: {},
   },
 
+  // ── 1a. Qué agrupa cada motivo de salida (Oscar, 2026-09-09) ────────────────
+  // Se muestra en la página Salidas al pasar el cursor (o tocar, en el teléfono) sobre la
+  // barra del motivo. La clave es el nombre del motivo tal como aparece en la gráfica.
+  // Solo descripciones generales: nunca casos ni personas concretas. Para agregar un motivo,
+  // se añade una línea; si un motivo no está aquí, su barra simplemente no tiene detalle.
+  detalleMotivos: {
+    'Clima laboral': 'Maltrato, jefes abusivos, insultos, mal ambiente en la tienda.',
+    'Salario': 'No se paga el salario mínimo, bono 14, aguinaldo u horas extra.',
+    'Horarios': 'No hay pago de hora extra, exigencia de trabajar de lunes a lunes, no permiten vacaciones.',
+  },
+
   // ── 1b. Cifras del documento "Propuesta de estructuración de RRHH" (sep 2026) ──
   documento: {
     personasRRHH: 3,                  // jefe + dos asistentes

@@ -268,3 +268,13 @@ footer {
 .tabla-sup td.n { white-space: nowrap; }
 .tabla-sup th { white-space: normal; font-size: 11.5px; }
 .tabla-sup .pct { font-size: 11px; color: var(--tinta-suave); margin-left: 3px; }
+
+/* ── globo de detalle sobre motivos (Salidas) ── */
+.con-detalle { cursor: pointer; outline: none; }
+.con-detalle:hover rect:not(:first-child), .con-detalle:focus rect:not(:first-child) { filter: brightness(0.9); }
+.eti-detalle { text-decoration: underline dotted; text-underline-offset: 3px; }
+.globo {
+  position: absolute; z-index: 30; background: var(--tinta); color: #fff; font-size: 13px; line-height: 1.45;
+  padding: 9px 12px; border-radius: 8px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18); pointer-events: none;
+}
+.globo b { display: block; margin-bottom: 2px; }

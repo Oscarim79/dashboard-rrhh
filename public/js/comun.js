@@ -379,3 +379,42 @@ export function diasCalibrados(diasCobertura, tipo, minimo = 8) {
   if (t && t.n >= minimo && t.mediana != null) return { dias: t.mediana, fuente: `mediana tipo ${tipo} (n=${t.n})` };
   return { dias: diasCobertura.global.mediana, fuente: `mediana global (n=${diasCobertura.global.n})` };
 }
+
+// ── Globo de detalle sobre filas de gráfica (`data-detalle`) ──────────────────
+// En escritorio aparece al pasar el cursor; en el teléfono, al tocar la fila (y se cierra al
+// tocar fuera). Se activa una sola vez por página; funciona aunque las gráficas se redibujen.
+let globoActivo = false;
+export function activarDetalles() {
+  if (globoActivo) return;
+  globoActivo = true;
+  const tip = document.createElement('div');
+  tip.className = 'globo';
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  let fijado = null; // fila tocada (móvil): el globo queda hasta tocar fuera
+  const mostrar = (fila) => {
+    tip.innerHTML = `<b>${fila.dataset.titulo}</b> ${fila.dataset.detalle}`;
+    tip.hidden = false;
+    const r = fila.getBoundingClientRect();
+    const ancho = Math.min(360, window.innerWidth - 24);
+    tip.style.width = ancho + 'px';
+    let x = r.left + r.width / 2 - ancho / 2;
+    x = Math.max(12, Math.min(x, window.innerWidth - ancho - 12));
+    tip.style.left = x + window.scrollX + 'px';
+    tip.style.top = r.bottom + window.scrollY + 6 + 'px';
+  };
+  const ocultar = () => { tip.hidden = true; fijado = null; };
+  document.addEventListener('mouseover', (e) => { const f = e.target.closest?.('.con-detalle'); if (f && !fijado && matchMedia('(hover: hover)').matches) mostrar(f); });
+  document.addEventListener('mouseout', (e) => { if (!fijado && e.target.closest?.('.con-detalle') && !e.relatedTarget?.closest?.('.con-detalle')) tip.hidden = true; });
+  document.addEventListener('click', (e) => {
+    const f = e.target.closest?.('.con-detalle');
+    if (!f) { if (!e.target.closest('.globo')) ocultar(); return; }
+    if (fijado === f) { ocultar(); return; }
+    fijado = f; mostrar(f);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') ocultar();
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.classList?.contains('con-detalle')) { e.preventDefault(); e.target.click(); }
+  });
+  document.addEventListener('focusin', (e) => { if (e.target.classList?.contains('con-detalle')) mostrar(e.target); });
+}

@@ -87,6 +87,13 @@ período ("los datos más finos y confiables son los de los últimos 12 meses…
 la comparativa. El CEO ya conoce el tema y no debe aparecer cuando se presente a otros gerentes. La nota
 bajo la barra ahora solo dice qué cubre "todo el registro". El hecho sigue documentado aquí y en CLAUDE.md.
 
+**Globo de detalle por motivo (Oscar, 2026-09-09):** en las dos gráficas de motivos de Salidas, los motivos
+subrayados muestran un globo al pasar el cursor (escritorio) o tocar la barra (teléfono) con qué casos
+agrupa cada uno. Los textos viven en `public/js/propuesta-datos.js → detalleMotivos` (hoy: Clima laboral,
+Salario, Horarios; agregar un motivo = una línea) y se les suma automáticamente lo que el pipeline
+unificó del registro ("mal trato", "por salario"…). Mecánica: `barrasH` acepta `detalle` por fila
+(graficas.js) y `activarDetalles()` en comun.js pinta el globo (`.globo` en el CSS).
+
 Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
 último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).
 

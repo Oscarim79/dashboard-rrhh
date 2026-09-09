@@ -1,7 +1,8 @@
 // Gráficas SVG mínimas, sin dependencias. Cada elemento codifica un dato.
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
 
-// Barras horizontales: items = [{eti, valor, extra?, color?}]
+// Barras horizontales: items = [{eti, valor, extra?, color?, detalle?}]
+// `detalle`: texto que se muestra al pasar el cursor o tocar la fila (ver activarDetalles en comun.js).
 export function barrasH(items, { formato = (v) => v, ancho = 800, colorDef = '#46615A' } = {}) {
   const alto = items.length * 34 + 6;
   const max = Math.max(...items.map((i) => i.valor), 1);
@@ -11,9 +12,11 @@ export function barrasH(items, { formato = (v) => v, ancho = 800, colorDef = '#4
   items.forEach((it, i) => {
     const y = i * 34 + 4;
     const w = Math.max((it.valor / max) * zonaBarra, 2);
-    s += `<text x="${zonaEti - 8}" y="${y + 17}" text-anchor="end" font-size="13" fill="#17251F">${esc(it.eti)}</text>`;
+    if (it.detalle) s += `<g class="con-detalle" tabindex="0" role="button" aria-label="${esc(it.eti)}: ${esc(it.detalle)}" data-detalle="${esc(it.detalle)}" data-titulo="${esc(it.eti)}"><rect x="0" y="${y}" width="${ancho}" height="30" fill="transparent"/>`;
+    s += `<text x="${zonaEti - 8}" y="${y + 17}" text-anchor="end" font-size="13" fill="#17251F"${it.detalle ? ' class="eti-detalle"' : ''}>${esc(it.eti)}</text>`;
     s += `<rect x="${zonaEti}" y="${y + 4}" width="${w}" height="18" rx="4" fill="${it.color ?? colorDef}"/>`;
     s += `<text x="${zonaEti + w + 8}" y="${y + 17}" font-size="13" font-weight="700" fill="#17251F" style="font-variant-numeric:tabular-nums">${esc(formato(it.valor))}${it.extra ? ` <tspan font-weight="400" fill="#5A6660">${esc(it.extra)}</tspan>` : ''}</text>`;
+    if (it.detalle) s += '</g>';
   });
   return s + '</svg>';
 }

@@ -2,7 +2,7 @@
 // Selector General / Comercial: usa el bloque porDepartamento.comercial del JSON
 // (columna AREA LAB del sheet). Selector de período (global): todo el registro,
 // últimos 12 meses, un año (el año en curso = "a la fecha") o un mes concreto.
-import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE,
+import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE, activarDetalles,
   pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO } from './comun.js';
 import { DATOS } from './propuesta-datos.js';
 import { barrasH, columnas } from './graficas.js';
@@ -30,6 +30,14 @@ if (!salidasTodo.total) {
   // El pipeline unifica sinónimos antes de contar (mal ambiente/mal trato → clima laboral, etc.);
   // se dice en el pie de cada gráfica de motivos con lo que de verdad se unificó en el registro.
   const nombreSub = (k) => (aplicarDesglose({ [k]: 1 }, null).items[0]?.eti ?? k);
+  // Qué agrupa cada motivo: texto de RRHH (propuesta-datos.js) + lo que el registro unificó.
+  // Se muestra en un globo al pasar el cursor o tocar la barra (pedido de Oscar, 2026-09-09).
+  const detalleMotivo = (eti) => {
+    const manual = DATOS.detalleMotivos?.[eti] ?? '';
+    const reg = Object.entries(salidasTodo.agrupacionesSubMotivo ?? {}).find(([dest]) => nombreSub(dest) === eti)?.[1];
+    const regTexto = reg ? `En el registro incluye lo anotado como ${Object.keys(reg).map((s) => `"${s.toLowerCase()}"`).join(' y ')}.` : '';
+    return [manual, regTexto].filter(Boolean).join(' ') || null;
+  };
   const notaUnificados = (() => {
     const g = Object.entries(salidasTodo.agrupacionesSubMotivo ?? {});
     if (!g.length) return '';
@@ -117,11 +125,11 @@ if (!salidasTodo.total) {
     const conReparto = depto === 'comercial' && periodo === 'todo' && Object.keys(DATOS.desgloseVoluntaria?.casos ?? {}).length > 0;
     const des = aplicarDesglose(D.subMotivo, conReparto ? DATOS.desgloseVoluntaria : null);
     document.getElementById('submotivo').innerHTML = des.items.length ? barrasH(
-      des.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A' })),
+      des.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#46615A', detalle: detalleMotivo(i.eti) })),
       { formato: fmtNum }) : '<p class="sub">Sin motivos registrados.</p>';
     document.getElementById('submotivo-nota').innerHTML = conReparto
       ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). ${notaUnificados}`
-      : `Todos los motivos por separado, tal como los registra RRHH, sin agrupar en "Otros". ${notaUnificados} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle.`;
+      : `Todos los motivos por separado, tal como los registra RRHH, sin agrupar en "Otros". Los motivos subrayados tienen detalle: pasa el cursor o tócalos para ver qué casos agrupan. ${notaUnificados} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle.`;
 
     // ── los que se van antes de 6 meses: POR QUÉ (pedido del CEO, 2026-09-08) ──
     // El pipeline cruza razón/sub-motivo con antigüedad menor a 6 meses (solo conteos, n≥3).
@@ -133,10 +141,10 @@ if (!salidasTodo.total) {
       ? `${fmtNum(TP.n)} de las ${fmtNum(D.n)} salidas de ${etiP} (${pctTemprano}%) fueron de personas con menos de 6 meses en la empresa: ${partesRazon.join(', ')}. Estos son sus motivos:`
       : `Sin salidas antes de 6 meses en ${etiP}.`;
     document.getElementById('tempranas').innerHTML = desT.items.length ? barrasH(
-      desT.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#B5741A' })),
+      desT.items.map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#B5741A', detalle: detalleMotivo(i.eti) })),
       { formato: fmtNum }) : '';
     document.getElementById('tempranas-nota').innerHTML = TP.n
-      ? `Solo cuenta a quienes salieron con menos de 6 meses de antigüedad; los motivos son los que RRHH registró para cada salida, todos por separado, sin agrupar en "Otros". ${notaUnificados} La barra gris son salidas marcadas solo como "voluntaria", sin detalle.`
+      ? `Solo cuenta a quienes salieron con menos de 6 meses de antigüedad; los motivos son los que RRHH registró para cada salida, todos por separado, sin agrupar en "Otros". Los motivos subrayados tienen detalle: pasa el cursor o tócalos para ver qué casos agrupan. ${notaUnificados} La barra gris son salidas marcadas solo como "voluntaria", sin detalle.`
       : '';
 
     // ── agencia (top 12) ──
@@ -276,5 +284,6 @@ if (!salidasTodo.total) {
     (p) => { periodo = p; pintar(depto, periodo); });
   pintar(depto, periodo);
   pintarComparativa(depto);
+  activarDetalles();
   pintarPie(meta);
 }
