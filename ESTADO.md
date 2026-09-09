@@ -550,7 +550,7 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
    definir). Pendiente de largo plazo: que el pipeline lea ese Sheet en vez de config/tiendas.json.
 6. **Textos de los globos de motivos** (propuesta-datos.js → detalleMotivos): solo hay Clima laboral, Salario y
    Horarios; Oscar puede dar frases para los demás motivos.
-7. Archivo suelto `AGENTS.md` (copia vieja de CLAUDE.md creada por alguna herramienta): borrar o commitear.
+7. ~~AGENTS.md~~ borrado el 2026-09-09.
 
 ## Pendientes (no bloquean nada)
 
