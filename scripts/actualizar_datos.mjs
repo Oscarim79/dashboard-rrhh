@@ -26,6 +26,11 @@ function sheetId() {
 }
 
 const TIENDAS_CFG = JSON.parse(readFileSync(path.join(ROOT, 'config', 'tiendas.json'), 'utf8'));
+// Marcas FUERA de todas las cifras principales por ahora (Oscar, 2026-09-09): Abi Q y Friotec son otros
+// negocios y no hay respuestas sobre sus plantillas, costos y personal compartido. Sus filas siguen
+// leyéndose y se publican aparte (salidas.json → porMarca, rotacion.json → calculado.series) para
+// reactivarlas sin tocar el pipeline: basta con vaciar este conjunto.
+const MARCAS_EXCLUIDAS = new Set(['Abi Q', 'Friotec']);
 
 // ── descarga (con reintentos: Google a veces corta la conexión a medias) ───
 async function descargar(id, intentos = 3) {
@@ -204,7 +209,7 @@ I.depto = colIdx(H, 'DEPARTAMENTO');
 const desconocidos = new Map();
 let negativos = 0, discrepantes = 0, cerradasSinFechaCierre = 0, cerradasSinDias = 0, sinMotivo = 0;
 
-const filasVac = vac.filas.map((f) => {
+const filasVacTodas = vac.filas.map((f) => {
   const solicitud = fechaISO(f[I.sol]);
   const cierre = fechaISO(f[I.cie]);
   const estatus = norm(f[I.estatus]) || null; // CERRADA / ABIERTA / CANCELADA
@@ -350,6 +355,8 @@ function agregarVacantes(filas) {
   };
 }
 
+const filasVac = filasVacTodas.filter((r) => !MARCAS_EXCLUIDAS.has(r.empresa));
+if (filasVacTodas.length !== filasVac.length) console.log(`Vacantes: ${filasVacTodas.length - filasVac.length} filas de ${[...MARCAS_EXCLUIDAS].join(' y ')} quedan fuera (decisión de Oscar, 2026-09-09).`);
 const agregadosVac = agregarVacantes(filasVac);
 const canales = agregadosVac.canales;
 const filasComercial = filasVac.filter((r) => r.departamento === 'COMERCIAL');
@@ -364,6 +371,7 @@ const vacantesJson = {
   porDepartamento: { comercial: agregarVacantes(filasComercial) },
   departamentos: contarPor(filasVac, (r) => r.departamento),
   departamentoFuente: I.depto >= 0 ? 'columna DEPARTAMENTO del sheet' : 'deducido del puesto (la pestaña no trae departamento)',
+  marcasExcluidas: [...MARCAS_EXCLUIDAS],
 };
 
 // ── 2) ROTACIÓN acumulada (INDICADOR: AÑO, MES, % ROTACION, inicio/fin) ────
@@ -535,7 +543,8 @@ if (!sal) {
       supervisor: IS.supervisor >= 0 ? nombreSupervisor(f[IS.supervisor]) : '(sin supervisor registrado)',
     });
   }
-  regsSalidas = regs;
+  regsSalidas = regs; // todas las marcas (para porMarca y la rotación calculada por marca)
+  const regsPrincipal = regs.filter((r) => !MARCAS_EXCLUIDAS.has(r.marca)); // cifras principales del sitio
   const corte12m = hace12mISO.slice(0, 7);
   const cuenta = (arr, clave, minimo = 1) => {
     const c = {};
@@ -671,7 +680,7 @@ if (!sal) {
     };
   };
   const hoyYm = hoyISO.slice(0, 7);
-  const regsComercial = regs.filter((r) => r.area === 'COMERCIAL');
+  const regsComercial = regsPrincipal.filter((r) => r.area === 'COMERCIAL');
   // Filtro por marca en todo el sitio (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios y no
   // deben mezclarse con Americana. Un bloque completo por marca (columna MARCA de la pestaña).
   const CLAVE_MARCA = { Americana: 'americana', 'Abi Q': 'abiq', Friotec: 'friotec' };
@@ -680,13 +689,14 @@ if (!sal) {
     generado: hoy.toISOString(),
     // qué etiquetas del registro se unificaron bajo cada motivo (solo etiquetas y conteos)
     agrupacionesSubMotivo,
-    ...bloqueSalidas(regs),
+    marcasExcluidas: [...MARCAS_EXCLUIDAS],
+    ...bloqueSalidas(regsPrincipal),
     // Selector General / Comercial del sitio: mismo desglose, solo el área COMERCIAL
     // (columna AREA LAB de la pestaña).
     porDepartamento: { comercial: bloqueSalidas(regsComercial) },
     porMarca,
   };
-  console.log(`Salidas: ${regs.length} en total, ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
+  console.log(`Salidas: ${regs.length} leídas, ${regsPrincipal.length} en las cifras principales (${regs.length - regsPrincipal.length} de ${[...MARCAS_EXCLUIDAS].join(' y ')} fuera), ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} ${diasLabMalos === 1 ? 'salida tiene' : 'salidas tienen'} días laborados imposibles (negativos o enormes); se ${diasLabMalos === 1 ? 'excluye' : 'excluyen'} de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
   const nFut = Object.values(bajasFuturas).reduce((a, b) => a + b, 0);
@@ -783,14 +793,18 @@ const metaJson = {
 // la marca "A2K, ABIQ" (personal corporativo compartido) se cuenta en Americana y se informa aparte.
 {
   const ESCOPOS = ['total', 'comercial', 'americana', 'abiq', 'friotec'];
-  const MARCA_CLAVE = { AMERICANA: 'americana', A2K: 'americana', 'A2K, ABIQ': 'americana', 'A2K ABIQ': 'americana', 'A2K,ABIQ': 'americana', ABIQ: 'abiq', 'ABI Q': 'abiq', FRIOTEC: 'friotec' };
-  const esCompartida = (m) => m.includes('A2K') && m.includes('ABIQ');
+  // ADMINISTRACION = los administrativos del corporativo (antes 'A2K, ABIQ'; Oscar, 2026-09-09): cuentan en Americana
+  const MARCA_CLAVE = { AMERICANA: 'americana', A2K: 'americana', 'A2K, ABIQ': 'americana', 'A2K ABIQ': 'americana', 'A2K,ABIQ': 'americana', ADMINISTRACION: 'americana', ADMINISTRATIVOS: 'americana', ADMINISTRATIVO: 'americana', ABIQ: 'abiq', 'ABI Q': 'abiq', FRIOTEC: 'friotec' };
+  const esAdministracion = (m) => m.startsWith('ADMINISTRA') || (m.includes('A2K') && m.includes('ABIQ'));
   const MARCA_ETI_CLAVE = { Americana: 'americana', 'Abi Q': 'abiq', Friotec: 'friotec' };
   const AREA_NORM = (a) => { const n = norm(a); return n === 'COBROS Y CREDITOS' || n === 'COBROS' ? 'CREDITOS Y COBROS' : n; };
+  const CLAVES_EXCLUIDAS = new Set([...MARCAS_EXCLUIDAS].map((m) => ({ 'Abi Q': 'abiq', Friotec: 'friotec', Americana: 'americana' })[m]));
   const escoposDe = (marcaNorm, areaNorm) => {
-    const s = ['total'];
-    if (areaNorm === 'COMERCIAL') s.push('comercial');
-    const m = MARCA_CLAVE[marcaNorm]; if (m) s.push(m);
+    const m = MARCA_CLAVE[marcaNorm];
+    const fuera = m && CLAVES_EXCLUIDAS.has(m); // total y comercial se calculan sin las marcas excluidas
+    const s = fuera ? [] : ['total'];
+    if (!fuera && areaNorm === 'COMERCIAL') s.push('comercial');
+    if (m) s.push(m);
     return s;
   };
   const vacio = () => Object.fromEntries(ESCOPOS.map((x) => [x, 0]));
@@ -819,14 +833,15 @@ const metaJson = {
       const alta = fechaISO(f[iAltaB]); const salida = fechaISO(f[iSalB]);
       if (!alta) { if (norm(f[iMarcaB]) || norm(f[iDepB])) baseSinAlta++; continue; }
       if (salida) continue;
-      const m = norm(f[iMarcaB]); if (esCompartida(m)) compartida++;
+      const m = norm(f[iMarcaB]); if (esAdministracion(m)) compartida++;
       for (const e of escoposDe(m, AREA_NORM(f[iDepB]))) activos[e]++;
     }
     // bajas por mes (registro de SALIDAS ya leído)
     const bajasMes = {};
     for (const r of regsSalidas) {
       bajasMes[r.ym] ??= vacio();
-      const esc = ['total']; if (r.area === 'COMERCIAL') esc.push('comercial'); if (MARCA_ETI_CLAVE[r.marca]) esc.push(MARCA_ETI_CLAVE[r.marca]);
+      const fuera = MARCAS_EXCLUIDAS.has(r.marca);
+      const esc = fuera ? [] : ['total']; if (!fuera && r.area === 'COMERCIAL') esc.push('comercial'); if (MARCA_ETI_CLAVE[r.marca]) esc.push(MARCA_ETI_CLAVE[r.marca]);
       for (const e of esc) bajasMes[r.ym][e]++;
     }
     // reconstrucción mes a mes, desde el primer mes con altas hasta hoy
@@ -863,15 +878,16 @@ const metaJson = {
     }).filter(Boolean);
     rotacionJson.calculado = {
       fuente: 'Bajas: pestaña SALIDAS. Altas: pestaña ALTAS (solo conteos). Plantilla de hoy: BASE DE DATOS GENERAL (solo conteo de activos). Plantilla de meses anteriores reconstruida hacia atrás con altas y bajas.',
-      anclaje: { fecha: hoyISO, activos, marcaCompartidaEnAmericana: compartida },
+      anclaje: { fecha: hoyISO, activos, administracionEnAmericana: compartida },
+      marcasExcluidas: [...MARCAS_EXCLUIDAS], // total y comercial se calculan sin ellas (el indicador manual del sheet sí las incluye)
       desde: primero, hasta: hoyYmR,
       series,
       comparacion: { total: comparar('total', 'TOTAL EMPRESA'), comercial: comparar('comercial', 'AREA COMERCIAL') },
     };
-    console.log(`Rotación calculada: activos hoy ${JSON.stringify(activos)} (compartida A2K/ABIQ: ${compartida}) · meses ${primero}→${hoyYmR}`);
+    console.log(`Rotación calculada: activos hoy ${JSON.stringify(activos)} (administración, contada en Americana: ${compartida}) · meses ${primero}→${hoyYmR}`);
     if (altasSinFecha) calidad.push({ tipo: 'aviso', n: altasSinFecha, mensaje: `${altasSinFecha} filas de ALTAS no tienen fecha de alta; no entran al indicador calculado.` });
     if (baseSinAlta) calidad.push({ tipo: 'aviso', n: baseSinAlta, mensaje: `${baseSinAlta} filas de BASE DE DATOS GENERAL no tienen fecha de alta; no cuentan como activas.` });
-    if (compartida) calidad.push({ tipo: 'info', n: compartida, mensaje: `${compartida} colaboradores activos con marca "A2K, ABIQ" (corporativo compartido) se cuentan en Americana para el indicador por marca.` });
+    if (compartida) calidad.push({ tipo: 'info', n: compartida, mensaje: `${compartida} colaboradores activos de ADMINISTRACION (corporativo) se cuentan en Americana para el indicador por marca.` });
   }
 }
 

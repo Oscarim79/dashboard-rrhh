@@ -110,8 +110,10 @@ export function pintarSelectorDepto(onCambio) {
 // Friotec queda fuera del sitio por ahora (Oscar, 2026-09-09): 2 tiendas y 1 persona activa, sus
 // fuentes no cuadran. Sus datos siguen en los JSON; para reactivarla basta con volver a ponerla aquí
 // y quitarla de MARCAS_OCULTAS.
-export const MARCAS = { todas: 'Todas las marcas', americana: 'Americana', abiq: 'Abi Q' };
-export const MARCAS_OCULTAS = ['Friotec'];
+// 2026-09-09 (cierre): Oscar también saca a Abi Q. Con solo Americana no hay nada que elegir, así que el
+// desplegable de marca no se pinta (se pinta solo cuando MARCAS tiene más de una opción).
+export const MARCAS = { todas: 'Todas las marcas' };
+export const MARCAS_OCULTAS = ['Abi Q', 'Friotec'];
 const CLAVE_MARCA = 'dashboard-rrhh:marca';
 export function marcaActual() {
   try {
@@ -159,9 +161,10 @@ export function salidasDe(salidas, depto) {
 export function notaAlcance(depto) {
   const marca = marcaActual();
   if (marca !== 'todas') return `Viendo solo la marca <b>${MARCAS[marca]}</b> (todas sus tiendas y puestos). Con una marca elegida, el selector General/Comercial no aplica. Cambia a "Todas las marcas" en la barra de período para ver el conjunto.`;
-  return depto === 'comercial'
+  const fuera = MARCAS_OCULTAS.length ? ` <b>${MARCAS_OCULTAS.join(' y ')}</b> quedan fuera de todas las cifras por ahora.` : '';
+  return (depto === 'comercial'
     ? 'Viendo solo el <b>departamento Comercial</b> (tiendas). Cambia a "General" arriba para ver toda la empresa.'
-    : 'Viendo <b>toda la empresa</b>. Cambia a "Comercial" arriba para ver solo el departamento comercial.';
+    : 'Viendo <b>toda la empresa</b>. Cambia a "Comercial" arriba para ver solo el departamento comercial.') + fuera;
 }
 
 // ── Selector global de período (pedido del CEO, 2026-09-07) ───────────────────
@@ -241,7 +244,7 @@ export function pintarSelectorPeriodo({ anios, meses, generado, contenedor = nul
       <option value="">Un mes…</option>
       ${mesesOrd.map((ym) => `<option value="m:${ym}" ${`m:${ym}` === actual ? 'selected' : ''}>${fmtYm(ym)}</option>`).join('')}
     </select>
-    ${marca ? `<select class="sel-marca ${marcaActual() !== 'todas' ? 'primario' : ''}" aria-label="Marca">
+    ${marca && Object.keys(MARCAS).length > 1 ? `<select class="sel-marca ${marcaActual() !== 'todas' ? 'primario' : ''}" aria-label="Marca">
       ${Object.entries(MARCAS).map(([k, eti]) => `<option value="${k}" ${k === marcaActual() ? 'selected' : ''}>${k === 'todas' ? 'Marca: todas' : eti}</option>`).join('')}
     </select>` : ''}
     ${nota ? `<span class="barra-periodo-nota">${nota}</span>` : ''}

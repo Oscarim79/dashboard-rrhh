@@ -145,17 +145,17 @@ function pintarMarcas(rango) {
   const el = document.getElementById('tabla-marcas'), nota = document.getElementById('marcas-nota');
   if (!CALC) { el.innerHTML = '<p class="sub">El pipeline aún no publica el indicador calculado.</p>'; nota.textContent = ''; return; }
   const hastaYm = rango.hasta ? rango.hasta.slice(0, 7) : null;
-  const filas = ['total', 'comercial', 'americana', 'abiq'].map((e) => { // friotec fuera por ahora (Oscar, 2026-09-09)
+  const filas = ['total', 'comercial'].map((e) => { // Abi Q y Friotec fuera por ahora (Oscar, 2026-09-09): total = Americana
     const s = (CALC.series[e] ?? []).filter((r) => !r.parcial && (!hastaYm || r.ym <= hastaYm));
     const u = s.at(-1); if (!u) return null;
     const delAnio = s.filter((r) => r.anio === u.anio);
     return { e, u, altasAnio: delAnio.reduce((a, r) => a + r.altas, 0) };
   }).filter(Boolean);
   const ultimo = filas[0]?.u;
-  document.getElementById('h-marcas').textContent = `Rotación por marca (calculada automáticamente)${ultimo ? ` · acumulada a ${MES_CORTO[ultimo.mesNum - 1]} ${ultimo.anio}` : ''}`;
+  document.getElementById('h-marcas').textContent = `Rotación calculada automáticamente (solo Americana)${ultimo ? ` · acumulada a ${MES_CORTO[ultimo.mesNum - 1]} ${ultimo.anio}` : ''}`;
   el.innerHTML = `<div class="tabla-scroll"><table class="tabla-sup"><thead><tr><th>Alcance</th><th class="n">Plantilla</th><th class="n">Altas</th><th class="n">Bajas</th><th class="n">% acum.</th></tr></thead><tbody>${filas.map(({ e, u, altasAnio }) => `<tr${marcaActual() === e ? ' class="fila-activa"' : ''}><td>${ESCOPO_ETI[e].charAt(0).toUpperCase() + ESCOPO_ETI[e].slice(1)}</td><td class="n">${fmtNum(u.fin)}</td><td class="n">${fmtNum(altasAnio)}</td><td class="n">${fmtNum(u.bajasAcum)}</td><td class="n"><b class="${u.pctAcum >= 0.6 ? 'rojo' : ''}">${u.pctAcum != null ? fmtPct(u.pctAcum, 1) : '—'}</b>${u.fin < 5 ? '<span class="pct">plantilla muy pequeña</span>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
   const a = CALC.anclaje;
-  nota.textContent = `Cálculo del dashboard con la misma fórmula del indicador: bajas acumuladas del año ÷ promedio de la plantilla del mes. Bajas del registro de SALIDAS, altas de la pestaña ALTAS y plantilla de hoy (${a.fecha}) contada en la BASE DE DATOS GENERAL: ${fmtNum(a.activos.total)} activos en total, ${fmtNum(a.activos.comercial)} en Comercial. Los meses anteriores se reconstruyen hacia atrás con altas y bajas.${a.marcaCompartidaEnAmericana ? ` ${fmtNum(a.marcaCompartidaEnAmericana)} personas del corporativo tienen marca compartida (A2K y Abi Q) y se cuentan en Americana.` : ''} Solo conteos: ningún dato individual.`;
+  nota.textContent = `Cálculo del dashboard con la misma fórmula del indicador: bajas acumuladas del año ÷ promedio de la plantilla del mes. Bajas del registro de SALIDAS, altas de la pestaña ALTAS y plantilla de hoy (${a.fecha}) contada en la BASE DE DATOS GENERAL: ${fmtNum(a.activos.total)} activos en total, ${fmtNum(a.activos.comercial)} en Comercial. Los meses anteriores se reconstruyen hacia atrás con altas y bajas.${a.administracionEnAmericana ? ` ${fmtNum(a.administracionEnAmericana)} personas de administración (corporativo) se cuentan en Americana.` : ''} ${CALC.marcasExcluidas?.length ? `${CALC.marcasExcluidas.join(' y ')} quedan fuera de este cálculo por ahora.` : ''} Solo conteos: ningún dato individual.`;
 }
 // Tabla: indicador manual del sheet frente al calculado, mes a mes del último año, para el alcance actual.
 function pintarValidacion(esCom) {
@@ -168,7 +168,7 @@ function pintarValidacion(esCom) {
     const d = r.calculado.pctAcum != null && r.manual.pctAcum != null ? (r.calculado.pctAcum - r.manual.pctAcum) * 100 : null;
     return `<tr><td>${MES_CORTO[r.mesNum - 1]} ${r.anio}</td><td class="n">${fmtPct(r.manual.pctAcum, 1)}<span class="pct">${fmtNum(r.manual.fin)} pers.</span></td><td class="n">${r.calculado.pctAcum != null ? fmtPct(r.calculado.pctAcum, 1) : '—'}<span class="pct">${fmtNum(r.calculado.fin)} pers.</span></td><td class="n"><span class="delta ${d == null ? 'igual' : Math.abs(d) < 1 ? 'igual' : 'mas'}">${d == null ? '—' : (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1) + ' pts'}</span></td></tr>`;
   }).join('')}</tbody></table></div>`;
-  nota.textContent = 'Sirve para validar el cálculo automático contra lo que el jefe de RRHH llena a mano (el número pequeño es la plantilla al cierre del mes; "Altas" y "Bajas" de la tabla de marcas son las del año en curso y "Plantilla" la del cierre del último mes completo). Diferencias de 1 punto o menos son normales; si son mayores, conviene revisar qué bajas o altas faltan en alguna de las dos fuentes. Cuando cuadre de forma sostenida, la pestaña manual puede dejar de llenarse.';
+  nota.textContent = (CALC.marcasExcluidas?.length ? 'Ojo: el indicador manual del sheet incluye ' + CALC.marcasExcluidas.join(' y ') + ' y el calculado no; parte de la diferencia viene de ahí. ' : '') + 'Sirve para validar el cálculo automático contra lo que el jefe de RRHH llena a mano (el número pequeño es la plantilla al cierre del mes; "Altas" y "Bajas" de la tabla de marcas son las del año en curso y "Plantilla" la del cierre del último mes completo). Diferencias de 1 punto o menos son normales; si son mayores, conviene revisar qué bajas o altas faltan en alguna de las dos fuentes. Cuando cuadre de forma sostenida, la pestaña manual puede dejar de llenarse.';
 }
 
 let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });

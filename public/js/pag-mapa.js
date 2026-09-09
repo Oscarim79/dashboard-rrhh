@@ -213,6 +213,7 @@ function pintarMapa() {
   document.querySelectorAll('[data-modo-color]').forEach((b) => b.classList.toggle('primario', b.dataset.modoColor === modoColor));
   document.querySelectorAll('[data-modo-tamano]').forEach((b) => b.classList.toggle('primario', b.dataset.modoTamano === modoTamano));
   const cm = document.getElementById('ctrl-marca');
+  cm.hidden = MARCAS.length < 2; // con una sola marca activa no hay nada que filtrar
   if (!cm.querySelector('[data-marca]')) cm.insertAdjacentHTML('beforeend', ['todas', ...MARCAS].map((m) => `<button type="button" data-marca="${esc(m)}">${m === 'todas' ? 'Todas' : esc(m)}</button>`).join(''));
   cm.querySelectorAll('[data-marca]').forEach((b) => b.classList.toggle('primario', b.dataset.marca === marca));
   const btn = document.getElementById('anim-play');

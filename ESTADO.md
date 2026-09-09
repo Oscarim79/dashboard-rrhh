@@ -536,6 +536,17 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   1 jefe de tienda + 1 asistente. Sustenta el 15% de impacto en ventas del simulador: un vendedor
   menos = 20–33% de la capacidad de venta, así que 15% asume que el equipo cubre buena parte.
 
+## ✅ Cierre del 2026-09-09 (última hora): Abi Q y Friotec fuera de todas las cifras
+
+- Oscar: "no es justo que Abi Q afecte números sin tener las respuestas". `MARCAS_EXCLUIDAS` en el pipeline saca
+  sus filas (y las de Friotec) de salidas, vacantes y de la rotación calculada total/comercial. Sus datos siguen
+  publicándose aparte (porMarca, calculado.series) para reactivarlas cuando haya respuestas. El desplegable de
+  marca desaparece del sitio (solo queda Americana) y el mapa oculta sus tiendas; Diana Mendez (solo Abi Q) deja de
+  aparecer en supervisores. La nota de alcance de cada página dice que quedan fuera.
+- Datos que dio Oscar: "A2K, ABIQ" = administrativos (corporativo); Oscar ya los renombró en la BASE DE DATOS GENERAL como ADMINISTRACION (27 activos) y el pipeline los cuenta en Americana. CEDI y Logística son lo mismo: Chiquimula
+  bajo Dulce Vidal; zona 12 (Guatemala) bajo David Hernández y/o César Tejeda.
+- Ojo al validar rotación: el indicador manual del sheet sí incluye Abi Q; el calculado ya no. La tabla lo avisa.
+
 ## Qué sigue (cierre del 2026-09-09, en orden de prioridad)
 
 1. **Validar el indicador calculado** un par de meses contra el manual (tabla "Indicador manual vs.
