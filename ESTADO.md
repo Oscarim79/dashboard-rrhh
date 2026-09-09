@@ -28,9 +28,39 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
-## ⏳ PENDIENTE PARA MAÑANA — pedido del CEO (anotado 2026-09-08, noche)
+## ✅ HECHO 2026-09-09: comparativa entre años y "por qué se van antes de 6 meses" (pedido del CEO)
 
-Oscar lo dejó como nota; se trabaja en la sesión del 2026-09-09. Dos cosas:
+Las dos cosas que el CEO pidió el 2026-09-08 ya están en la página **Salidas** (publicadas y verificadas en vivo):
+
+1. **Comparativa entre años · mismo período** — sección al final de Salidas (hay un enlace bajo los KPIs
+   que baja hasta ahí). Controles propios: "Comparar [año] con [año] de enero a [mes]". Por defecto
+   compara el año anterior con el año en curso hasta el **último mes completo con dato** (hoy: enero a
+   agosto de 2025 vs 2026; el CEO pidió ene–jul: se elige julio en el desplegable). Tablas lado a lado
+   (año A · año B · Cambio, con el % que cada fila pesa en su tramo): lo esencial (bajas, renuncias,
+   despidos, antes de 6 meses, % y antigüedad mediana), bajas por mes, antigüedad, razón, motivos,
+   motivos de los que se van antes de 6 meses, agencia (top 12), área (solo en General), marca y género.
+   Naranja = más salidas (o peor) en el segundo año; verde = menos (o mejor). Lleva la advertencia de
+   confiabilidad cuando alguno de los años es 2025 o anterior.
+   - Datos: el pipeline publica `salidas.json → acumuladoAnio[año][mes]` (desglose de enero a ese mes,
+     para cada mes con dato, sin meses posteriores a la lectura). Se calcula en el pipeline y NO sumando
+     meses en el navegador, para que la regla n≥3 → OTROS se aplique sobre el tramo completo.
+     salidas.json pasó de 84 KB a 226 KB (comprimido por Pages es mucho menos); si estorbara, se
+     puede recortar `agencia` de los cortes acumulados. `dimsAcumulado()` en comun.js lo lee.
+2. **Los que se van antes de 6 meses, ¿por qué se van?** — tarjeta nueva en "Por qué se van" (respeta los
+   selectores General/Comercial y de período). El pipeline cruza razón y sub-motivo con antigüedad
+   menor a 6 meses (`tempranas` dentro de cada desglose: n, razon, subMotivo, subMotivoRenuncias, rango;
+   regla n≥3 → OTROS; solo conteos). Últimos 12 meses Comercial: 87 de 137 salidas (64%) fueron de
+   gente con menos de 6 meses; motivos principales salario (30) y clima laboral (20).
+   Ojo: en 2025 (ene–ago) el cruce muestra 0 en "salario" y 0 en "clima laboral" — no es que no
+   existieran, es que en la primera mitad de 2025 los motivos se capturaban distinto ("descuentos",
+   "otros"); de ahí la advertencia de confiabilidad.
+
+Pendiente de Oscar: enseñárselo al CEO y, si prefiere que la comparativa arranque en julio en vez del
+último mes completo, es un cambio de una línea en `pintarComparativa` (pag-salidas.js).
+
+## (Cumplido) PENDIENTE PARA MAÑANA — pedido del CEO (anotado 2026-09-08, noche)
+
+Oscar lo dejó como nota; se resolvió en la sesión del 2026-09-09 (ver arriba). Dos cosas:
 
 1. **Comparativa enero–julio 2025 vs enero–julio 2026 de toda la data de salidas**, lado a
    lado (a la par). Toda la data = las mismas vistas de la página Salidas: total, razón

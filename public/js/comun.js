@@ -313,7 +313,9 @@ export function aniosYMeses({ vacantes, salidas, rotacion } = {}) {
 }
 
 // Desglose de salidas.json para un período (ya con el alcance General/Comercial aplicado).
-const DIMS_VACIAS = () => ({ n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, genero: {}, area: {}, marca: {}, agencia: {}, rango: {}, diasLab: { n: 0, mediana: null, promedio: null } });
+const DIMS_VACIAS = () => ({ n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, genero: {}, area: {}, marca: {}, agencia: {}, rango: {}, diasLab: { n: 0, mediana: null, promedio: null },
+  tempranas: { n: 0, razon: {}, subMotivo: {}, subMotivoRenuncias: {}, rango: {} } });
+export const DIMS_SALIDAS_VACIAS = DIMS_VACIAS;
 export function dimsSalidas(salidas, p) {
   if (!salidas?.total) return DIMS_VACIAS();
   if (p === 'todo') return salidas.total;
@@ -321,6 +323,17 @@ export function dimsSalidas(salidas, p) {
   if (p.startsWith('a:')) return salidas.porAnio?.[p.slice(2)] ?? DIMS_VACIAS();
   if (p.startsWith('m:')) return salidas.porMesDetalle?.[p.slice(2)] ?? DIMS_VACIAS();
   return DIMS_VACIAS();
+}
+
+// Desglose acumulado de enero al mes `mm` ('01'…'12') de un año (comparativa entre años del
+// mismo período). El pipeline publica un corte por cada mes con dato; si el año no llega al
+// mes pedido, vale el último corte disponible (no hay más salidas después).
+export function dimsAcumulado(salidas, anio, mm) {
+  const cortes = salidas?.acumuladoAnio?.[anio];
+  if (!cortes) return DIMS_VACIAS();
+  if (cortes[mm]) return cortes[mm];
+  const previo = Object.keys(cortes).filter((k) => k <= mm).sort().at(-1);
+  return previo ? cortes[previo] : DIMS_VACIAS();
 }
 
 // ── Reparto manual de las renuncias "voluntarias" (RRHH, ver propuesta-datos.js) ──

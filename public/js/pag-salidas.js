@@ -3,7 +3,7 @@
 // (columna AREA LAB del sheet). Selector de período (global): todo el registro,
 // últimos 12 meses, un año (el año en curso = "a la fecha") o un mes concreto.
 import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE,
-  pintarSelectorPeriodo, dimsSalidas, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO } from './comun.js';
+  pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO } from './comun.js';
 import { DATOS } from './propuesta-datos.js';
 import { barrasH, columnas } from './graficas.js';
 
@@ -61,10 +61,10 @@ if (!salidasTodo.total) {
       <div class="kpi"><div class="kpi-valor">${fmtNum(T.n)}</div><div class="kpi-eti">salidas registradas en total</div><div class="kpi-nota">${rangoTotal}</div></div>`;
 
     if (!D.n) {
-      for (const id of ['por-mes', 'antiguedad', 'razon', 'submotivo', 'agencia', 'area', 'marca', 'genero']) {
+      for (const id of ['por-mes', 'antiguedad', 'razon', 'submotivo', 'tempranas', 'agencia', 'area', 'marca', 'genero']) {
         document.getElementById(id).innerHTML = `<p class="sub">Sin salidas registradas en ${etiP} con este alcance.</p>`;
       }
-      for (const id of ['mes-nota', 'antiguedad-nota', 'submotivo-nota']) document.getElementById(id).textContent = '';
+      for (const id of ['mes-nota', 'antiguedad-nota', 'submotivo-nota', 'tempranas-nota', 'tempranas-resumen']) document.getElementById(id).textContent = '';
       return;
     }
 
@@ -114,6 +114,22 @@ if (!salidasTodo.total) {
       ? `De las ${fmtNum(des.voluntarias)} renuncias que el registro solo marca como "voluntaria", RRHH repartió ${fmtNum(des.repartidas)} por motivo (${Object.entries(DATOS.desgloseVoluntaria.casos).map(([k, v]) => `${k} ${v}`).join(', ')})${des.resto > 0 ? (DATOS.desgloseVoluntaria.cubreTodas ? `; las ${fmtNum(des.resto)} restantes, según RRHH, coinciden con casos ya registrados en mejor oportunidad y clima laboral` : `; ${fmtNum(des.resto)} siguen sin detalle`) : ''}. Los motivos que ya existían en el registro se sumaron ("mal trato" cuenta como clima laboral). Motivos con menos de 3 casos van en "Otros".`
       : `Cada motivo por separado, tal como lo registra RRHH. ${des.notaAgrupaciones} La barra gris son salidas que el registro solo marca como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`;
 
+    // ── los que se van antes de 6 meses: POR QUÉ (pedido del CEO, 2026-09-08) ──
+    // El pipeline cruza razón/sub-motivo con antigüedad menor a 6 meses (solo conteos, n≥3).
+    const TP = D.tempranas ?? { n: 0, razon: {}, subMotivo: {} };
+    document.getElementById('h-tempranas').textContent = `Los que se van antes de 6 meses, ¿por qué se van? · ${etiP}`;
+    const desT = aplicarDesglose(TP.subMotivo, null);
+    const partesRazon = Object.entries(TP.razon).map(([k, v]) => `${fmtNum(v)} ${k === 'RENUNCIA' ? (v === 1 ? 'renuncia' : 'renuncias') : k === 'DESPIDO' ? (v === 1 ? 'despido' : 'despidos') : k === 'OTROS' ? 'con otra razón' : titulo(k).toLowerCase()}`);
+    document.getElementById('tempranas-resumen').textContent = TP.n
+      ? `${fmtNum(TP.n)} de las ${fmtNum(D.n)} salidas de ${etiP} (${pctTemprano}%) fueron de personas con menos de 6 meses en la empresa: ${partesRazon.join(', ')}. Estos son sus motivos:`
+      : `Sin salidas antes de 6 meses en ${etiP}.`;
+    document.getElementById('tempranas').innerHTML = desT.items.length ? barrasH(
+      desT.items.slice(0, 12).map((i) => ({ ...i, color: i.eti === SIN_DETALLE ? '#C9CFC9' : '#B5741A' })),
+      { formato: fmtNum }) : '';
+    document.getElementById('tempranas-nota').innerHTML = TP.n
+      ? `Solo cuenta a quienes salieron con menos de 6 meses de antigüedad; los motivos son los que RRHH registró para cada salida. ${desT.notaAgrupaciones} La barra gris son salidas marcadas solo como "voluntaria", sin detalle. Motivos con menos de 3 casos en el período van en "Otros".`
+      : '';
+
     // ── agencia (top 12) ──
     document.getElementById('agencia').innerHTML = barrasH(
       Object.entries(D.agencia).slice(0, 12).map(([k, v]) => {
@@ -136,9 +152,110 @@ if (!salidasTodo.total) {
       })), { formato: fmtNum });
   }
 
-  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });
+  // ── Comparativa entre años del mismo período (pedido del CEO, 2026-09-08) ──
+  // Enero→mes de un año frente al mismo tramo de otro año. Usa `acumuladoAnio` del JSON
+  // (cortes calculados en el pipeline, con la regla n≥3 aplicada sobre el tramo completo).
+  // Los controles son propios de esta sección: no usan el selector global de período.
+  const compSel = { a: null, b: null, mm: null };
+  const celda = (v, total) => `${fmtNum(v)}${total ? `<span class="pct">${Math.round((v / total) * 100)}%</span>` : ''}`;
+  const delta = (a, b, { inverso = false, unidad = '' } = {}) => {
+    if (a == null || b == null) return '<span class="delta igual">—</span>';
+    const d = Math.round((b - a) * 10) / 10;
+    if (!d) return '<span class="delta igual">=</span>';
+    const sube = d > 0;
+    const malo = inverso ? !sube : sube; // más salidas = malo (ámbar); menos = bueno (verde)
+    return `<span class="delta ${malo ? 'mas' : 'menos'}">${sube ? '+' : '−'}${fmtNum(Math.abs(d))}${unidad}</span>`;
+  };
+  const tablaComp = (filas, etiA, etiB) => filas.length ? `<div class="tabla-scroll"><table class="tabla-comp">
+    <thead><tr><th></th><th class="n">${etiA}</th><th class="n">${etiB}</th><th class="n">Cambio</th></tr></thead>
+    <tbody>${filas.map((f) => `<tr><td>${f.eti}</td><td class="n">${f.ca ?? celda(f.a, f.na)}</td><td class="n">${f.cb ?? celda(f.b, f.nb)}</td><td class="n">${delta(f.a, f.b, f)}</td></tr>`).join('')}</tbody>
+    </table></div>` : '<p class="sub">Sin datos en este tramo.</p>';
+  // une dos conteos {clave: n} en filas comparables; orden fijo (si se da) o por total descendente
+  const filasDim = (A, B, objA, objB, etiqueta = titulo, orden = null) => {
+    const claves = orden ? orden.filter((k) => (objA?.[k] ?? 0) || (objB?.[k] ?? 0)) : [...new Set([...Object.keys(objA ?? {}), ...Object.keys(objB ?? {})])]
+      .sort((x, y) => ((objB?.[y] ?? 0) + (objA?.[y] ?? 0)) - ((objB?.[x] ?? 0) + (objA?.[x] ?? 0)));
+    return claves.map((k) => ({ eti: etiqueta(k), a: objA?.[k] ?? 0, b: objB?.[k] ?? 0, na: A.n, nb: B.n }));
+  };
+  const aMapa = (items) => Object.fromEntries(items.map((i) => [i.eti, i.valor]));
+  const etiquetaDeptoLarga = (d) => (d === 'comercial' ? 'solo departamento Comercial' : 'toda la empresa');
+
+  function pintarComparativa(depto) {
+    const salidas = salidasDe(salidasTodo, depto);
+    const acum = salidas.acumuladoAnio ?? {};
+    const anios = Object.keys(acum).sort();
+    const cont = document.getElementById('comparativa');
+    if (anios.length < 2) { cont.innerHTML = '<div class="tarjeta"><p class="sub">Hacen falta al menos dos años con registro para comparar.</p></div>'; return; }
+    const hoyYm = salidas.generado.slice(0, 7);
+    if (!acum[compSel.b] || !acum[compSel.a]) { compSel.b = anios.at(-1); compSel.a = anios.at(-2); compSel.mm = null; }
+    // meses disponibles: los del año más reciente de los dos (los anteriores llegan a diciembre)
+    const mesesDisp = Object.keys(acum[compSel.a > compSel.b ? compSel.a : compSel.b]).sort();
+    if (!compSel.mm || !mesesDisp.includes(compSel.mm)) {
+      // por defecto, el último mes COMPLETO con dato del año en curso (el mes en curso aún se está capturando)
+      const completos = mesesDisp.filter((m) => `${anios.at(-1)}-${m}` < hoyYm);
+      compSel.mm = completos.at(-1) ?? mesesDisp.at(-1);
+    }
+    const { a, b, mm } = compSel;
+    const A = dimsAcumulado(salidas, a, mm), B = dimsAcumulado(salidas, b, mm);
+    const tramo = mm === '01' ? 'enero' : `enero a ${MES_LARGO[+mm - 1]}`;
+    // encabezados de tabla: solo el año (el tramo ya está dicho arriba; en teléfono no cabe más)
+    const etiA = a, etiB = b;
+    const tramoCorto = mm === '01' ? 'ene' : `ene–${MES_CORTO[+mm - 1]}`;
+    const opc = (lista, sel, eti = (x) => x) => lista.map((x) => `<option value="${x}" ${x === sel ? 'selected' : ''}>${eti(x)}</option>`).join('');
+    const temp = (D) => RANGOS_TEMPRANOS.reduce((s, k) => s + (D.rango?.[k] ?? 0), 0);
+    const medMeses = (D) => (D.diasLab?.mediana != null ? Math.round((D.diasLab.mediana / 30.4) * 10) / 10 : null);
+    const pct = (v, n) => (n ? Math.round((v / n) * 100) : 0);
+    const meses = Array.from({ length: +mm }, (_, i) => String(i + 1).padStart(2, '0'));
+    const anioViejo = Math.min(+a, +b);
+    const aviso = anioViejo <= 2025
+      ? `<b>Ojo al comparar:</b> el registro se terminó de estructurar a mediados de 2025 y antes la captura era menos rigurosa, así que parte de la diferencia en motivos y antigüedad puede venir del registro y no de la realidad. `
+      : '';
+    const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+    cont.innerHTML = `
+      <div class="tarjeta">
+        <div class="sup-inputs comp-controles">
+          <label>Comparar <select id="comp-a" aria-label="Primer año">${opc(anios, a)}</select></label>
+          <label>con <select id="comp-b" aria-label="Segundo año">${opc(anios, b)}</select></label>
+          <label>de enero a <select id="comp-mm" aria-label="Mes final del tramo">${opc(mesesDisp, mm, (m) => MES_LARGO[+m - 1])}</select></label>
+        </div>
+        <p class="comp-titulo"><b>${cap(tramo)} de ${a}</b> frente a <b>${tramo} de ${b}</b>, ${etiquetaDeptoLarga(depto)}.</p>
+        <p class="pie">${aviso}En la columna "Cambio", <span class="delta mas">naranja</span> = más salidas (o peor) en ${b} que en ${a}; <span class="delta menos">verde</span> = menos (o mejor). El porcentaje pequeño es la parte que cada fila representa dentro de su tramo.</p>
+      </div>
+      <div class="tarjeta"><h3>Lo esencial</h3>${tablaComp([
+        { eti: 'Bajas en el tramo', a: A.n, b: B.n, ca: fmtNum(A.n), cb: fmtNum(B.n) },
+        { eti: 'Renuncias', a: A.razon?.RENUNCIA ?? 0, b: B.razon?.RENUNCIA ?? 0, na: A.n, nb: B.n },
+        { eti: 'Despidos', a: A.razon?.DESPIDO ?? 0, b: B.razon?.DESPIDO ?? 0, na: A.n, nb: B.n },
+        { eti: 'Se fueron antes de cumplir 6 meses', a: temp(A), b: temp(B), na: A.n, nb: B.n },
+        { eti: '% que se va antes de 6 meses', a: pct(temp(A), A.n), b: pct(temp(B), B.n), ca: `${pct(temp(A), A.n)}%`, cb: `${pct(temp(B), B.n)}%`, unidad: ' pts' },
+        { eti: 'Antigüedad mediana al salir (meses)', a: medMeses(A), b: medMeses(B), ca: medMeses(A) ?? '—', cb: medMeses(B) ?? '—', inverso: true },
+      ], etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Bajas por mes</h3>${tablaComp(meses.map((m) => ({
+        eti: cap(MES_LARGO[+m - 1]),
+        a: salidas.porMes?.[`${a}-${m}`] ?? 0, b: salidas.porMes?.[`${b}-${m}`] ?? 0,
+        ca: fmtNum(salidas.porMes?.[`${a}-${m}`] ?? 0), cb: fmtNum(salidas.porMes?.[`${b}-${m}`] ?? 0),
+      })), etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Antigüedad al momento de salir</h3>${tablaComp(filasDim(A, B, A.rango, B.rango, (k) => ETI_RANGO[k] ?? titulo(k), ORDEN_RANGO), etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Razón de salida</h3>${tablaComp(filasDim(A, B, A.razon, B.razon), etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Motivos de salida</h3>${tablaComp(filasDim(A, B, aMapa(aplicarDesglose(A.subMotivo, null).items), aMapa(aplicarDesglose(B.subMotivo, null).items), (k) => k), etiA, etiB)}
+        <p class="pie">Motivos con menos de 3 casos en el tramo van en "Otros". "${SIN_DETALLE}" son renuncias sin motivo registrado.</p></div>
+      <div class="tarjeta"><h3>Los que se van antes de 6 meses, ¿por qué?</h3>${tablaComp(filasDim(A.tempranas ?? { n: 0 }, B.tempranas ?? { n: 0 }, aMapa(aplicarDesglose(A.tempranas?.subMotivo, null).items), aMapa(aplicarDesglose(B.tempranas?.subMotivo, null).items), (k) => k), etiA, etiB)}
+        <p class="pie">Solo salidas con menos de 6 meses de antigüedad: ${fmtNum(A.tempranas?.n ?? 0)} en ${tramoCorto} ${a} y ${fmtNum(B.tempranas?.n ?? 0)} en ${tramoCorto} ${b}. El porcentaje es sobre ese grupo.</p></div>
+      <div class="tarjeta"><h3>Por agencia / tienda (las 12 con más salidas)</h3>${tablaComp(filasDim(A, B, A.agencia, B.agencia, (k) => { const [n, t] = k.split('·'); return t ? `${n} (${t})` : titulo(n); }).slice(0, 12), etiA, etiB)}</div>
+      ${depto === 'comercial' ? '' : `<div class="tarjeta"><h3>Por área de la empresa</h3>${tablaComp(filasDim(A, B, A.area, B.area, (k) => NOMBRE_AREA[k] ?? titulo(k)), etiA, etiB)}</div>`}
+      <div class="tarjeta"><h3>Por marca</h3>${tablaComp(filasDim(A, B, A.marca, B.marca, (k) => k), etiA, etiB)}</div>
+      <div class="tarjeta"><h3>Por género</h3>${tablaComp(filasDim(A, B, A.genero, B.genero), etiA, etiB)}</div>`;
+    for (const [id, clave] of [['comp-a', 'a'], ['comp-b', 'b'], ['comp-mm', 'mm']]) {
+      cont.querySelector(`#${id}`).addEventListener('change', (e) => {
+        compSel[clave] = e.target.value;
+        if (clave !== 'mm' && compSel.a === compSel.b) compSel[clave === 'a' ? 'b' : 'a'] = anios.find((x) => x !== compSel[clave]);
+        pintarComparativa(depto);
+      });
+    }
+  }
+
+  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); });
   let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado },
     (p) => { periodo = p; pintar(depto, periodo); });
   pintar(depto, periodo);
+  pintarComparativa(depto);
   pintarPie(meta);
 }

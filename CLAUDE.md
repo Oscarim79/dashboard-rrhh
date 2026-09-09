@@ -104,6 +104,11 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   período por defecto) y la nota bajo la barra de período lo dice en todas las páginas.
 - **Días de vacante y plazas abiertas:** control de VACANTES. NO usarlo para contar salidas:
   solo registra las plazas que se abrieron (171 vs 474 bajas en todo el registro).
+- **Comparativa entre años y "antes de 6 meses, por qué" (CEO, 2026-09-08 → hecho 2026-09-09):** cada
+  desglose de `salidas.json` trae `tempranas` (razón/sub-motivo/rango de las salidas con menos de
+  6 meses, n≥3 → OTROS) y el bloque `acumuladoAnio[año][mes]` = desglose de enero a ese mes. Los cortes
+  acumulados se calculan en el pipeline (no sumando meses en el navegador) para que la regla n≥3 se
+  aplique sobre el tramo completo. La comparativa vive al final de Salidas con controles propios.
 
 ## Reglas de trabajo
 

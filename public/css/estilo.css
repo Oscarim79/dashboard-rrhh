@@ -241,3 +241,21 @@ footer {
   font-style: normal; font-size: 11px; color: var(--tinta-suave);
   border: 1px solid var(--borde); border-radius: 4px; padding: 0 5px; margin-left: 6px;
 }
+
+/* ── comparativa entre años (Salidas) ── */
+.comp-controles select {
+  font: inherit; font-size: 14px; padding: 7px 8px; border: 1px solid var(--borde);
+  border-radius: 8px; background: var(--tarjeta); color: var(--tinta);
+}
+.comp-titulo { font-size: 14px; color: var(--tinta-suave); margin: 4px 0 8px; }
+.comp-titulo b { color: var(--tinta); }
+.tabla-comp { table-layout: fixed; }
+.tabla-comp th:first-child { width: 40%; }
+.tabla-comp td, .tabla-comp th { padding: 6px 4px; font-size: 13.5px; }
+.tabla-comp td:first-child { overflow-wrap: anywhere; }
+.tabla-comp .n { white-space: nowrap; }
+.tabla-comp .pct { font-size: 11px; color: var(--tinta-suave); margin-left: 4px; }
+.delta { font-weight: 600; font-variant-numeric: tabular-nums; }
+.delta.mas { color: var(--ambar); }
+.delta.menos { color: var(--verde); }
+.delta.igual { color: var(--tinta-suave); }

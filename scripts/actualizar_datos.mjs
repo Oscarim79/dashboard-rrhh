@@ -530,6 +530,19 @@ if (!sal) {
     }
     return c;
   };
+  // Pedido del CEO (2026-09-08): POR QUÉ se van los que salen antes de los 6 meses. Cruce
+  // razón/sub-motivo × antigüedad temprana, solo conteos con la misma regla n≥3 → OTROS.
+  const RANGOS_TEMPRANOS = new Set(['MENOS 1 MES', 'DE 1 A 2 MESES', 'DE 2 A 4 MESES', 'DE 4 A 6 MESES']);
+  const tempranas = (arr) => {
+    const t = arr.filter((r) => RANGOS_TEMPRANOS.has(r.rango));
+    return {
+      n: t.length,
+      razon: cuenta(t, (r) => r.razon, 3),
+      subMotivo: cuenta(t, (r) => r.sub, 3),
+      subMotivoRenuncias: cuenta(t.filter((r) => r.razon === 'RENUNCIA'), (r) => r.sub, 3),
+      rango: cuenta(t, (r) => r.rango),
+    };
+  };
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
     porTipoTienda: porTipoTienda(arr),
@@ -543,6 +556,7 @@ if (!sal) {
     agencia: cuenta(arr, (r) => `${r.agencia}${r.tipoTienda ? `·${r.tipoTienda}` : ''}`),
     rango: cuenta(arr, (r) => r.rango),
     diasLab: stats(arr.map((r) => r.diasLab).filter((d) => d != null)),
+    tempranas: tempranas(arr),
     n: arr.length,
   });
   // porAnio lleva el desglose completo de cada año (misma forma que "total"),
@@ -575,8 +589,19 @@ if (!sal) {
       // privacidad n≥3 → OTROS se aplica dentro de cada mes
       porMesDetalle: Object.fromEntries([...new Set(arr.map((r) => r.ym))].sort().map((ym) => [ym, dims(arr.filter((r) => r.ym === ym))])),
       captura: { total: captura(arr), ult12m: captura(u12) },
+      // Comparativa entre años del mismo período (pedido del CEO, 2026-09-08): para cada año,
+      // el desglose acumulado de enero al mes MM (todos los meses hasta el último con dato,
+      // sin contar meses posteriores a la fecha de lectura). Se calcula aquí y no sumando
+      // meses en el navegador porque la regla n≥3 → OTROS debe aplicarse sobre el rango
+      // completo: sumando meses ya agrupados se perderían motivos que sí llegan a 3 en el rango.
+      acumuladoAnio: Object.fromEntries(anios.map((a) => {
+        const ultimoMes = Math.max(...arr.filter((r) => r.anio === a && r.ym <= hoyYm).map((r) => +r.ym.slice(5, 7)), 0);
+        const meses = Array.from({ length: ultimoMes }, (_, i) => String(i + 1).padStart(2, '0'));
+        return [a, Object.fromEntries(meses.map((mm) => [mm, dims(arr.filter((r) => r.anio === a && r.ym <= `${a}-${mm}`))]))];
+      })),
     };
   };
+  const hoyYm = hoyISO.slice(0, 7);
   const regsComercial = regs.filter((r) => r.area === 'COMERCIAL');
   salidasJson = {
     generado: hoy.toISOString(),
