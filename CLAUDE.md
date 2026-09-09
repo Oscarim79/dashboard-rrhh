@@ -25,7 +25,10 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    GitHub Actions. Jamás en código, README, commits ni logs.
 2. Ningún dato personal puede llegar a `public/`, al bundle ni al repo: nombres de candidatos,
    `¿A QUIEN REEMPLAZA?`, jefes directos, solicitantes, entrevistadores, DPI, teléfonos, sueldos.
-   La pestaña ALTAS y la BASE DE DATOS GENERAL se ignoran por completo. Excepción acordada con
+   **Tercera excepción (Oscar, 2026-09-09, para la rotación por marca):** las pestañas ALTAS y BASE DE
+   DATOS GENERAL se leen SOLO para contar (altas por mes, marca y área; activos por marca y departamento);
+   jamás se lee nombre, DPI, teléfono, sueldo ni otro dato individual. Con eso el pipeline calcula el
+   indicador de rotación por marca (`rotacion.json → calculado`). Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
    (razón, sub-motivo, género, área, marca, agencia, rangos de antigüedad) — jamás filas
    individuales. **Cambio (Oscar, 2026-09-09, pedido del CEO):** el desglose de salidas **por supervisor
@@ -100,7 +103,11 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   DEPARTAMENTO, manda ella). El Simulador no cambia de modelo, solo de calibración.
 - **Filtro por marca (global, Oscar 2026-09-09):** desplegable en la barra de período (`MARCAS` /
   `marcaActual()` en comun.js). `salidas.json → porMarca.{americana,abiq,friotec}` y `vacantesDe` filtra
-  filas por empresa. Con marca elegida el selector General/Comercial no aplica; Rotación no distingue marca.
+  filas por empresa. Con marca elegida el selector General/Comercial no aplica. Rotación usa el
+  **indicador calculado** (`rotacion.json → calculado.series.{total,comercial,americana,abiq,friotec}`:
+  bajas de SALIDAS + altas de ALTAS + activos de BASE DE DATOS GENERAL, plantilla reconstruida hacia
+  atrás, misma fórmula del manual: bajas acumuladas ÷ promedio(inicio, fin)); `comparacion` lo contrasta
+  con el manual. La marca "A2K, ABIQ" (corporativo compartido) cuenta en Americana.
 - **Selector de período** (también global): `todo` · `12m` (por defecto) · `a:AAAA` · `m:AAAA-MM`.
   Vacantes se filtran por fecha de solicitud y se re-agregan en el navegador (`agregarVacantes` en
   comun.js debe seguir espejando `agregarVacantes` del pipeline); salidas usan `porMesDetalle`

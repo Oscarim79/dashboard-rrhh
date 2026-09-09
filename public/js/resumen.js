@@ -123,9 +123,15 @@ function pintar(depto, periodo) {
       .filter((r) => r.area === areaRot && r.fin != null && (!hastaYm || `${r.anio}-${String(r.mesNum).padStart(2, '0')}` <= hastaYm))
       .sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
     const salidas12 = salidasCosteadas + salidasSinTipo + salidasNoTienda;
+    const serieMarca = marcaActual() !== 'todas' ? (rotacion.calculado?.series?.[marcaActual()] ?? []).filter((r) => !r.parcial && (!hastaYm || r.ym <= hastaYm)) : [];
+    const cierreMarca = serieMarca.at(-1);
     if (marcaActual() !== 'todas') {
-      // con una marca elegida no se conoce su plantilla (el indicador de rotación no distingue marca): solo el conteo
-      if (salidas12 > 0) tiles.push(kpi(fmtNum(salidas12), `renuncias y despidos en ${etiquetaMarca()} · ${etiP}`, 'sin % de plantilla: el indicador de rotación mensual no distingue marca'));
+      // con una marca elegida, la plantilla sale del indicador calculado por el dashboard (ALTAS + BASE DE DATOS GENERAL)
+      if (cierreMarca && cierreMarca.fin > 0 && salidas12 > 0) {
+        const pct = Math.round((salidas12 / cierreMarca.fin) * 100);
+        tiles.push(kpi(`${pct}%`, `de la plantilla de ${etiquetaMarca()} se reemplazó · ${etiP}`,
+          `${fmtNum(salidas12)} renuncias y despidos (registro de salidas) · ${fmtNum(cierreMarca.fin)} colaboradores al cierre de ${MES_CORTO[cierreMarca.mesNum - 1]} ${cierreMarca.anio} (plantilla calculada por el dashboard)`, pct >= 50 ? 'rojo' : ''));
+      } else if (salidas12 > 0) tiles.push(kpi(fmtNum(salidas12), `renuncias y despidos en ${etiquetaMarca()} · ${etiP}`, 'sin % de plantilla: no hay indicador calculado para esta marca'));
     } else if (cierre && cierre.fin > 0 && salidas12 > 0) {
       const pct = Math.round((salidas12 / cierre.fin) * 100);
       tiles.push(kpi(`${pct}%`, `de la plantilla ${esCom ? 'comercial' : 'de toda la empresa'} se reemplazó · ${etiP}`,

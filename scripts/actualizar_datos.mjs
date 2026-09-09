@@ -444,6 +444,7 @@ const rotacionJson = { generado: hoy.toISOString(), acumulado, mensual };
 // ── 4) SALIDAS: SOLO AGREGADOS (la pestaña tiene datos personales que jamás se publican) ──
 // Se leen únicamente columnas no personales y se emiten conteos; ninguna fila individual.
 const REQ_SAL = [['DIAS LAB'], ['RANGO MES'], ['GENERO'], ['AGENCIA'], ['BAJA']];
+let regsSalidas = []; // filas agregables de SALIDAS (sin nombres), para la rotación calculada de la sección 6
 const sal = detectar(wb, REQ_SAL);
 let salidasJson = null;
 if (!sal) {
@@ -534,6 +535,7 @@ if (!sal) {
       supervisor: IS.supervisor >= 0 ? nombreSupervisor(f[IS.supervisor]) : '(sin supervisor registrado)',
     });
   }
+  regsSalidas = regs;
   const corte12m = hace12mISO.slice(0, 7);
   const cuenta = (arr, clave, minimo = 1) => {
     const c = {};
@@ -767,6 +769,111 @@ const metaJson = {
   filasIntegracion: integracionJson ? integracionJson.total.n : 0,
   calidad,
 };
+
+// ── 6) ROTACIÓN CALCULADA por marca (autorizado por Oscar, 2026-09-09) ──────────────
+// Reproduce el indicador de rotación sin que el jefe de RRHH lo copie a mano:
+//   bajas por mes  ← pestaña SALIDAS (ya leída arriba: columnas MARCA y AREA LAB)
+//   altas por mes  ← pestaña ALTAS: SOLO se cuentan filas por fecha de alta, marca y área
+//   plantilla hoy  ← BASE DE DATOS GENERAL: SOLO se cuentan filas activas (con fecha de alta y sin
+//                    fecha de salida) por marca y departamento
+// La plantilla de cada mes se reconstruye hacia atrás desde la de hoy:
+//   inicio(m) = fin(m) − altas(m) + bajas(m); fin(m−1) = inicio(m).
+// % acumulado = bajas acumuladas del año ÷ promedio(inicio, fin): la misma fórmula del indicador manual.
+// De estas pestañas JAMÁS se lee nombre, DPI, teléfono, sueldo ni ningún otro dato individual;
+// la marca "A2K, ABIQ" (personal corporativo compartido) se cuenta en Americana y se informa aparte.
+{
+  const ESCOPOS = ['total', 'comercial', 'americana', 'abiq', 'friotec'];
+  const MARCA_CLAVE = { AMERICANA: 'americana', A2K: 'americana', 'A2K, ABIQ': 'americana', 'A2K ABIQ': 'americana', 'A2K,ABIQ': 'americana', ABIQ: 'abiq', 'ABI Q': 'abiq', FRIOTEC: 'friotec' };
+  const esCompartida = (m) => m.includes('A2K') && m.includes('ABIQ');
+  const MARCA_ETI_CLAVE = { Americana: 'americana', 'Abi Q': 'abiq', Friotec: 'friotec' };
+  const AREA_NORM = (a) => { const n = norm(a); return n === 'COBROS Y CREDITOS' || n === 'COBROS' ? 'CREDITOS Y COBROS' : n; };
+  const escoposDe = (marcaNorm, areaNorm) => {
+    const s = ['total'];
+    if (areaNorm === 'COMERCIAL') s.push('comercial');
+    const m = MARCA_CLAVE[marcaNorm]; if (m) s.push(m);
+    return s;
+  };
+  const vacio = () => Object.fromEntries(ESCOPOS.map((x) => [x, 0]));
+  const altasHoja = detectar(wb, [['ALTA/BAJA'], ['MARCA'], ['AREA', 'LAB'], ['SUPERVISOR']]);
+  const baseHoja = detectar(wb, [['FECHA DE ALTA'], ['FECHA DE SALIDA'], ['MARCA'], ['DEPARTAMENTO']]);
+  if (!altasHoja || !baseHoja || !salidasJson) {
+    calidad.push({ tipo: 'aviso', n: 1, mensaje: 'No se pudo calcular el indicador de rotación por marca: falta la pestaña ALTAS o BASE DE DATOS GENERAL (o sus encabezados cambiaron).' });
+  } else {
+    // altas por mes
+    const HA = altasHoja.headers;
+    const iAlta = HA.findIndex((h) => h === 'ALTA'), iMarcaA = HA.findIndex((h) => h === 'MARCA'), iAreaA = colIdx(HA, 'AREA', 'LAB');
+    const altasMes = {}; let altasSinFecha = 0;
+    for (const f of altasHoja.filas) {
+      const alta = fechaISO(f[iAlta]);
+      if (!alta) { if (norm(f[iMarcaA]) || norm(f[iAreaA])) altasSinFecha++; continue; }
+      const ym = alta.slice(0, 7);
+      altasMes[ym] ??= vacio();
+      for (const e of escoposDe(norm(f[iMarcaA]), AREA_NORM(f[iAreaA]))) altasMes[ym][e]++;
+    }
+    // plantilla activa hoy (ancla)
+    const HB = baseHoja.headers;
+    const iAltaB = colIdx(HB, 'FECHA DE ALTA'), iSalB = colIdx(HB, 'FECHA DE SALIDA'), iMarcaB = HB.findIndex((h) => h === 'MARCA');
+    const iDepB = HB.findIndex((h) => h === 'DEPARTAMENTO') >= 0 ? HB.findIndex((h) => h === 'DEPARTAMENTO') : colIdx(HB, 'DEPARTAMENTO');
+    const activos = vacio(); let compartida = 0, baseSinAlta = 0;
+    for (const f of baseHoja.filas) {
+      const alta = fechaISO(f[iAltaB]); const salida = fechaISO(f[iSalB]);
+      if (!alta) { if (norm(f[iMarcaB]) || norm(f[iDepB])) baseSinAlta++; continue; }
+      if (salida) continue;
+      const m = norm(f[iMarcaB]); if (esCompartida(m)) compartida++;
+      for (const e of escoposDe(m, AREA_NORM(f[iDepB]))) activos[e]++;
+    }
+    // bajas por mes (registro de SALIDAS ya leído)
+    const bajasMes = {};
+    for (const r of regsSalidas) {
+      bajasMes[r.ym] ??= vacio();
+      const esc = ['total']; if (r.area === 'COMERCIAL') esc.push('comercial'); if (MARCA_ETI_CLAVE[r.marca]) esc.push(MARCA_ETI_CLAVE[r.marca]);
+      for (const e of esc) bajasMes[r.ym][e]++;
+    }
+    // reconstrucción mes a mes, desde el primer mes con altas hasta hoy
+    const hoyISO = hoy.toISOString().slice(0, 10);
+    const hoyYmR = hoyISO.slice(0, 7);
+    const primero = Object.keys(altasMes).sort()[0] ?? hoyYmR;
+    const meses = []; for (let ym = primero; ym <= hoyYmR; ) { meses.push(ym); const [y, m] = ym.split('-').map(Number); ym = m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`; }
+    const series = Object.fromEntries(ESCOPOS.map((e) => [e, []]));
+    for (const e of ESCOPOS) {
+      let fin = activos[e];
+      const filas = [];
+      for (const ym of [...meses].reverse()) {
+        const altas = altasMes[ym]?.[e] ?? 0, bajas = bajasMes[ym]?.[e] ?? 0;
+        const inicio = fin - altas + bajas;
+        filas.unshift({ ym, anio: +ym.slice(0, 4), mesNum: +ym.slice(5, 7), mes: MESES[+ym.slice(5, 7) - 1], inicio, fin, altas, bajas, parcial: ym === hoyYmR });
+        fin = inicio;
+      }
+      let anioAcc = null, acc = 0;
+      for (const r of filas) {
+        if (r.anio !== anioAcc) { anioAcc = r.anio; acc = 0; }
+        acc += r.bajas; r.bajasAcum = acc;
+        const prom = (r.inicio + r.fin) / 2;
+        // plantilla negativa = las fuentes no cuadran para ese alcance (p. ej. Friotec, 1 persona activa): sin %
+        r.inconsistente = r.inicio < 0 || r.fin < 0;
+        r.pctAcum = prom > 0 && !r.inconsistente ? acc / prom : null;
+        r.pctMes = prom > 0 && !r.inconsistente ? r.bajas / prom : null;
+      }
+      series[e] = filas;
+    }
+    // comparación con el indicador manual (TOTAL EMPRESA / AREA COMERCIAL)
+    const comparar = (escopo, areaManual) => series[escopo].filter((r) => !r.parcial).map((r) => {
+      const m = acumulado.find((x) => x.area === areaManual && x.anio === r.anio && x.mesNum === r.mesNum);
+      return m ? { anio: r.anio, mesNum: r.mesNum, manual: { inicio: m.inicio, fin: m.fin, bajasAcum: m.bajasAcum, pctAcum: m.pctAcum }, calculado: { inicio: r.inicio, fin: r.fin, bajasAcum: r.bajasAcum, pctAcum: r.pctAcum } } : null;
+    }).filter(Boolean);
+    rotacionJson.calculado = {
+      fuente: 'Bajas: pestaña SALIDAS. Altas: pestaña ALTAS (solo conteos). Plantilla de hoy: BASE DE DATOS GENERAL (solo conteo de activos). Plantilla de meses anteriores reconstruida hacia atrás con altas y bajas.',
+      anclaje: { fecha: hoyISO, activos, marcaCompartidaEnAmericana: compartida },
+      desde: primero, hasta: hoyYmR,
+      series,
+      comparacion: { total: comparar('total', 'TOTAL EMPRESA'), comercial: comparar('comercial', 'AREA COMERCIAL') },
+    };
+    console.log(`Rotación calculada: activos hoy ${JSON.stringify(activos)} (compartida A2K/ABIQ: ${compartida}) · meses ${primero}→${hoyYmR}`);
+    if (altasSinFecha) calidad.push({ tipo: 'aviso', n: altasSinFecha, mensaje: `${altasSinFecha} filas de ALTAS no tienen fecha de alta; no entran al indicador calculado.` });
+    if (baseSinAlta) calidad.push({ tipo: 'aviso', n: baseSinAlta, mensaje: `${baseSinAlta} filas de BASE DE DATOS GENERAL no tienen fecha de alta; no cuentan como activas.` });
+    if (compartida) calidad.push({ tipo: 'info', n: compartida, mensaje: `${compartida} colaboradores activos con marca "A2K, ABIQ" (corporativo compartido) se cuentan en Americana para el indicador por marca.` });
+  }
+}
 
 // ── VERIFICACIÓN ANTI-FUGAS (última línea de defensa) ──────────────────────
 // Términos prohibidos como palabras completas (así "Benito" no dispara "NIT").

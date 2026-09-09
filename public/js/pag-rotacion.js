@@ -4,7 +4,7 @@
 // Selector de período: los KPI se leen al último mes del período; las gráficas
 // muestran los meses del período (un mes concreto se muestra con su año de contexto).
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, notaAlcance,
-  pintarSelectorPeriodo, etiquetaPeriodo, rangoPeriodo, mesesDelPeriodo, aniosYMeses, MES_CORTO, fmtYm, marcaActual, etiquetaMarca } from './comun.js';
+  pintarSelectorPeriodo, etiquetaPeriodo, rangoPeriodo, mesesDelPeriodo, aniosYMeses, MES_CORTO, fmtYm, marcaActual, etiquetaMarca, MARCAS } from './comun.js';
 import { barrasH, columnas, lineas, leyenda } from './graficas.js';
 import { fmtPct } from './modelo.js';
 
@@ -16,20 +16,30 @@ const ymDe = (r) => `${r.anio}-${String(r.mesNum).padStart(2, '0')}`;
 
 const total = rotacion.acumulado.filter((r) => r.area === 'TOTAL EMPRESA' && r.pctAcum != null);
 const comercial = rotacion.acumulado.filter((r) => r.area === 'AREA COMERCIAL' && r.pctAcum != null);
+// Indicador calculado por el pipeline (SALIDAS + ALTAS + BASE DE DATOS GENERAL), por alcance:
+// total · comercial · americana · abiq · friotec. Misma forma que el manual para poder graficarlo igual.
+const CALC = rotacion.calculado ?? null;
+const ESCOPO_ETI = { total: 'total empresa', comercial: 'área comercial', americana: 'Americana', abiq: 'Abi Q', friotec: 'Friotec' };
+const serieCalc = (escopo) => (CALC?.series?.[escopo] ?? []).filter((r) => !r.parcial && r.pctAcum != null).map((r) => ({ ...r, area: escopo }));
 const mesesMensual = [...new Set(rotacion.mensual.map(ymDe))].sort();
 
 function pintar(depto, periodo) {
   const esCom = depto === 'comercial';
-  const serie = esCom && comercial.length ? comercial : total;
-  const nombreSerie = esCom ? 'área comercial' : 'total empresa';
+  const marca = marcaActual();
+  const conMarca = marca !== 'todas' && serieCalc(marca).length > 0;
+  // con una marca elegida se usa el indicador calculado de esa marca; si no, el manual del sheet
+  const serie = conMarca ? serieCalc(marca) : (esCom && comercial.length ? comercial : total);
+  const nombreSerie = conMarca ? `marca ${MARCAS[marca]} (calculado)` : esCom ? 'área comercial' : 'total empresa';
   const generado = rotacion.generado;
   const etiP = etiquetaPeriodo(periodo, generado);
   const rango = rangoPeriodo(periodo, generado);
   const desdeYm = rango.desde ? rango.desde.slice(0, 7) : null, hastaYm = rango.hasta ? rango.hasta.slice(0, 7) : null;
   const enRango = (r) => (!desdeYm || ymDe(r) >= desdeYm) && (!hastaYm || ymDe(r) <= hastaYm);
-  document.getElementById('alcance').innerHTML = marcaActual() !== 'todas'
-    ? `El indicador de rotación mensual no distingue marca: aquí se muestra ${esCom ? 'el área comercial' : 'toda la empresa'} completa, no solo ${etiquetaMarca()}.`
-    : notaAlcance(depto);
+  document.getElementById('alcance').innerHTML = conMarca
+    ? `Viendo la rotación de <b>${MARCAS[marca]}</b>, calculada automáticamente por el dashboard (bajas del registro de SALIDAS, altas de la pestaña ALTAS y plantilla activa de la BASE DE DATOS GENERAL). El indicador manual del sheet no distingue marca.`
+    : marca !== 'todas'
+      ? `No hay indicador calculado para ${etiquetaMarca()}; se muestra ${esCom ? 'el área comercial' : 'toda la empresa'} completa.`
+      : notaAlcance(depto);
 
   // ── KPIs: al último mes con dato dentro del período ──────────────────────
   const enPeriodo = serie.filter(enRango).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum);
@@ -74,7 +84,11 @@ function pintar(depto, periodo) {
   document.getElementById('acumulado-anios').innerHTML = lineas(MES_CORTO, seriesAnios, { formato: pct0 });
   document.getElementById('leyenda-anios').innerHTML = leyenda(seriesAnios.map((s) => ({ eti: s.nombre, color: s.color })));
   document.getElementById('acumulado-nota').textContent =
-    `${esCom ? 'Área comercial' : 'Total empresa'}. El acumulado crece mes a mes dentro de cada año; la referencia del mercado que usa RRHH es ~60% anual.`;
+    `${conMarca ? `Marca ${MARCAS[marca]}, indicador calculado` : esCom ? 'Área comercial' : 'Total empresa'}. El acumulado crece mes a mes dentro de cada año; la referencia del mercado que usa RRHH es ~60% anual.`;
+
+  // ── rotación por marca (calculada) y validación contra el manual ──────────
+  pintarMarcas(rango);
+  pintarValidacion(esCom);
 
   // ── comercial vs total (el último año del período) — siempre se muestra la comparación ──
   const anioCT = ultimo ? ultimo.anio : aniosTodos.at(-1);
@@ -124,6 +138,37 @@ function pintar(depto, periodo) {
       .map(([k, v]) => ({ eti: titulo(k), valor: v, color: k === 'COMERCIAL' ? '#B5741A' : '#46615A' }));
     document.getElementById('bajas-depto').innerHTML = items.length ? barrasH(items, { formato: fmtNum }) : `<p class="sub">Sin bajas registradas en ${etiP}.</p>`;
   }
+}
+
+// Tabla: cada alcance con su plantilla al cierre, altas y bajas del año, y % acumulado al último mes completo.
+function pintarMarcas(rango) {
+  const el = document.getElementById('tabla-marcas'), nota = document.getElementById('marcas-nota');
+  if (!CALC) { el.innerHTML = '<p class="sub">El pipeline aún no publica el indicador calculado.</p>'; nota.textContent = ''; return; }
+  const hastaYm = rango.hasta ? rango.hasta.slice(0, 7) : null;
+  const filas = ['total', 'comercial', 'americana', 'abiq', 'friotec'].map((e) => {
+    const s = (CALC.series[e] ?? []).filter((r) => !r.parcial && (!hastaYm || r.ym <= hastaYm));
+    const u = s.at(-1); if (!u) return null;
+    const delAnio = s.filter((r) => r.anio === u.anio);
+    return { e, u, altasAnio: delAnio.reduce((a, r) => a + r.altas, 0) };
+  }).filter(Boolean);
+  const ultimo = filas[0]?.u;
+  document.getElementById('h-marcas').textContent = `Rotación por marca (calculada automáticamente)${ultimo ? ` · acumulada a ${MES_CORTO[ultimo.mesNum - 1]} ${ultimo.anio}` : ''}`;
+  el.innerHTML = `<div class="tabla-scroll"><table class="tabla-sup"><thead><tr><th>Alcance</th><th class="n">Plantilla</th><th class="n">Altas</th><th class="n">Bajas</th><th class="n">% acum.</th></tr></thead><tbody>${filas.map(({ e, u, altasAnio }) => `<tr${marcaActual() === e ? ' class="fila-activa"' : ''}><td>${ESCOPO_ETI[e].charAt(0).toUpperCase() + ESCOPO_ETI[e].slice(1)}</td><td class="n">${fmtNum(u.fin)}</td><td class="n">${fmtNum(altasAnio)}</td><td class="n">${fmtNum(u.bajasAcum)}</td><td class="n"><b class="${u.pctAcum >= 0.6 ? 'rojo' : ''}">${u.pctAcum != null ? fmtPct(u.pctAcum, 1) : '—'}</b>${u.fin < 5 ? '<span class="pct">plantilla muy pequeña</span>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+  const a = CALC.anclaje;
+  nota.textContent = `Cálculo del dashboard con la misma fórmula del indicador: bajas acumuladas del año ÷ promedio de la plantilla del mes. Bajas del registro de SALIDAS, altas de la pestaña ALTAS y plantilla de hoy (${a.fecha}) contada en la BASE DE DATOS GENERAL: ${fmtNum(a.activos.total)} activos en total, ${fmtNum(a.activos.comercial)} en Comercial. Los meses anteriores se reconstruyen hacia atrás con altas y bajas.${a.marcaCompartidaEnAmericana ? ` ${fmtNum(a.marcaCompartidaEnAmericana)} personas del corporativo tienen marca compartida (A2K y Abi Q) y se cuentan en Americana.` : ''} Solo conteos: ningún dato individual.`;
+}
+// Tabla: indicador manual del sheet frente al calculado, mes a mes del último año, para el alcance actual.
+function pintarValidacion(esCom) {
+  const el = document.getElementById('tabla-valida'), nota = document.getElementById('valida-nota');
+  const comp = CALC?.comparacion?.[esCom ? 'comercial' : 'total'] ?? [];
+  document.getElementById('h-valida').textContent = `Indicador manual vs. calculado · ${esCom ? 'área comercial' : 'total empresa'}`;
+  if (!comp.length) { el.innerHTML = '<p class="sub">Sin meses comparables.</p>'; nota.textContent = ''; return; }
+  const ult = comp.slice(-12);
+  el.innerHTML = `<div class="tabla-scroll"><table class="tabla-comp tabla-valida"><thead><tr><th>Mes</th><th class="n">Manual</th><th class="n">Calculado</th><th class="n">Diferencia</th></tr></thead><tbody>${ult.map((r) => {
+    const d = r.calculado.pctAcum != null && r.manual.pctAcum != null ? (r.calculado.pctAcum - r.manual.pctAcum) * 100 : null;
+    return `<tr><td>${MES_CORTO[r.mesNum - 1]} ${r.anio}</td><td class="n">${fmtPct(r.manual.pctAcum, 1)}<span class="pct">${fmtNum(r.manual.fin)} pers.</span></td><td class="n">${r.calculado.pctAcum != null ? fmtPct(r.calculado.pctAcum, 1) : '—'}<span class="pct">${fmtNum(r.calculado.fin)} pers.</span></td><td class="n"><span class="delta ${d == null ? 'igual' : Math.abs(d) < 1 ? 'igual' : 'mas'}">${d == null ? '—' : (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1) + ' pts'}</span></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+  nota.textContent = 'Sirve para validar el cálculo automático contra lo que el jefe de RRHH llena a mano (el número pequeño es la plantilla al cierre del mes; "Altas" y "Bajas" de la tabla de marcas son las del año en curso y "Plantilla" la del cierre del último mes completo). Diferencias de 1 punto o menos son normales; si son mayores, conviene revisar qué bajas o altas faltan en alguna de las dos fuentes. Cuando cuadre de forma sostenida, la pestaña manual puede dejar de llenarse.';
 }
 
 let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });

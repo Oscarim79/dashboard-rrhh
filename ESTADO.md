@@ -28,6 +28,25 @@
   ventas perdidas además explica el origen del 15% de impacto (supuesto del modelo: un vendedor
   menos en un equipo de 5-7 = 14-20% de la fuerza de venta).
 
+## ✅ HECHO 2026-09-09 (noche): indicador de rotación calculado por marca (ALTAS + BASE DE DATOS GENERAL)
+
+- **Autorización de Oscar (2026-09-09):** el pipeline lee ALTAS y BASE DE DATOS GENERAL SOLO para contar.
+  Con eso reproduce el indicador de rotación que el jefe de RRHH llenaba a mano y lo separa por marca:
+  bajas por mes (SALIDAS), altas por mes (ALTAS), plantilla activa de hoy (BASE: fila con fecha de alta y sin
+  fecha de salida) y plantilla de los meses anteriores reconstruida hacia atrás (inicio = fin − altas + bajas).
+  Fórmula idéntica al manual: bajas acumuladas del año ÷ promedio(inicio, fin). Se publica en
+  `rotacion.json → calculado` (series total/comercial/americana/abiq/friotec + comparación con el manual).
+- **Validación (2026-09-09):** el calculado se separa del manual entre 0.7 y 3.3 puntos en 2026 (Comercial jul:
+  manual 46.7% con 172 personas; calculado 43.4% con 181). Diferencias explicables por las bajas que el
+  jefe no contó en ene-feb y por 4 personas de más en BASE. La página Rotación muestra la tabla "Indicador
+  manual vs. calculado" para seguirlo; cuando cuadre de forma sostenida, la pestaña manual puede dejar de llenarse.
+- **Resultado por marca (acumulado a agosto 2026):** Americana 46.2% (244 activos), Abi Q 62.9% (17 activos,
+  11 bajas), Friotec 200% con 1 persona (plantilla demasiado pequeña; las fuentes no cuadran: ALTAS 4, SALIDAS 2,
+  BASE 1). Los 20 del corporativo con marca "A2K, ABIQ" se cuentan en Americana.
+- **Sitio:** Rotación tiene la tabla "Rotación por marca (calculada)" y, con una marca elegida, todo (KPIs y
+  gráficas) usa la serie calculada de esa marca. El Resumen recupera el "% de la plantilla reemplazada" con
+  marca usando esa plantilla.
+
 ## ✅ HECHO 2026-09-09 (tarde): registro de tiendas en Google Sheets y página Mapa
 
 - **Registro de tiendas (maestro):** Google Sheet "Registro de tiendas — Corporación Americana" en el

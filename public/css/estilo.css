@@ -376,3 +376,10 @@ button.secundario { background: none; border-color: transparent; color: var(--ti
 
 .barra-periodo .sel-marca { margin-left: auto; }
 .barra-periodo .sel-marca.primario { background: var(--ambar); border-color: var(--ambar); color: #fff; font-weight: 600; }
+
+tr.fila-activa td { background: var(--ambar-suave); }
+.tabla-valida td.n { white-space: normal; }
+.tabla-valida .pct { display: block; margin: 0; }
+.tabla-sup .pct { display: block; margin: 0; }
+.tabla-valida td, .tabla-valida th { padding-left: 3px; padding-right: 3px; }
+.tabla-sup .pct, .tabla-valida .pct { white-space: normal; }
