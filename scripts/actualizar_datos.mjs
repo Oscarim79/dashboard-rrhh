@@ -577,14 +577,17 @@ if (!sal) {
   };
   // Desglose por supervisor (decisión de Oscar 2026-09-09): por cada supervisor, cuántas salidas,
   // cuántas renuncias/despidos y cuántas antes de los 6 meses. Solo conteos.
+  // `motivos`: los 5 sub-motivos más frecuentes del equipo (Oscar, 2026-09-09: el sitio muestra el top 3).
   const porSupervisor = (arr) => {
     const c = {};
     for (const r of arr) {
-      const s = (c[r.supervisor] ??= { n: 0, renuncia: 0, despido: 0, otros: 0, tempranas: 0 });
+      const s = (c[r.supervisor] ??= { n: 0, renuncia: 0, despido: 0, otros: 0, tempranas: 0, motivos: {} });
       s.n++;
       s[r.razon === 'RENUNCIA' ? 'renuncia' : r.razon === 'DESPIDO' ? 'despido' : 'otros']++;
       if (RANGOS_TEMPRANOS.has(r.rango)) s.tempranas++;
+      if (!r.sub.startsWith('(')) s.motivos[r.sub] = (s.motivos[r.sub] ?? 0) + 1;
     }
+    for (const s of Object.values(c)) s.motivos = Object.fromEntries(Object.entries(s.motivos).sort((a, b) => b[1] - a[1]).slice(0, 5));
     return Object.fromEntries(Object.entries(c).sort((a, b) => b[1].n - a[1].n));
   };
   const dims = (arr) => ({

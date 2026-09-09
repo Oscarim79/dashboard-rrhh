@@ -69,7 +69,7 @@ n≥3 del pipeline para sub-motivos; la razón renuncia/despido sí la conserva)
 (tabla: bajas, renuncias, despidos, antes de 6 meses por supervisor, con nombre; respeta los selectores)
 y tabla equivalente en la comparativa. Se le advirtió a Oscar que son personas identificables en un sitio
 público y se le ofreció publicarlo con contraseña o con códigos; eligió **abierto con nombres**. El
-pipeline lee la columna SUPERVISOR O JEFE (18 supervisores) y publica solo conteos por supervisor.
+pipeline lee la columna SUPERVISOR O JEFE (18 supervisores) y publica solo conteos por supervisor. Ampliación (misma tarde): cada supervisor lleva sus 5 motivos más frecuentes (`motivos`) y el sitio muestra el top 3 bajo el nombre, en la tabla de Salidas y en la comparativa (un renglón por año).
 
 **Revisión de motivos "en cero" (2026-09-09):** ninguna salida tiene sub-motivo vacío. Los ceros de 2025
 en la comparativa son un cambio de criterio de captura: de enero a agosto de 2025 nadie usó "salario" ni

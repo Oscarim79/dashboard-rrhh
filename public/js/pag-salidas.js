@@ -38,6 +38,8 @@ if (!salidasTodo.total) {
     const regTexto = reg ? `En el registro incluye lo anotado como ${Object.keys(reg).map((s) => `"${s.toLowerCase()}"`).join(' y ')}.` : '';
     return [manual, regTexto].filter(Boolean).join(' ') || null;
   };
+  // "Salario 8 · Clima laboral 5 · Horarios 2": los 3 motivos más frecuentes de un equipo
+  const top3 = (motivos) => Object.entries(motivos ?? {}).slice(0, 3).map(([k, v]) => `${nombreSub(k)} ${fmtNum(v)}`).join(' · ');
   const notaUnificados = (() => {
     const g = Object.entries(salidasTodo.agrupacionesSubMotivo ?? {});
     if (!g.length) return '';
@@ -167,10 +169,11 @@ if (!salidasTodo.total) {
     const sups = Object.entries(D.porSupervisor ?? {});
     document.getElementById('supervisor').innerHTML = sups.length ? `<div class="tabla-scroll"><table class="tabla-sup">
       <thead><tr><th>Supervisor</th><th class="n">Bajas</th><th class="n">Renuncia</th><th class="n">Despido</th><th class="n">&lt; 6 meses</th></tr></thead>
-      <tbody>${sups.map(([nombre, s]) => `<tr><td>${nombre}</td><td class="n"><b>${fmtNum(s.n)}</b></td><td class="n">${fmtNum(s.renuncia)}</td><td class="n">${fmtNum(s.despido)}</td><td class="n">${fmtNum(s.tempranas)}<span class="pct">${s.n ? Math.round((s.tempranas / s.n) * 100) : 0}%</span></td></tr>`).join('')}</tbody>
+      <tbody>${sups.map(([nombre, s]) => `<tr class="sup-fila"><td>${nombre}</td><td class="n"><b>${fmtNum(s.n)}</b></td><td class="n">${fmtNum(s.renuncia)}</td><td class="n">${fmtNum(s.despido)}</td><td class="n">${fmtNum(s.tempranas)}<span class="pct">${s.n ? Math.round((s.tempranas / s.n) * 100) : 0}%</span></td></tr>
+        <tr class="sup-motivos"><td colspan="5">${top3(s.motivos) ? `Por qué se van: ${top3(s.motivos)}` : 'Sin motivos registrados'}</td></tr>`).join('')}</tbody>
       </table></div>` : '<p class="sub">Sin dato de supervisor.</p>';
     document.getElementById('supervisor-nota').textContent =
-      `Salidas del equipo de cada supervisor o jefe en ${etiP}, según la columna "supervisor o jefe" del registro de RRHH. "< 6 meses" = cuántas de esas salidas tenían menos de 6 meses en la empresa (y qué parte de las bajas de ese equipo representan). Bajas que no son renuncia ni despido (no confirmados, temporales, vacacionistas) cuentan en el total pero no en esas dos columnas.${depto === 'comercial' ? ' Ojo: con el selector en Comercial solo se cuentan las salidas del área Comercial; un supervisor de Logística, Mercadeo o Créditos aparece con pocas o ninguna. Para ver a todos los equipos completos, cambia el selector a General.' : ''}`;
+      `Salidas del equipo de cada supervisor o jefe en ${etiP}, según la columna "supervisor o jefe" del registro de RRHH. "< 6 meses" = cuántas de esas salidas tenían menos de 6 meses en la empresa (y qué parte de las bajas de ese equipo representan). Bajo cada nombre, los 3 motivos más frecuentes de su equipo en el período. Bajas que no son renuncia ni despido (no confirmados, temporales, vacacionistas) cuentan en el total pero no en esas dos columnas.${depto === 'comercial' ? ' Ojo: con el selector en Comercial solo se cuentan las salidas del área Comercial; un supervisor de Logística, Mercadeo o Créditos aparece con pocas o ninguna. Para ver a todos los equipos completos, cambia el selector a General.' : ''}`;
 
     // ── género ──
     document.getElementById('genero').innerHTML = barrasH(
@@ -195,7 +198,7 @@ if (!salidasTodo.total) {
   };
   const tablaComp = (filas, etiA, etiB) => filas.length ? `<div class="tabla-scroll"><table class="tabla-comp">
     <thead><tr><th></th><th class="n">${etiA}</th><th class="n">${etiB}</th><th class="n">Cambio</th></tr></thead>
-    <tbody>${filas.map((f) => `<tr><td>${f.eti}</td><td class="n">${f.ca ?? celda(f.a, f.na)}</td><td class="n">${f.cb ?? celda(f.b, f.nb)}</td><td class="n">${delta(f.a, f.b, f)}</td></tr>`).join('')}</tbody>
+    <tbody>${filas.map((f) => `<tr${f.sub ? ' class="sup-fila"' : ''}><td>${f.eti}</td><td class="n">${f.ca ?? celda(f.a, f.na)}</td><td class="n">${f.cb ?? celda(f.b, f.nb)}</td><td class="n">${delta(f.a, f.b, f)}</td></tr>${f.sub ? `<tr class="sup-motivos"><td colspan="4">${f.sub}</td></tr>` : ''}`).join('')}</tbody>
     </table></div>` : '<p class="sub">Sin datos en este tramo.</p>';
   // une dos conteos {clave: n} en filas comparables; orden fijo (si se da) o por total descendente
   const filasDim = (A, B, objA, objB, etiqueta = titulo, orden = null) => {
@@ -267,8 +270,9 @@ if (!salidasTodo.total) {
       <div class="tarjeta"><h3>Por agencia / tienda (las 12 con más salidas)</h3>${tablaComp(filasDim(A, B, A.agencia, B.agencia, (k) => { const [n, t] = k.split('·'); return t ? `${n} (${t})` : titulo(n); }).slice(0, 12), etiA, etiB)}</div>
       ${depto === 'comercial' ? '' : `<div class="tarjeta"><h3>Por área de la empresa</h3>${tablaComp(filasDim(A, B, A.area, B.area, (k) => NOMBRE_AREA[k] ?? titulo(k)), etiA, etiB)}</div>`}
       <div class="tarjeta"><h3>Por marca</h3>${tablaComp(filasDim(A, B, A.marca, B.marca, (k) => k), etiA, etiB)}</div>
-      <div class="tarjeta"><h3>Por supervisor o jefe</h3>${tablaComp(filasDim(A, B, Object.fromEntries(Object.entries(A.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), Object.fromEntries(Object.entries(B.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), (k) => k), etiA, etiB)}
-        <p class="pie">Bajas del equipo de cada supervisor en cada tramo; el porcentaje es su parte del total del tramo.</p></div>
+      <div class="tarjeta"><h3>Por supervisor o jefe</h3>${tablaComp(filasDim(A, B, Object.fromEntries(Object.entries(A.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), Object.fromEntries(Object.entries(B.porSupervisor ?? {}).map(([k, s]) => [k, s.n])), (k) => k)
+        .map((f) => ({ ...f, sub: `<span class="sup-tramo">${a}:</span> ${top3(A.porSupervisor?.[f.eti]?.motivos) || '—'}<br><span class="sup-tramo">${b}:</span> ${top3(B.porSupervisor?.[f.eti]?.motivos) || '—'}` })), etiA, etiB)}
+        <p class="pie">Bajas del equipo de cada supervisor en cada tramo; el porcentaje es su parte del total del tramo. Bajo cada nombre, los 3 motivos más frecuentes de su equipo en cada año.</p></div>
       <div class="tarjeta"><h3>Por género</h3>${tablaComp(filasDim(A, B, A.genero, B.genero), etiA, etiB)}</div>`;
     for (const [id, clave] of [['comp-a', 'a'], ['comp-b', 'b'], ['comp-mm', 'mm']]) {
       cont.querySelector(`#${id}`).addEventListener('change', (e) => {
