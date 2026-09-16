@@ -122,9 +122,10 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   sin plazas nuevas en RRHH; el comodín actual vuelve a asistente, Comercial pone 2 comodines y 1 capacitador
   por región, inducción automatizada, métrica de cultura), marcada "pendiente de aprobación". Las antiguas
   propuestas 1 y 2 se retiraron; el capacitador y la métrica de cultura son "Detalle A/B" de la misma.
-  **Lugar fijo de capacitación fuera de la tienda (Oscar, 2026-09-16):** punto 1.3 del problema (en tienda, jefes y
-  supervisores desvían al nuevo a otras tareas, p. ej. volantear sin aviso, y lo despiden por "no es pilas") y bloque
-  propio en el detalle A. Es un reclamo de justicia con la persona además de costo; mantenerlo en ese tono.
+  **Primera semana en una tienda que NO es la suya (Oscar, 2026-09-16):** punto 1.3 del problema (en su propia tienda,
+  su jefe y su supervisor desvían al nuevo a otras tareas, p. ej. volantear sin aviso, y lo despiden por "no es pilas")
+  y bloque propio en el detalle A. NO es un lugar fuera de la tienda (Oscar lo corrigió): sigue siendo una tienda real,
+  pero distinta a la que va a ocupar. Es un reclamo de justicia con la persona además de costo; mantener ese tono.
 
 ## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 
