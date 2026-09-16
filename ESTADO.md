@@ -553,6 +553,15 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   pero no en el costo (falta su modelo)".
 - Al validar rotación: el indicador manual del sheet incluye Abi Q y Friotec; el calculado ahora incluye Abi Q
   (solo falta Friotec, 1 activo). Validador del modelo de costo: los 4 controles cuadran.
+- **Tabla "Indicador manual vs. calculado" retirada del sitio (Oscar, 2026-09-16, más tarde):** el CEO no debe ver
+  diferencias entre dos fuentes que resten confianza a los datos. Sigue en `rotacion.json → calculado.comparacion`
+  para validar por dentro: leerla desde el JSON (o con node) cuando haga falta revisar si el calculado cuadra con
+  lo que llena a mano el jefe de RRHH. Al 2026-09-16 (Comercial, Abi Q ya dentro del calculado): diferencias de
+  −1 a −4 pts en 2025 y mar–jul 2026, +2 en ene–feb 2026; jul 2026 manual 46.7% vs calculado 42.5%.
+- Sheet corregido por Oscar (2026-09-16): la celda de días transcurridos de la vacante 208 (San Benito, jefe de
+  agencia) tenía un 61 pegado a mano en vez de la fórmula HOY()-solicitud; el tablero mostraba 85 (correcto,
+  cuenta desde la solicitud). Ojo: si otras filas cerradas sin fecha de cierre tienen valores pegados, el pipeline
+  los usa tal cual para días de cobertura.
 - Pendiente detectado (no tocado): el pie de "De dónde salen los datos" del Resumen sigue diciendo que no se
   usan las pestañas de altas ni la base de datos general; desde el 2026-09-09 sí se leen (solo conteos).
 

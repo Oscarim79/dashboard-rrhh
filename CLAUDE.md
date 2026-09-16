@@ -108,6 +108,9 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   bajas de SALIDAS + altas de ALTAS + activos de BASE DE DATOS GENERAL, plantilla reconstruida hacia
   atrás, misma fórmula del manual: bajas acumuladas ÷ promedio(inicio, fin)); `comparacion` lo contrasta
   con el manual. La marca "A2K, ABIQ" (corporativo compartido) cuenta en Americana.
+  **La tabla "Indicador manual vs. calculado" NO se muestra en el sitio (Oscar, 2026-09-16):** el CEO no debe
+  ver diferencias entre fuentes que resten confianza a las cifras. `comparacion` sigue en el JSON solo para
+  validar por dentro; no volver a pintarla ni mencionar en copy que el manual y el calculado difieren.
 - **Selector de período** (también global): `todo` · `12m` (por defecto) · `a:AAAA` · `m:AAAA-MM`.
   Vacantes se filtran por fecha de solicitud y se re-agregan en el navegador (`agregarVacantes` en
   comun.js debe seguir espejando `agregarVacantes` del pipeline); salidas usan `porMesDetalle`

@@ -88,7 +88,6 @@ function pintar(depto, periodo) {
 
   // ── rotación por marca (calculada) y validación contra el manual ──────────
   pintarMarcas(rango);
-  pintarValidacion(esCom);
 
   // ── comercial vs total (el último año del período) — siempre se muestra la comparación ──
   const anioCT = ultimo ? ultimo.anio : aniosTodos.at(-1);
@@ -158,20 +157,9 @@ function pintarMarcas(rango) {
   const a = CALC.anclaje;
   nota.textContent = `Cálculo del dashboard con la misma fórmula del indicador: bajas acumuladas del año ÷ promedio de la plantilla del mes. Bajas del registro de SALIDAS, altas de la pestaña ALTAS y plantilla de hoy (${a.fecha}) contada en la BASE DE DATOS GENERAL: ${fmtNum(a.activos.total)} activos en total, ${fmtNum(a.activos.comercial)} en Comercial. Los meses anteriores se reconstruyen hacia atrás con altas y bajas.${a.administracionEnAmericana ? ` ${fmtNum(a.administracionEnAmericana)} personas de administración (corporativo) se cuentan en Americana.` : ''} ${CALC.marcasExcluidas?.length ? `${CALC.marcasExcluidas.join(' y ')} quedan fuera de este cálculo por ahora.` : ''} Solo conteos: ningún dato individual.`;
 }
-// Tabla: indicador manual del sheet frente al calculado, mes a mes del último año, para el alcance actual.
-function pintarValidacion(esCom) {
-  const el = document.getElementById('tabla-valida'), nota = document.getElementById('valida-nota');
-  const comp = CALC?.comparacion?.[esCom ? 'comercial' : 'total'] ?? [];
-  document.getElementById('h-valida').textContent = `Indicador manual vs. calculado · ${esCom ? 'área comercial' : 'total empresa'}`;
-  if (!comp.length) { el.innerHTML = '<p class="sub">Sin meses comparables.</p>'; nota.textContent = ''; return; }
-  const ult = comp.slice(-12);
-  el.innerHTML = `<div class="tabla-scroll"><table class="tabla-comp tabla-valida"><thead><tr><th>Mes</th><th class="n">Manual</th><th class="n">Calculado</th><th class="n">Diferencia</th></tr></thead><tbody>${ult.map((r) => {
-    const d = r.calculado.pctAcum != null && r.manual.pctAcum != null ? (r.calculado.pctAcum - r.manual.pctAcum) * 100 : null;
-    return `<tr><td>${MES_CORTO[r.mesNum - 1]} ${r.anio}</td><td class="n">${fmtPct(r.manual.pctAcum, 1)}<span class="pct">${fmtNum(r.manual.fin)} pers.</span></td><td class="n">${r.calculado.pctAcum != null ? fmtPct(r.calculado.pctAcum, 1) : '—'}<span class="pct">${fmtNum(r.calculado.fin)} pers.</span></td><td class="n"><span class="delta ${d == null ? 'igual' : Math.abs(d) < 1 ? 'igual' : 'mas'}">${d == null ? '—' : (d > 0 ? '+' : '−') + Math.abs(d).toFixed(1) + ' pts'}</span></td></tr>`;
-  }).join('')}</tbody></table></div>`;
-  nota.textContent = (CALC.marcasExcluidas?.length ? 'Ojo: el indicador manual del sheet incluye ' + CALC.marcasExcluidas.join(' y ') + ' y el calculado no; parte de la diferencia viene de ahí. ' : '') + 'Sirve para validar el cálculo automático contra lo que el jefe de RRHH llena a mano (el número pequeño es la plantilla al cierre del mes; "Altas" y "Bajas" de la tabla de marcas son las del año en curso y "Plantilla" la del cierre del último mes completo). Diferencias de 1 punto o menos son normales; si son mayores, conviene revisar qué bajas o altas faltan en alguna de las dos fuentes. Cuando cuadre de forma sostenida, la pestaña manual puede dejar de llenarse.';
-}
-
+// La tabla "Indicador manual vs. calculado" se QUITÓ del sitio (Oscar, 2026-09-16): el CEO no debe ver
+// diferencias entre dos fuentes que resten confianza a las cifras. La comparación sigue publicándose en
+// rotacion.json → calculado.comparacion.{total,comercial} para validar por dentro (ver ESTADO.md).
 let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });
 let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ rotacion }), generado: rotacion.generado },
   (p) => { periodo = p; pintar(depto, periodo); });
