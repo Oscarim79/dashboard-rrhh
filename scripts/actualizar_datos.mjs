@@ -26,11 +26,16 @@ function sheetId() {
 }
 
 const TIENDAS_CFG = JSON.parse(readFileSync(path.join(ROOT, 'config', 'tiendas.json'), 'utf8'));
-// Marcas FUERA de todas las cifras principales por ahora (Oscar, 2026-09-09): Abi Q y Friotec son otros
-// negocios y no hay respuestas sobre sus plantillas, costos y personal compartido. Sus filas siguen
-// leyéndose y se publican aparte (salidas.json → porMarca, rotacion.json → calculado.series) para
-// reactivarlas sin tocar el pipeline: basta con vaciar este conjunto.
-const MARCAS_EXCLUIDAS = new Set(['Abi Q', 'Friotec']);
+// Marcas FUERA de todas las cifras principales por ahora (Oscar, 2026-09-09): otros negocios sin
+// respuestas sobre sus plantillas, costos y personal compartido. Sus filas siguen leyéndose y se
+// publican aparte (salidas.json → porMarca, rotacion.json → calculado.series) para reactivarlas sin
+// tocar el pipeline: basta con vaciar este conjunto.
+const MARCAS_EXCLUIDAS = new Set(['Friotec']);
+// Marcas que SÍ entran a salidas, rotación y vacantes pero NO al costo (Oscar, 2026-09-16): Abi Q
+// vuelve a las cifras principales, pero como no hay modelo de costo propio (salarios y ventas de sus
+// tiendas), sus renuncias y despidos se publican en porTipoTienda bajo 'sin costo' y el Resumen no las
+// multiplica por el costo por salida. Cuando llegue su modelo: quitarla de aquí.
+const MARCAS_SIN_COSTO = new Set(['Abi Q']);
 
 // ── descarga (con reintentos: Google a veces corta la conexión a medias) ───
 async function descargar(id, intentos = 3) {
@@ -357,6 +362,7 @@ function agregarVacantes(filas) {
 
 const filasVac = filasVacTodas.filter((r) => !MARCAS_EXCLUIDAS.has(r.empresa));
 if (filasVacTodas.length !== filasVac.length) console.log(`Vacantes: ${filasVacTodas.length - filasVac.length} filas de ${[...MARCAS_EXCLUIDAS].join(' y ')} quedan fuera (decisión de Oscar, 2026-09-09).`);
+{ const n = filasVac.filter((r) => MARCAS_SIN_COSTO.has(r.empresa)).length; if (n) console.log(`Vacantes: ${n} filas de ${[...MARCAS_SIN_COSTO].join(' y ')} entran a días de vacante y plazas abiertas, pero no al costo (Oscar, 2026-09-16).`); }
 const agregadosVac = agregarVacantes(filasVac);
 const canales = agregadosVac.canales;
 const filasComercial = filasVac.filter((r) => r.departamento === 'COMERCIAL');
@@ -372,6 +378,7 @@ const vacantesJson = {
   departamentos: contarPor(filasVac, (r) => r.departamento),
   departamentoFuente: I.depto >= 0 ? 'columna DEPARTAMENTO del sheet' : 'deducido del puesto (la pestaña no trae departamento)',
   marcasExcluidas: [...MARCAS_EXCLUIDAS],
+  marcasSinCosto: [...MARCAS_SIN_COSTO], // sus vacantes cuentan para días y plazas abiertas, no para el costo
 };
 
 // ── 2) ROTACIÓN acumulada (INDICADOR: AÑO, MES, % ROTACION, inicio/fin) ────
@@ -560,11 +567,12 @@ if (!sal) {
   // Salidas por tipo de tienda y razón: es lo que el Resumen multiplica por el costo por
   // salida (decisión de Oscar 2026-09-07: contar con el registro de SALIDAS, no con el de
   // vacantes, que solo tiene las plazas abiertas). 'no tienda' = oficinas/regiones/CEDI;
-  // 'sin tipo' = tienda sin clasificar o nombre no reconocido.
+  // 'sin tipo' = tienda sin clasificar o nombre no reconocido. 'sin costo' = marcas sin modelo de costo
+  // propio (MARCAS_SIN_COSTO, hoy Abi Q): cuentan como salidas pero el Resumen no las costea.
   const porTipoTienda = (arr) => {
     const c = {};
     for (const r of arr) {
-      const tipo = r.esTienda === false ? 'no tienda' : (r.tipoTienda ?? 'sin tipo');
+      const tipo = MARCAS_SIN_COSTO.has(r.marca) ? 'sin costo' : r.esTienda === false ? 'no tienda' : (r.tipoTienda ?? 'sin tipo');
       const raz = r.razon === 'RENUNCIA' ? 'renuncia' : r.razon === 'DESPIDO' ? 'despido' : 'otros';
       c[tipo] ??= { renuncia: 0, despido: 0, otros: 0 };
       c[tipo][raz]++;
@@ -618,7 +626,7 @@ if (!sal) {
   const dims = (arr) => ({
     razon: cuenta(arr, (r) => r.razon, 3),
     porTipoTienda: porTipoTienda(arr),
-    sinTipoOrigen: cuenta(arr.filter((r) => r.esTienda !== false && !r.tipoTienda && ['RENUNCIA', 'DESPIDO'].includes(r.razon)), (r) => `${r.agencia}${r.esTienda === null ? ' — nombre no reconocido en el archivo de tiendas' : ' (sin tipo)'}`),
+    sinTipoOrigen: cuenta(arr.filter((r) => !MARCAS_SIN_COSTO.has(r.marca) && r.esTienda !== false && !r.tipoTienda && ['RENUNCIA', 'DESPIDO'].includes(r.razon)), (r) => `${r.agencia}${r.esTienda === null ? ' — nombre no reconocido en el archivo de tiendas' : ' (sin tipo)'}`),
     // Motivos: TODOS por separado (Oscar, 2026-09-09; antes se agrupaban los de menos de 3 casos en
     // OTROS). Siguen siendo conteos sin nombres; los sinónimos ya vienen unificados por SUB_ALIAS.
     subMotivo: cuenta(arr, (r) => r.sub),
@@ -690,13 +698,14 @@ if (!sal) {
     // qué etiquetas del registro se unificaron bajo cada motivo (solo etiquetas y conteos)
     agrupacionesSubMotivo,
     marcasExcluidas: [...MARCAS_EXCLUIDAS],
+    marcasSinCosto: [...MARCAS_SIN_COSTO], // entran a las cifras; en porTipoTienda van bajo 'sin costo'
     ...bloqueSalidas(regsPrincipal),
     // Selector General / Comercial del sitio: mismo desglose, solo el área COMERCIAL
     // (columna AREA LAB de la pestaña).
     porDepartamento: { comercial: bloqueSalidas(regsComercial) },
     porMarca,
   };
-  console.log(`Salidas: ${regs.length} leídas, ${regsPrincipal.length} en las cifras principales (${regs.length - regsPrincipal.length} de ${[...MARCAS_EXCLUIDAS].join(' y ')} fuera), ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
+  console.log(`Salidas: ${regs.length} leídas, ${regsPrincipal.length} en las cifras principales (${regs.length - regsPrincipal.length} de ${[...MARCAS_EXCLUIDAS].join(' y ')} fuera; ${regsPrincipal.filter((r) => MARCAS_SIN_COSTO.has(r.marca)).length} de ${[...MARCAS_SIN_COSTO].join(' y ')} dentro pero sin costear), ${regsComercial.length} del área Comercial; razón capturada ${captura(regs).conTipo}/${regs.length}`);
   if (diasLabMalos) calidad.push({ tipo: 'aviso', n: diasLabMalos, mensaje: `${diasLabMalos} ${diasLabMalos === 1 ? 'salida tiene' : 'salidas tienen'} días laborados imposibles (negativos o enormes); se ${diasLabMalos === 1 ? 'excluye' : 'excluyen'} de la antigüedad.` });
   if (sinRazon) calidad.push({ tipo: 'aviso', n: sinRazon, mensaje: `${sinRazon} salidas no registran razón (renuncia/despido); aparecen como "sin razón".` });
   const nFut = Object.values(bajasFuturas).reduce((a, b) => a + b, 0);
@@ -880,6 +889,7 @@ const metaJson = {
       fuente: 'Bajas: pestaña SALIDAS. Altas: pestaña ALTAS (solo conteos). Plantilla de hoy: BASE DE DATOS GENERAL (solo conteo de activos). Plantilla de meses anteriores reconstruida hacia atrás con altas y bajas.',
       anclaje: { fecha: hoyISO, activos, administracionEnAmericana: compartida },
       marcasExcluidas: [...MARCAS_EXCLUIDAS], // total y comercial se calculan sin ellas (el indicador manual del sheet sí las incluye)
+      marcasSinCosto: [...MARCAS_SIN_COSTO], // sí entran a total y comercial (solo quedan fuera del costo)
       desde: primero, hasta: hoyYmR,
       series,
       comparacion: { total: comparar('total', 'TOTAL EMPRESA'), comercial: comparar('comercial', 'AREA COMERCIAL') },

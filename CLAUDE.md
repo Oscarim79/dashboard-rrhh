@@ -116,15 +116,21 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   menú como última opción "Propuesta" (pedido del CEO, 2026-09-07). Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
   viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.
 
-## Abi Q y Friotec fuera de todas las cifras (Oscar, 2026-09-09, cierre)
+## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 
-- `MARCAS_EXCLUIDAS` en el pipeline: sus filas de SALIDAS y VACANTES no entran a las cifras principales
-  (total, General/Comercial) ni a la rotación calculada total/comercial; se publican aparte en
-  `salidas.json → porMarca` y `rotacion.json → calculado.series.{abiq,friotec}`. En el sitio, el
-  desplegable de marca no se pinta (`MARCAS` solo tiene "todas") y el mapa oculta sus tiendas
-  (`MARCAS_OCULTAS`). Para reactivarlas: vaciar `MARCAS_EXCLUIDAS`, devolver las claves a `MARCAS` y
-  quitar de `MARCAS_OCULTAS`. Motivo: no hay respuestas sobre sus plantillas, costos y personal
-  compartido (preguntas en ESTADO.md). El indicador manual del sheet sí las incluye.
+- Dos listas en el pipeline. `MARCAS_EXCLUIDAS` (hoy solo **Friotec**): sus filas de SALIDAS y VACANTES no
+  entran a las cifras principales (total, General/Comercial) ni a la rotación calculada total/comercial; se
+  publican aparte en `salidas.json → porMarca` y `rotacion.json → calculado.series.friotec`. En el sitio el
+  mapa oculta sus tiendas (`MARCAS_OCULTAS` en comun.js) y no está en el desplegable `MARCAS`.
+- `MARCAS_SIN_COSTO` (hoy **Abi Q**, decisión de Oscar 2026-09-16, antes estaba excluida del todo): SÍ entra a
+  salidas, rotación calculada (total/comercial) y control de vacantes, pero NO al costo porque no hay modelo
+  propio (salarios y ventas de sus tiendas). Mecanismo: en `porTipoTienda` sus renuncias/despidos van bajo la
+  clave **`'sin costo'`** en vez de su tipo AA/A/B/C, así el Resumen no las multiplica por ningún costo y
+  muestra la nota "N salidas de Abi Q no se costean todavía"; la tarjeta de plazas abiertas descuenta sus
+  vacantes; el mapa muestra sus tiendas con salidas y motivos pero "sin costear" (Q0 en las sumas). En el sitio
+  la lista espejo es `MARCAS_SIN_COSTO` en comun.js. Cuando llegue el modelo de Abi Q: quitarla de ambas listas.
+- Motivo de la exclusión original (2026-09-09): no hay respuestas sobre plantillas, costos y personal
+  compartido (preguntas en ESTADO.md). El indicador manual del sheet incluye a ambas marcas.
 - Datos de Oscar (2026-09-09): la marca "A2K, ABIQ" de la BASE DE DATOS GENERAL son los
   **administrativos** (corporativo); CEDI y Logística son lo mismo: uno en Chiquimula (Dulce Vidal) y
   otro en zona 12, Guatemala (David Hernández y/o César Tejeda).

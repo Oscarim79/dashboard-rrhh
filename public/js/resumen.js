@@ -5,7 +5,7 @@
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca, MARCAS_SIN_COSTO } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -103,6 +103,13 @@ function pintar(depto, periodo) {
     salidasCosteadas += salidasNoTienda;
     detallePorTipo.push({ tipo: 'NT', salidas: noTienda, cR, cD, anual, cal: { dias, fuente: A.diasCobertura.global.mediana != null ? `mediana global (n=${A.diasCobertura.global.n})` : 'supuesto del modelo' } });
   }
+  // Marcas sin modelo de costo propio (Oscar, 2026-09-16: Abi Q): sus renuncias y despidos cuentan
+  // como salidas (y en el % de plantilla reemplazada) pero no se multiplican por ningún costo.
+  const sc = salidasPorTipo['sin costo'];
+  const salidasSinCosto = sc ? sc.renuncia + sc.despido : 0;
+  const ETI_SIN_COSTO = MARCAS_SIN_COSTO.join(' y ');
+  // todo el alcance es de una marca sin costo (p. ej. marca Abi Q elegida): no se enseña ningún quetzal
+  const soloSinCosto = salidasSinCosto > 0 && !salidasCosteadas && !salidasSinTipo;
   const salidasOtras = Object.values(salidasPorTipo).reduce((s, v) => s + (v.otros ?? 0), 0); // no confirmados, vacacionistas, sin razón
   // de qué lugares vienen las salidas sin tipo (registro de SALIDAS: tienda sin clasificar o
   // nombre de agencia que no está en config/tiendas.json)
@@ -122,7 +129,7 @@ function pintar(depto, periodo) {
     const cierre = rotacion.acumulado
       .filter((r) => r.area === areaRot && r.fin != null && (!hastaYm || `${r.anio}-${String(r.mesNum).padStart(2, '0')}` <= hastaYm))
       .sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
-    const salidas12 = salidasCosteadas + salidasSinTipo + salidasNoTienda;
+    const salidas12 = salidasCosteadas + salidasSinTipo + salidasSinCosto; // salidasCosteadas ya incluye las 'no tienda'
     const serieMarca = marcaActual() !== 'todas' ? (rotacion.calculado?.series?.[marcaActual()] ?? []).filter((r) => !r.parcial && (!hastaYm || r.ym <= hastaYm)) : [];
     const cierreMarca = serieMarca.at(-1);
     if (marcaActual() !== 'todas') {
@@ -150,18 +157,23 @@ function pintar(depto, periodo) {
         pct >= 50 ? 'rojo' : ''));
     }
 
-    // 3. cuánto cuesta cada salida (renuncia; rango tienda B → A, con días reales)
-    const cB = costoTipo.B.cR.total, cA = costoTipo.A.cR.total;
-    const mil = (v) => fmtNum(Math.round(v / 1000));
-    tiles.push(kpi(`Q${mil(cB)}–${mil(cA)} mil`, 'cuesta cada salida (renuncia, tienda B a tienda A)',
-      'con días de vacante reales · detalle por tipo más abajo', '', 'medio'));
+    // 3. cuánto cuesta cada salida (renuncia; rango tienda B → A, con días reales); no aplica a una
+    // marca sin modelo de costo
+    if (!soloSinCosto) {
+      const cB = costoTipo.B.cR.total, cA = costoTipo.A.cR.total;
+      const mil = (v) => fmtNum(Math.round(v / 1000));
+      tiles.push(kpi(`Q${mil(cB)}–${mil(cA)} mil`, 'cuesta cada salida (renuncia, tienda B a tienda A)',
+        'con días de vacante reales · detalle por tipo más abajo', '', 'medio'));
+    }
 
     // 4. lo que ya cuestan las plazas abiertas hoy (no depende del período)
-    const abiertas = vacantes.filas.filter((r) => r.estatus === 'ABIERTA');
+    const abiertasTodas = vacantes.filas.filter((r) => r.estatus === 'ABIERTA');
+    const abiertas = abiertasTodas.filter((r) => !MARCAS_SIN_COSTO.includes(r.empresa ?? r.marca));
+    const abiertasSinCosto = abiertasTodas.length - abiertas.length;
     if (abiertas.length) {
       const costoAbiertas = abiertas.reduce((s, r) => s + (costoTipo[r.tipo] ?? costoTipo.B).cR.total, 0);
       tiles.push(kpi(fmtQ(costoAbiertas), `ya cuestan las ${fmtNum(abiertas.length)} plazas abiertas hoy`,
-        'costo de renuncia por tipo de tienda; sin tipo se asume tipo B · no depende del período', 'ambar', 'medio'));
+        `costo de renuncia por tipo de tienda; sin tipo se asume tipo B · no depende del período${abiertasSinCosto ? ` · sin contar ${fmtNum(abiertasSinCosto)} de ${ETI_SIN_COSTO} (sin modelo de costo)` : ''}`, 'ambar', 'medio'));
     }
 
     // 5. días para cubrir una vacante
@@ -202,13 +214,14 @@ function pintar(depto, periodo) {
     const enTiendas = salidasCosteadas - salidasNoTienda;
     document.getElementById('kpis').innerHTML = `
     <div class="kpi" style="grid-column: 1 / -1;">
-      <div class="kpi-valor grande">${fmtQ(costoAnual + extra)}</div>
+      <div class="kpi-valor grande">${soloSinCosto ? 'Sin costear' : fmtQ(costoAnual + extra)}</div>
       <div class="kpi-eti">costo de rotación · <b>${etiquetaDepto(depto)}</b> · ${etiP}</div>
-      <div class="kpi-nota">Suma de <b>${fmtNum(salidasCosteadas + salidasSinTipo)}</b> renuncias y despidos según el registro de salidas: ${fmtNum(enTiendas)} en tiendas clasificadas${salidasNoTienda ? `, ${fmtNum(salidasNoTienda)} ${NT_ETI}` : ''}${supuesto ? `, ${fmtNum(salidasSinTipo)} en tiendas sin clasificar (estimadas por supuesto)` : ''}.${!esCom && salidasNoTienda ? ' Las salidas en tiendas son las mismas que en Comercial: todas las tiendas pertenecen a ese departamento; la diferencia está en las de oficinas, CEDI y regiones.' : ''}</div>
+      ${soloSinCosto ? '' : `<div class="kpi-nota">Suma de <b>${fmtNum(salidasCosteadas + salidasSinTipo)}</b> renuncias y despidos según el registro de salidas: ${fmtNum(enTiendas)} en tiendas clasificadas${salidasNoTienda ? `, ${fmtNum(salidasNoTienda)} ${NT_ETI}` : ''}${supuesto ? `, ${fmtNum(salidasSinTipo)} en tiendas sin clasificar (estimadas por supuesto)` : ''}.${!esCom && salidasNoTienda ? ' Las salidas en tiendas son las mismas que en Comercial: todas las tiendas pertenecen a ese departamento; la diferencia está en las de oficinas, CEDI y regiones.' : ''}</div>`}
       ${supuesto ? `<div class="kpi-nota">Incluye <b>${fmtQ(extra)}</b> estimados con un <b>SUPUESTO</b> sobre ${salidasSinTipo === 1 ? 'la salida' : `las ${fmtNum(salidasSinTipo)} salidas`} en tiendas sin clasificar — el reparto se ajusta en la tarjeta de abajo.</div>` : ''}
       ${salidasNoTienda ? `<div class="kpi-nota">${salidasNoTienda === 1 ? `La salida ${NT_ETI} se costea` : `Las ${fmtNum(salidasNoTienda)} salidas ${NT_ETI} se costean`} <b>sin ventas perdidas</b> (no hay piso de venta): solo curva de aprendizaje, tiempo de jefatura y RRHH, gastos de contratación y finiquito o indemnización. Ver su tarjeta más abajo.</div>` : ''}
+      ${salidasSinCosto ? `<div class="kpi-nota">${salidasSinCosto === 1 ? `1 salida de <b>${ETI_SIN_COSTO}</b> no se costea` : `<b>${fmtNum(salidasSinCosto)}</b> salidas de <b>${ETI_SIN_COSTO}</b> no se costean`} todavía: no hay modelo de costo propio para esa marca (salarios y ventas de sus tiendas). Sí cuentan en las salidas, la rotación y las vacantes.</div>` : ''}
       ${salidasOtras ? `<div class="kpi-nota">${salidasOtras === 1 ? '1 salida más no se costea' : `${fmtNum(salidasOtras)} salidas más no se costean`} por no ser renuncia ni despido (no confirmados, vacacionistas o sin razón registrada).</div>` : ''}
-      ${!salidasCosteadas && !salidasSinTipo ? '<div class="kpi-nota">No hay renuncias ni despidos registrados en este período y alcance.</div>' : ''}
+      ${!salidasCosteadas && !salidasSinTipo && !salidasSinCosto ? '<div class="kpi-nota">No hay renuncias ni despidos registrados en este período y alcance.</div>' : ''}
     </div>
     <div class="kpi">
       <div class="kpi-valor">${medianaDias ?? '—'} días</div>

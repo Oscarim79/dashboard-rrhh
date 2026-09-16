@@ -7,7 +7,7 @@
 // mes, comparación del supervisor con sus pares, costo estimado, zoom y arrastre del mapa.
 import { pintarPie, marcarNavActiva, fmtNum, salidasDe, vacantesDe, pintarSelectorDepto, pintarSelectorPeriodo,
   dimsSalidas, etiquetaPeriodo, aniosYMeses, aplicarDesglose, fmtYm, fmtYmCorto, COLOR_SUPERVISOR,
-  vacantesEnPeriodo, agregarVacantes, diasCalibrados, MARCAS as MARCAS_GLOBAL, MARCAS_OCULTAS, marcaActual, guardarMarca } from './comun.js';
+  vacantesEnPeriodo, agregarVacantes, diasCalibrados, MARCAS as MARCAS_GLOBAL, MARCAS_OCULTAS, MARCAS_SIN_COSTO, marcaActual, guardarMarca } from './comun.js';
 import { costoMezcla, VENTAS_TIPO, PARAMS_DEFECTO, fmtQ } from './modelo.js';
 
 marcarNavActiva();
@@ -42,6 +42,8 @@ const ubicadasTodas = todasTiendas.filter((t) => t.lat != null);
 const MARCAS = [...new Set(todasTiendas.map((t) => t.marca).filter(Boolean))].sort();
 // Filtro por marca (Oscar, 2026-09-09): Abi Q y Friotec son otros negocios; sus costos y motivos
 // no se mezclan con Americana. 'todas' = sin filtro. Las listas de abajo se recalculan al filtrar.
+// Abi Q (Oscar, 2026-09-16) vuelve al mapa con sus salidas y motivos, pero sin costo estimado
+// (MARCAS_SIN_COSTO: no hay modelo de costo propio); en las sumas cuenta como Q0.
 // Ligado al filtro global del sitio (comun.js): aquí se guarda por su etiqueta ('Abi Q'), allá por clave ('abiq').
 const claveMarca = (eti) => Object.entries(MARCAS_GLOBAL).find(([, e]) => e === eti)?.[0] ?? 'todas';
 let marca = MARCAS_GLOBAL[marcaActual()] && marcaActual() !== 'todas' ? MARCAS_GLOBAL[marcaActual()] : 'todas';
@@ -124,7 +126,9 @@ function calcularCostos() {
     costoPorTipo[tipo] = costoMezcla(v, pR, pD, { ...PARAMS_DEFECTO, diasVacante: dias });
   }
 }
-const costoTienda = (t) => bajasTienda(t.nombre) * (costoPorTipo[t.tipo] ?? costoPorTipo.B);
+const sinCosto = (t) => MARCAS_SIN_COSTO.includes(t.marca);
+const costoTienda = (t) => (sinCosto(t) ? 0 : bajasTienda(t.nombre) * (costoPorTipo[t.tipo] ?? costoPorTipo.B));
+const costoEti = (t) => (sinCosto(t) ? 'sin costear' : fmtQ(costoTienda(t)));
 // Cifras de un supervisor: sin filtro, las del registro de salidas (columna supervisor); con filtro
 // de marca, la suma de sus tiendas de esa marca (así Abi Q no se mezcla con Americana).
 const statsSup = (sup) => {
@@ -186,7 +190,7 @@ function pintarMapa() {
     const r = rBase + Math.sqrt(medida(t) / maxM) * rExtra;
     const activo = sel?.tipo === 'tienda' && sel.clave === t.nombre;
     const sem = semaforo[t.nombre];
-    s += `<circle cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorTienda(t)}" fill-opacity="${apagadoSup(t.supervisor) ? 0.25 : 0.92}" stroke="${activo ? '#17251F' : '#fff'}" stroke-width="${((activo ? 3.2 : 1.6) * k).toFixed(2)}" data-tienda="${esc(t.nombre)}" class="tienda"><title>${esc(t.nombre)} (${tipoEti(t)}) · ${t.supervisor ?? SIN_SUP} · ${plural(b, 'salida', 'salidas')} en ${etiP} · ${fmtQ(costoTienda(t))}${sem ? ` · semáforo ${sem.color} (promedio de su tipo: ${sem.prom.toFixed(1)})` : ''}</title></circle>`;
+    s += `<circle cx="${t.x.toFixed(1)}" cy="${t.y.toFixed(1)}" r="${r.toFixed(1)}" fill="${colorTienda(t)}" fill-opacity="${apagadoSup(t.supervisor) ? 0.25 : 0.92}" stroke="${activo ? '#17251F' : '#fff'}" stroke-width="${((activo ? 3.2 : 1.6) * k).toFixed(2)}" data-tienda="${esc(t.nombre)}" class="tienda"><title>${esc(t.nombre)} (${tipoEti(t)}) · ${t.supervisor ?? SIN_SUP} · ${plural(b, 'salida', 'salidas')} en ${etiP} · ${costoEti(t)}${sem ? ` · semáforo ${sem.color} (promedio de su tipo: ${sem.prom.toFixed(1)})` : ''}</title></circle>`;
   }
   s += '</g></svg>';
   document.getElementById('mapa').innerHTML = s;
@@ -278,7 +282,7 @@ function activarZoomArrastre(svg) {
 const semaforoEti = (t) => { const s = semaforo[t.nombre]; return s ? `<i class="punto" style="background:${SEMAFORO[s.color]}" title="Semáforo ${s.color}: promedio de su tipo ${s.prom.toFixed(1)}"></i>` : ''; };
 function listaTiendas(lista) {
   const orden = [...lista].sort((a, b) => bajasTienda(b.nombre) - bajasTienda(a.nombre) || a.nombre.localeCompare(b.nombre));
-  return `<table class="tabla-mapa"><thead><tr><th>Tienda</th><th>Tipo</th><th class="n">Salidas</th><th class="n">Costo est.</th></tr></thead><tbody>${orden.map((t) => `<tr><td><button type="button" class="enlace" data-ir-tienda="${esc(t.nombre)}"><i class="punto" style="background:${colorSup(t.supervisor)}"></i>${esc(t.nombre)}</button> ${semaforoEti(t)}</td><td>${t.tipo ?? '—'}</td><td class="n">${fmtNum(bajasTienda(t.nombre))}</td><td class="n">${fmtQ(costoTienda(t))}</td></tr>`).join('')}</tbody></table>`;
+  return `<table class="tabla-mapa"><thead><tr><th>Tienda</th><th>Tipo</th><th class="n">Salidas</th><th class="n">Costo est.</th></tr></thead><tbody>${orden.map((t) => `<tr><td><button type="button" class="enlace" data-ir-tienda="${esc(t.nombre)}"><i class="punto" style="background:${colorSup(t.supervisor)}"></i>${esc(t.nombre)}</button> ${semaforoEti(t)}</td><td>${t.tipo ?? '—'}</td><td class="n">${fmtNum(bajasTienda(t.nombre))}</td><td class="n">${sinCosto(t) ? '<span class="pct">sin costear</span>' : fmtQ(costoTienda(t))}</td></tr>`).join('')}</tbody></table>`;
 }
 // "Por qué se ha ido la gente": barras de motivos (todos los que haya, de mayor a menor)
 function motivosHtml(motivos, total, titulo = 'Por qué se ha ido la gente') {
@@ -287,7 +291,7 @@ function motivosHtml(motivos, total, titulo = 'Por qué se ha ido la gente') {
   const max = items[0][1];
   return `<h4>${titulo}</h4><div class="motivos">${items.map(([k, v]) => `<div class="mot"><span>${esc(nombreSub(k))}</span><i><b style="width:${Math.max(4, (v / max) * 100)}%"></b></i><em>${fmtNum(v)}<small>${pct(v, total)}%</small></em></div>`).join('')}</div>`;
 }
-const notaCosto = () => `<p class="pie">Costo estimado = salidas × costo por salida de su tipo, con el mismo modelo que el Resumen (días reales de vacante del período: ${Object.entries(diasPorTipo).map(([t, d]) => `${t} ${Math.round(d)} d`).join(' · ')}; mezcla renuncia/despido del período). Es una estimación para comparar, no un dato contable.</p>`;
+const notaCosto = () => `<p class="pie">Costo estimado = salidas × costo por salida de su tipo, con el mismo modelo que el Resumen (días reales de vacante del período: ${Object.entries(diasPorTipo).map(([t, d]) => `${t} ${Math.round(d)} d`).join(' · ')}; mezcla renuncia/despido del período). Es una estimación para comparar, no un dato contable.${tiendas.some(sinCosto) ? ` Las tiendas ${MARCAS_SIN_COSTO.join(' y ')} no se costean todavía (falta su modelo de costo) y cuentan como Q0 en las sumas.` : ''}</p>`;
 const kpisRD = (d, etiP) => `<div class="kpis kpis-panel">
     <div class="kpi"><div class="kpi-valor">${fmtNum(d.n)}</div><div class="kpi-eti">salidas · ${etiP}</div></div>
     <div class="kpi"><div class="kpi-valor">${fmtNum(d.renuncia)}</div><div class="kpi-eti">renuncias · ${fmtNum(d.despido)} despidos</div></div>
@@ -356,7 +360,9 @@ function pintarPanel() {
       <p class="sub">${esc(t.marca)} · ${tipoEti(t)} · ${esc(t.municipio ?? '—')}${t.departamento ? `, <button type="button" class="enlace" data-ir-depto="${esc(t.departamento)}">${esc(t.departamento)}</button>` : ''} · supervisor <button type="button" class="enlace" data-ir-sup="${esc(t.supervisor ?? '')}">${esc(t.supervisor ?? SIN_SUP)}</button>.</p>
       ${kpisRD(d, etiP)}
       <div class="kpis kpis-panel">
-        <div class="kpi"><div class="kpi-valor medio">${fmtQ(costoTienda(t))}</div><div class="kpi-eti">costo estimado de su rotación</div><div class="kpi-nota">${fmtQ(costoPorTipo[t.tipo] ?? costoPorTipo.B)} por salida (${tipoEti(t)}${t.tipo ? '' : ', se asume B'})</div></div>
+        ${sinCosto(t)
+          ? `<div class="kpi"><div class="kpi-valor medio">Sin costear</div><div class="kpi-eti">costo estimado de su rotación</div><div class="kpi-nota">${esc(t.marca)} no tiene todavía modelo de costo propio (salarios y ventas de sus tiendas)</div></div>`
+          : `<div class="kpi"><div class="kpi-valor medio">${fmtQ(costoTienda(t))}</div><div class="kpi-eti">costo estimado de su rotación</div><div class="kpi-nota">${fmtQ(costoPorTipo[t.tipo] ?? costoPorTipo.B)} por salida (${tipoEti(t)}${t.tipo ? '' : ', se asume B'})</div></div>`}
         ${sem ? `<div class="kpi"><div class="kpi-valor medio" style="color:${SEMAFORO[sem.color]}">${sem.color === 'verde' ? 'Mejor' : sem.color === 'rojo' ? 'Peor' : 'Igual'}</div><div class="kpi-eti">que el promedio de las tiendas tipo ${t.tipo ?? 'B'} (${sem.prom.toFixed(1)} salidas)</div></div>` : ''}
       </div>
       ${motivosHtml(d.motivos, d.n, `Por qué se ha ido la gente de ${esc(t.nombre)} · ${etiP}`)}

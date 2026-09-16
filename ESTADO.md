@@ -536,7 +536,27 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   1 jefe de tienda + 1 asistente. Sustenta el 15% de impacto en ventas del simulador: un vendedor
   menos = 20–33% de la capacidad de venta, así que 15% asume que el equipo cubre buena parte.
 
-## ✅ Cierre del 2026-09-09 (última hora): Abi Q y Friotec fuera de todas las cifras
+## ✅ HECHO 2026-09-16: Abi Q vuelve a salidas, rotación y vacantes (sin costo); Friotec sigue fuera
+
+- Oscar preguntó si se podía contar a Abi Q en salidas y rotación aunque no en el costo. Sí: el pipeline ahora
+  tiene dos listas. `MARCAS_EXCLUIDAS` = solo Friotec (fuera de todo). `MARCAS_SIN_COSTO` = Abi Q: entra a las
+  cifras principales de salidas (472 de 474 bajas; 48 son de Abi Q), a la rotación calculada total/comercial
+  (total ago 2026: 46.6% con 265 activos; Americana 45.5%, Abi Q 62.9%) y al control de vacantes (25 filas).
+- Costo: en `porTipoTienda` las salidas de Abi Q van bajo `'sin costo'` (no bajo AA/A/B/C), así el Resumen no las
+  multiplica por el costo por salida y lo dice: "19 salidas de Abi Q no se costean todavía…" (últimos 12 m,
+  Comercial). Con la marca Abi Q elegida, el costo aparece como "Sin costear" y no se muestra la tarjeta
+  "cuesta cada salida". La tarjeta de plazas abiertas descuenta la vacante de Abi Q.
+- Sitio: vuelve el desplegable de marca (Todas · Americana · Abi Q); el mapa muestra otra vez las 5 tiendas
+  Abi Q (Diana Mendez reaparece) con salidas y motivos pero "sin costear" (Q0 en sumas de supervisor y
+  departamento, con nota al pie); la tabla de rotación por marca lista Total · Comercial · Americana · Abi Q.
+  Nota de alcance en todas las páginas: "Friotec queda fuera… Abi Q cuenta en salidas, rotación y vacantes,
+  pero no en el costo (falta su modelo)".
+- Al validar rotación: el indicador manual del sheet incluye Abi Q y Friotec; el calculado ahora incluye Abi Q
+  (solo falta Friotec, 1 activo). Validador del modelo de costo: los 4 controles cuadran.
+- Pendiente detectado (no tocado): el pie de "De dónde salen los datos" del Resumen sigue diciendo que no se
+  usan las pestañas de altas ni la base de datos general; desde el 2026-09-09 sí se leen (solo conteos).
+
+## ✅ Cierre del 2026-09-09 (última hora): Abi Q y Friotec fuera de todas las cifras (SUPERADO el 2026-09-16 para Abi Q)
 
 - Oscar: "no es justo que Abi Q afecte números sin tener las respuestas". `MARCAS_EXCLUIDAS` en el pipeline saca
   sus filas (y las de Friotec) de salidas, vacantes y de la rotación calculada total/comercial. Sus datos siguen
@@ -554,7 +574,8 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
    22; SALIDAS 12 y 26). Cuando cuadre, dejar de llenar la pestaña manual.
 2. **Decidir qué hacer con los 20 del corporativo con marca "A2K, ABIQ"** (hoy cuentan en Americana).
 3. **Modelo de costo propio para Abi Q** en el Simulador: faltan sus salarios (vendedor nuevo, vendedor que
-   sale, jefe de tienda) y si su curva de aprendizaje es distinta. Hoy Abi Q se costea con parámetros de Americana.
+   sale, jefe de tienda) y si su curva de aprendizaje es distinta. Desde el 2026-09-16 Abi Q NO se costea
+   (sus salidas van bajo 'sin costo'); con el modelo, quitarla de `MARCAS_SIN_COSTO` (pipeline y comun.js).
 4. **Friotec** queda fuera del sitio hasta que sus fuentes cuadren (ALTAS 4 · SALIDAS 2 · BASE 1 activo).
 5. **Sheet "Registro de tiendas":** borrar las dos observaciones viejas (Pradera Chiquimula, Santa Catarina
    Mita); confirmar que Santa Catarina Mita ("Catocha") está activa; Santa Cruz abre el 3 de octubre (tipo por
