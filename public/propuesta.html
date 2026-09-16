@@ -102,7 +102,7 @@
 <main>
   <div class="portada">
     <div class="seccion-num solo-oculto" style="margin-top:14px">Propuesta a Gerencia · RRHH</div>
-    <h1 class="solo-oculto">Capacitación y retención: el problema y cuatro propuestas</h1>
+    <h1 class="solo-oculto">Capacitación y retención: el problema y la propuesta</h1>
     <h1 style="display:none" class="solo-visible">Vendedor capacitador oficial por región</h1>
     <p class="sub solo-oculto">Departamento Comercial · Recursos Humanos · septiembre de 2026. Las cifras del tablero se actualizan solas; las que RRHH carga a mano están marcadas.</p>
     <div class="acciones solo-oculto">
@@ -173,49 +173,50 @@
     </div>
   </section>
 
-  <!-- ══════════════════════ SECCIÓN 2 · PROPUESTAS ══════════════════════ -->
+  <!-- ══════════════════════ SECCIÓN 2 · LA PROPUESTA ══════════════════════ -->
+  <!-- Oscar, 2026-09-16: la propuesta es UNA sola, la que ya se discutió con Gerencia (antes "Alternativa 2");
+       solo falta su aprobación. Las antiguas propuestas 1 (asistente para el jefe de RRHH) y 2 (segundo comodín
+       de RRHH) se retiraron: las sustituye el reparto acordado. El capacitador y la métrica de cultura siguen
+       como detalle de esta misma propuesta. Sin nombres. -->
   <section class="seccion" id="propuestas">
     <div class="seccion-num solo-oculto">Sección 2</div>
-    <h2 class="solo-oculto">Propuestas</h2>
+    <h2 class="solo-oculto">La propuesta</h2>
 
-    <div class="propuesta solo-oculto" id="p1">
-      <h3>1. Asistente para el jefe de RRHH (traslado interno)</h3>
-      <div class="hoy">
-        <div class="eti">Hoy · jefe de RRHH</div>
-        <ul>
-          <li>Entrevistas a candidatos (lo que más tiempo le lleva), propuestas laborales, casos ante el MP y representación ante el MINTRAB.</li>
-          <li>Cada caso del MP o del MINTRAB, cerca de uno al mes, le consume casi dos días completos.</li>
-        </ul>
+    <div class="propuesta solo-oculto acordada" id="alternativa">
+      <h3>Lo mismo que necesita RRHH, con otro reparto <span class="estado">Discutida con Gerencia · pendiente de aprobación</span></h3>
+      <p class="objetivo"><b>Es la versión que ya se discutió con Gerencia y solo falta su aprobación.</b> Cubre las necesidades del área <b>sin abrir plazas nuevas en RRHH</b>, poniendo en Comercial lo que es de Comercial y automatizando lo que se puede automatizar.</p>
+      <div class="tabla-scroll">
+        <table class="comparativa">
+          <thead><tr><th>Necesidad</th><th>Qué se hará</th></tr></thead>
+          <tbody>
+            <tr><td>Seguimiento a los nuevos, apoyo en entrevistas y SSO</td><td><b>La persona que hoy es el comodín de RRHH regresa a ser asistente del área</b>, el puesto que ya tuvo: llevaba el control de seguimiento, apoyaba muy bien en las entrevistas, viajaba a tiendas y atendía SSO. Ya formada, sin curva de aprendizaje.</td></tr>
+            <tr><td>Cubrir la tienda cuando queda una plaza vacía</td><td><b>Comercial designa 2 comodines</b> entre su propia gente; la función de comodín sale de RRHH.</td></tr>
+            <tr><td>Capacitar al vendedor nuevo</td><td><b>Comercial designa 1 capacitador comercial por región</b> (detalle A, más abajo).</td></tr>
+            <tr><td>Inducción general de la empresa (no la comercial)</td><td><b>Programa de inducción automatizado con IA en una web</b>; la asistente lo controla y verifica que cada nuevo lo complete.</td></tr>
+            <tr><td>Clima y actitud en las tiendas</td><td><b>Métrica de cultura</b> a cargo del gerente comercial y los supervisores (detalle B, más abajo).</td></tr>
+          </tbody>
+        </table>
       </div>
-      <div class="prop-eti">Propuesta</div>
-      <p class="objetivo">Objetivo: <b>"descargarlo de todo lo demás"</b> para que el jefe de RRHH se concentre en las entrevistas y en los casos del MP y el MINTRAB, que son lo que se le ha confiado.</p>
+      <h4 style="font-size:14.5px; margin:14px 0 6px">Por qué conviene</h4>
       <ul>
-        <li>Se traslada a una persona de otro departamento para hacer <b>todo lo demás que hoy hace el jefe</b> (propuestas laborales, gestiones y documentación del área) y <b>lo que podría hacer con más tiempo</b>: planes de seguimiento al personal, escalonamiento de salarios y otros planes de retención.</li>
-        <li>Cuando el jefe no esté, coordina las entrevistas con la gerencia de RRHH para que las contrataciones no se detengan.</li>
-        <li><b>Ya hay una candidata identificada dentro de la empresa:</b> colaboradora del departamento de Garantías, que actualmente estudia Recursos Humanos y está interesada en la oportunidad.</li>
-        <li>Al ser traslado interno, la transición es rápida: conoce la empresa y sus procesos.</li>
+        <li id="alt-ratio">RRHH <b>no abre ninguna plaza nueva</b>.</li>
+        <li>Comercial queda <b>dueño</b> de sus comodines y capacitadores: es el mismo principio de la métrica de cultura, quien vive con la tienda gestiona la tienda.</li>
+        <li>La persona que regresa ya conoce el control de seguimiento, las entrevistas y SSO: <b>sin curva de aprendizaje</b>, y SSO deja de ser el trabajo obligatorio que hoy nadie puede hacer (anexo 5).</li>
+        <li>Hoy esa persona pasa buena parte del tiempo cubriendo tiendas; al devolverla a la asistencia, el seguimiento a los nuevos y SSO dejan de competir con la tienda vacía.</li>
+        <li>La inducción automatizada libera horas de RRHH y garantiza que todos los nuevos reciban lo mismo, sin depender de quién esté disponible ese día.</li>
       </ul>
-    </div>
-
-    <div class="propuesta solo-oculto" id="p2">
-      <h3>2. Segundo comodín, a la par de la asistente de RRHH actual</h3>
-      <div class="hoy">
-        <div class="eti">Hoy · asistente de RRHH de campo</div>
-        <ul>
-          <li>Comodín en tiendas cuando alguien renuncia o es despedido, búsqueda de perfiles en campo, capacitación operativa (facturación, sistema) y toda la gestión de Salud y Seguridad Ocupacional.</li>
-          <li>Seguimiento a los empleados nuevos, repartido con el resto del equipo para no perder tiempo.</li>
-        </ul>
-      </div>
-      <div class="prop-eti">Propuesta</div>
+      <h4 style="font-size:14.5px; margin:14px 0 6px">Lo que queda por definir al aprobarla</h4>
       <ul>
-        <li>Una segunda persona con el mismo perfil: cubre tiendas cuando queda una plaza en el aire, capacita en lo operativo y da seguimiento en tienda a los nuevos.</li>
-        <li>Con dos personas, una puede estar cubriendo una tienda mientras la otra acompaña a los nuevos: hoy esas dos cosas compiten por el mismo tiempo y siempre gana la tienda.</li>
+        <li>Que los comodines y el capacitador designados por Comercial tengan <b>tiempo real</b> para esa función y una remuneración definida con Gerencia, no solo el nombre.</li>
+        <li>Que Comercial reemplace de verdad al comodín de RRHH: si los dos comodines designados no tienen tiempo real, la tienda vacía vuelve a caer sobre la asistente y se pierde lo ganado.</li>
+        <li>Contenido y control de la inducción en la web: quién la mantiene al día y cómo se verifica que cada nuevo la completó antes de ir a tienda.</li>
+        <li>El jefe de RRHH sigue con la carga del MP y del MINTRAB; descargarlo de lo demás queda pendiente si nadie lo asume.</li>
       </ul>
     </div>
 
     <!-- Esta propuesta se redacta para poder mostrarse por separado (al gerente comercial): propuesta.html?solo=capacitador -->
     <div class="propuesta" id="capacitador">
-      <h3>3. Un vendedor capacitador oficial por región</h3>
+      <h3>Detalle A · Un vendedor capacitador comercial por región</h3>
       <div class="hoy">
         <div class="eti">Hoy · quién capacita al vendedor nuevo</div>
         <ul>
@@ -224,16 +225,16 @@
         </ul>
       </div>
       <div class="prop-eti">Propuesta</div>
-      <p>En cada región se nombra un vendedor con experiencia como <b>capacitador oficial</b>. Cuando llega alguien nuevo a su región, capacitarlo es su enfoque, con los documentos y el sistema de capacitación que ya existen; cuando no hay nadie que capacitar, sigue vendiendo con normalidad. No es una plaza nueva: es una función adicional para un vendedor que ya está.</p>
+      <p><b>Comercial designa</b> en cada región a un vendedor con experiencia como <b>capacitador oficial</b>. Cuando llega alguien nuevo a su región, capacitarlo es su enfoque, con los documentos y el sistema de capacitación que ya existen; cuando no hay nadie que capacitar, sigue vendiendo con normalidad. No es una plaza nueva: es una función adicional para un vendedor que ya está.</p>
       <h4 style="font-size:14.5px; margin:14px 0 6px">Primer paso: definir qué es un "vendedor capacitado"</h4>
       <p>El rol incluye trabajar con RRHH en definir el perfil de <b>"vendedor capacitado"</b>: qué debe saber hacer (sistema, facturación, atención, producto, cobros) y en cuánto tiempo. Esa definición es el primer paso hacia el plan de capacitación estructurado que se presentará después, y es lo que permite saber cuándo un nuevo ya puede quedarse solo.</p>
       <p class="pie">La remuneración del capacitador se define con Gerencia.</p>
     </div>
 
-    <!-- Propuesta 4 (Oscar, 2026-09-08): métrica de cultura para el gerente comercial y los supervisores.
+    <!-- Métrica de cultura (Oscar, 2026-09-08; parte de la propuesta acordada, 2026-09-16).
          Las cifras de clima/actitud se calculan en vivo del registro de salidas (propuesta.js). -->
     <div class="propuesta solo-oculto" id="cultura">
-      <h3>4. Una métrica de cultura para el gerente comercial y los supervisores</h3>
+      <h3>Detalle B · Una métrica de cultura para el gerente comercial y los supervisores</h3>
       <div class="hoy">
         <div class="eti">Hoy · el ambiente de las tiendas no lo mide nadie</div>
         <div class="cifras3" id="cultura-cifras" style="margin-top:6px"></div>
@@ -261,47 +262,13 @@
       <p class="pie">Los desgloses por supervisor y por tienda se comparten solo internamente; este sitio público no los publica.</p>
     </div>
 
-    <!-- Alternativa de Gerencia (Oscar, 2026-09-08): mismas necesidades, otro reparto. Sin nombres.
-         Oscar, 2026-09-16: es la versión que ya se discutió con Gerencia; solo falta la aprobación. -->
-    <div class="propuesta solo-oculto acordada" id="alternativa">
-      <h3>Alternativa 2: lo mismo, con otro reparto <span class="estado">Discutida · pendiente de aprobación</span></h3>
-      <p class="objetivo"><b>Es la versión que ya se discutió con Gerencia y solo falta su aprobación.</b> Cubre las mismas necesidades <b>sin abrir plazas nuevas en RRHH</b>, poniendo en Comercial lo que es de Comercial y automatizando lo que se puede automatizar.</p>
-      <div class="tabla-scroll">
-        <table class="comparativa">
-          <thead><tr><th>Necesidad</th><th>Propuesta de RRHH (1 a 4)</th><th>Alternativa de Gerencia</th></tr></thead>
-          <tbody>
-            <tr><td>Seguimiento a los nuevos, apoyo en entrevistas y SSO</td><td>Asistente para el jefe de RRHH (1).</td><td><b>La persona que hoy es el comodín de RRHH regresa a ser asistente del área</b>, el puesto que ya tuvo: llevaba el control de seguimiento, apoyaba muy bien en las entrevistas, viajaba a tiendas y atendía SSO. Ya formada, sin curva de aprendizaje.</td></tr>
-            <tr><td>Cubrir la tienda cuando queda una plaza vacía</td><td>El comodín de RRHH actual más un segundo comodín (2).</td><td><b>Comercial designa 2 comodines</b> entre su propia gente; la función de comodín sale de RRHH.</td></tr>
-            <tr><td>Capacitar al vendedor nuevo</td><td>Capacitador oficial por región (3).</td><td>Igual: <b>Comercial designa 1 capacitador comercial por región</b>.</td></tr>
-            <tr><td>Inducción general de la empresa (no la comercial)</td><td>La da RRHH en persona, cada vez.</td><td><b>Programa de inducción automatizado con IA en una web</b>; la asistente lo controla y verifica que cada nuevo lo complete.</td></tr>
-            <tr><td>Clima y actitud en las tiendas</td><td>Métrica de cultura (4).</td><td>Igual: se mantiene.</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <h4 style="font-size:14.5px; margin:14px 0 6px">Por qué conviene</h4>
-      <ul>
-        <li id="alt-ratio">RRHH <b>no abre ninguna plaza nueva</b>.</li>
-        <li>Comercial queda <b>dueño</b> de sus comodines y capacitadores: es el mismo principio de la métrica de cultura (4), quien vive con la tienda gestiona la tienda.</li>
-        <li>La persona que regresa ya conoce el control de seguimiento, las entrevistas y SSO: <b>sin curva de aprendizaje</b>, y SSO deja de ser el trabajo obligatorio que hoy nadie puede hacer (anexo 5).</li>
-        <li>Hoy esa persona pasa buena parte del tiempo cubriendo tiendas; al devolverla a la asistencia, el seguimiento a los nuevos y SSO dejan de competir con la tienda vacía.</li>
-        <li>La inducción automatizada libera horas de RRHH y garantiza que todos los nuevos reciban lo mismo, sin depender de quién esté disponible ese día.</li>
-      </ul>
-      <h4 style="font-size:14.5px; margin:14px 0 6px">Lo que queda por definir al aprobarla</h4>
-      <ul>
-        <li>Que los comodines y el capacitador designados por Comercial tengan <b>tiempo real</b> para esa función y una remuneración definida con Gerencia, no solo el nombre.</li>
-        <li>Que Comercial reemplace de verdad al comodín de RRHH: si los dos comodines designados no tienen tiempo real, la tienda vacía vuelve a caer sobre la asistente y se pierde lo ganado.</li>
-        <li>Contenido y control de la inducción en la web: quién la mantiene al día y cómo se verifica que cada nuevo la completó antes de ir a tienda.</li>
-        <li>El jefe de RRHH sigue con la carga del MP y del MINTRAB: la parte de "descargarlo de todo lo demás" (1) queda pendiente si nadie la asume.</li>
-      </ul>
-    </div>
-
     <div class="solo-oculto">
       <div class="seccion-num" style="margin-top:30px">Anexos importantes</div>
       <h2 style="font-size:20px; margin:2px 0 4px">Anexos importantes</h2>
       <h3>5. Salud y seguridad ocupacional: trabajo obligatorio que hoy nadie puede hacer</h3>
       <div class="bloque" id="sso"></div>
 
-      <h3>6. No es crecer RRHH: es llegar al mínimo de la industria</h3>
+      <h3>6. Tamaño de RRHH frente al sector</h3>
       <div class="bloque" id="benchmark"></div>
     </div>
   </section>
@@ -310,16 +277,16 @@
   <!-- ══════════════════════ CONCLUSIÓN (Oscar, 2026-09-08) ══════════════════════ -->
   <section class="seccion solo-oculto" id="conclusion">
     <div class="seccion-num">Conclusión</div>
-    <h2>Por qué estas propuestas sí atacan las razones de salida</h2>
+    <h2>Por qué esta propuesta sí ataca las razones de salida</h2>
     <div class="hecho">
       <p id="conclusion-dato"></p>
       <ul style="margin-bottom:0">
-        <li><b>Salario.</b> Un vendedor que se va a los tres meses casi nunca se fue por el sueldo base: se fue porque todavía no comisionaba. El capacitador (3) lo lleva a vender antes; el asistente del jefe de RRHH (1) libera el tiempo para diseñar el escalonamiento salarial y los planes de retención que hoy nadie tiene tiempo de hacer.</li>
-        <li><b>Clima laboral y mala actitud.</b> Hoy nadie es dueño de ese número. La métrica de cultura (4) se lo entrega al gerente comercial y a los supervisores, con revisión mensual y consecuencias; el capacitador (3) evita que el nuevo aprenda solo, con un jefe de agencia sobrecargado; el segundo comodín (2) baja la presión sobre la tienda mientras la plaza está vacía.</li>
-        <li><b>Bajo rendimiento y abandono.</b> Definir qué es un "vendedor capacitado" (3) y dar seguimiento a los nuevos (2 y 4) permite detectar a tiempo a quien no va a funcionar, en vez de descubrirlo con un despido o con una silla vacía.</li>
+        <li><b>Salario.</b> Un vendedor que se va a los tres meses casi nunca se fue por el sueldo base: se fue porque todavía no comisionaba. El capacitador comercial por región lo lleva a vender antes; la asistente que regresa apoya en las entrevistas, lo que más tiempo le lleva al jefe de RRHH, y le libera tiempo para diseñar el escalonamiento salarial y los planes de retención que hoy nadie tiene tiempo de hacer.</li>
+        <li><b>Clima laboral y mala actitud.</b> Hoy nadie es dueño de ese número. La métrica de cultura se lo entrega al gerente comercial y a los supervisores, con revisión mensual y consecuencias; el capacitador evita que el nuevo aprenda solo, con un jefe de agencia sobrecargado; los dos comodines de Comercial bajan la presión sobre la tienda mientras la plaza está vacía.</li>
+        <li><b>Bajo rendimiento y abandono.</b> Definir qué es un "vendedor capacitado" y dar seguimiento a los nuevos (la asistente con el control de seguimiento y la métrica de cultura) permite detectar a tiempo a quien no va a funcionar, en vez de descubrirlo con un despido o con una silla vacía.</li>
       </ul>
     </div>
-    <p style="margin-top:12px">Ninguna de estas propuestas sube un sueldo ni cambia a un jefe por decreto. Atacan el momento en que se decide quedarse o irse, <b>los primeros seis meses</b>: el capacitador (3) acompaña al nuevo desde el primer día hasta que puede quedarse solo y comisionar, y el segundo comodín (2) le da seguimiento en tienda mientras se asienta, en vez de dejarlo aprender solo con un jefe de agencia que también tiene que vender. Y le ponen <b>dueño</b> a las dos causas que hoy nadie gestiona: el clima y la actitud pasan a ser responsabilidad del <b>gerente comercial y de cada supervisor</b> en sus tiendas, con una métrica que se revisa cada mes (4); el salario y la retención pasan a tener quién los diseñe en RRHH, el <b>jefe de RRHH</b> con su asistente (1). Sin eso, cualquier ajuste de salario se va por la misma puerta. La <b>Alternativa 2</b>, ya discutida con Gerencia y pendiente solo de aprobación, cubre los mismos frentes con otro reparto: vale igual mientras cada frente tenga dueño y tiempo real.</p>
+    <p style="margin-top:12px">La propuesta no sube un sueldo ni cambia a un jefe por decreto. Ataca el momento en que se decide quedarse o irse, <b>los primeros seis meses</b>: el capacitador comercial acompaña al nuevo desde el primer día hasta que puede quedarse solo y comisionar, y la asistente de RRHH le da seguimiento mientras se asienta, en vez de dejarlo aprender solo con un jefe de agencia que también tiene que vender. Y le pone <b>dueño</b> a las dos causas que hoy nadie gestiona: el clima y la actitud pasan a ser responsabilidad del <b>gerente comercial y de cada supervisor</b> en sus tiendas, con una métrica que se revisa cada mes; el salario y la retención pasan a tener quién los diseñe en RRHH. Sin eso, cualquier ajuste de salario se va por la misma puerta. Funciona mientras cada frente tenga dueño y tiempo real.</p>
   </section>
 
   <p class="pie" id="pie-datos" style="margin-top:28px"></p>

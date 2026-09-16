@@ -95,7 +95,7 @@ try {
     const temp = TEMP.reduce((s, k) => s + (U.rango[k] ?? 0), 0);
     const sal = (U.subMotivo?.SALARIO ?? 0) + (U.subMotivo?.['POR SALARIO'] ?? 0);
     const cli = ['CLIMA LABORAL', 'MAL AMBIENTE', 'MAL TRATO', 'MALA ACTITUD'].reduce((s, k) => s + (U.subMotivo?.[k] ?? 0), 0);
-    q('conclusion-dato').innerHTML = `En los últimos 12 meses, <b>${pct(sal + cli, U.n)}%</b> de las salidas comerciales fue por salario (${pct(sal, U.n)}%) o por clima y actitud (${pct(cli, U.n)}%), y <b>${pct(temp, U.n)}%</b> ocurrió antes de los seis meses. Las propuestas se dirigen a eso:`;
+    q('conclusion-dato').innerHTML = `En los últimos 12 meses, <b>${pct(sal + cli, U.n)}%</b> de las salidas comerciales fue por salario (${pct(sal, U.n)}%) o por clima y actitud (${pct(cli, U.n)}%), y <b>${pct(temp, U.n)}%</b> ocurrió antes de los seis meses. La propuesta se dirige a eso:`;
   }
 } catch (e) { console.warn('conclusion', e); }
 
@@ -110,33 +110,29 @@ try {
     <p><b>La rotación borra las capacitaciones:</b> tiendas que cumplían en junio ya aparecen sin la capacitación en el seguimiento de septiembre porque la gente capacitada se fue. Ese costo de repetir capacitaciones aún no está en el modelo de costo.</p>`;
 } catch (e) { console.warn('sso', e); }
 
-// ── 6. referencia de industria (plantilla viva del indicador de rotación) ─────
+// ── 6. tamaño de RRHH frente al sector (plantilla viva del indicador de rotación) ──
+// Oscar, 2026-09-16: la propuesta acordada no abre plazas en RRHH (personasNuevasRRHH = 0), así que
+// el área sigue por debajo del mínimo del sector; lo compensa que Comercial absorbe comodines y
+// capacitador y que la inducción se automatiza.
 try {
   const cierre = (rotacion?.acumulado ?? []).filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
   const plantilla = cierre?.fin;
   const [bMin, bMax] = DOC.benchmarkRango;
+  const nProp = DOC.personasRRHH + DOC.personasNuevasRRHH;
   const hoyRatio = plantilla ? (DOC.personasRRHH / plantilla) * 100 : null;
-  const conRatio = plantilla ? ((DOC.personasRRHH + DOC.personasNuevasRRHH) / plantilla) * 100 : null;
+  const conRatio = plantilla ? (nProp / plantilla) * 100 : null;
+  const debajo = conRatio != null && conRatio < bMin;
   q('benchmark').innerHTML = `
     <div class="cifras3">
       <div><div class="cifra">${hoyRatio != null ? hoyRatio.toFixed(1) : '—'}</div>personas de RRHH por cada 100 colaboradores hoy (${DOC.personasRRHH} personas${plantilla ? ` para ${fmtNum(plantilla)} colaboradores al cierre de ${MES_LARGO[cierre.mesNum - 1]} ${cierre.anio}` : ''})</div>
       <div><div class="cifra">${bMin}–${bMax}</div>rango de referencia del sector (SHRM, ADP, Indeed); las empresas con alta rotación están en la parte alta</div>
-      <div><div class="cifra">${conRatio != null ? conRatio.toFixed(1) : '—'}</div>con la propuesta (${DOC.personasRRHH + DOC.personasNuevasRRHH} personas): dentro del rango, no arriba. Los capacitadores siguen siendo vendedores</div>
+      <div><div class="cifra">${conRatio != null ? conRatio.toFixed(1) : '—'}</div>con la propuesta (${nProp} personas, ${DOC.personasNuevasRRHH ? `${DOC.personasNuevasRRHH} nuevas` : 'sin plazas nuevas'}): ${debajo ? 'sigue por debajo del mínimo del sector' : 'dentro del rango, no arriba'}. Los comodines y capacitadores son gente de Comercial</div>
     </div>
-    <p>Las cadenas grandes del país separan reclutamiento de generalista de RRHH, y la más parecida en tamaño se apoya en un RRHH corporativo. La propuesta no infla el área; la lleva al tamaño normal de una operación como la nuestra.</p>`;
-} catch (e) { console.warn('benchmark', e); }
-
-// ── alternativa de Gerencia: ratio de RRHH con una sola persona nueva ─────────
-try {
-  const cierre = (rotacion?.acumulado ?? []).filter((r) => r.area === 'TOTAL EMPRESA' && r.fin != null).sort((a, b) => a.anio - b.anio || a.mesNum - b.mesNum).at(-1);
-  const plantilla = cierre?.fin;
-  if (plantilla && DOC.personasNuevasRRHHAlt != null) {
-    const conAlt = ((DOC.personasRRHH + DOC.personasNuevasRRHHAlt) / plantilla) * 100;
-    const conProp = ((DOC.personasRRHH + DOC.personasNuevasRRHH) / plantilla) * 100;
-    const nAlt = DOC.personasRRHH + DOC.personasNuevasRRHHAlt;
-    q('alt-ratio').innerHTML = `RRHH <b>no abre ninguna plaza nueva</b>: sigue con ${nAlt} personas para ${fmtNum(plantilla)} colaboradores (${conAlt.toFixed(1)} por cada 100, frente a ${conProp.toFixed(1)} con las propuestas 1 y 2). Ojo: queda ${conAlt < DOC.benchmarkRango[0] ? 'por debajo del' : 'en el'} mínimo del sector (${DOC.benchmarkRango[0]}); lo compensa que Comercial absorbe comodines y capacitador.`;
+    <p>Las cadenas grandes del país separan reclutamiento de generalista de RRHH, y la más parecida en tamaño se apoya en un RRHH corporativo. ${debajo ? 'La propuesta no crece el área: la mantiene por debajo del tamaño normal de una operación como la nuestra, y lo compensa con funciones que asume Comercial y con la inducción automatizada. Por eso importa que esas funciones tengan tiempo real.' : 'La propuesta no infla el área; la lleva al tamaño normal de una operación como la nuestra.'}</p>`;
+  if (plantilla && conRatio != null) {
+    q('alt-ratio').innerHTML = `RRHH <b>no abre ninguna plaza nueva</b>: sigue con ${nProp} personas para ${fmtNum(plantilla)} colaboradores (${conRatio.toFixed(1)} por cada 100). Ojo: queda ${debajo ? 'por debajo del' : 'en el'} mínimo del sector (${bMin}); lo compensa que Comercial absorbe comodines y capacitador.`;
   }
-} catch (e) { console.warn('alternativa', e); }
+} catch (e) { console.warn('benchmark', e); }
 
 // ── pie ───────────────────────────────────────────────────────────────────────
 try {

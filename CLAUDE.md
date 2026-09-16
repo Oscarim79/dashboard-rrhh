@@ -117,7 +117,11 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   para meses sueltos; rotación por mes del indicador.
 - `public/propuesta.html` es de **acceso abierto** (sin contraseña, decisión del CEO) y está en el
   menú como última opción "Propuesta" (pedido del CEO, 2026-09-07). Solo cargos, nunca nombres. Las cifras a mano (razones de salida, sueldos, comisión)
-  viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo la propuesta 3.
+  viven en `public/js/propuesta-datos.js`. `?solo=capacitador` muestra solo el bloque del capacitador.
+  **Desde 2026-09-16 la propuesta es UNA sola** (la que se discutió con Gerencia, antes "Alternativa 2":
+  sin plazas nuevas en RRHH; el comodín actual vuelve a asistente, Comercial pone 2 comodines y 1 capacitador
+  por región, inducción automatizada, métrica de cultura), marcada "pendiente de aprobación". Las antiguas
+  propuestas 1 y 2 se retiraron; el capacitador y la métrica de cultura son "Detalle A/B" de la misma.
 
 ## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 

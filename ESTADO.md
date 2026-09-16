@@ -562,9 +562,14 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   agencia) tenía un 61 pegado a mano en vez de la fórmula HOY()-solicitud; el tablero mostraba 85 (correcto,
   cuenta desde la solicitud). Ojo: si otras filas cerradas sin fecha de cierre tienen valores pegados, el pipeline
   los usa tal cual para días de cobertura.
-- **Propuesta (Oscar, 2026-09-16):** la "Alternativa 2: lo mismo, con otro reparto" queda marcada como la versión
-  ya discutida con Gerencia, pendiente solo de aprobación (chip verde en el título, primera frase del objetivo,
-  borde verde en la tarjeta y mención en la Conclusión). Las propuestas 1 a 4 siguen tal cual como referencia.
+- **Propuesta = una sola (Oscar, 2026-09-16, segunda ronda):** ya no hay "Alternativa 2" frente a cuatro
+  propuestas. La Sección 2 se llama "La propuesta" y contiene solo el reparto discutido con Gerencia (chip
+  "Discutida con Gerencia · pendiente de aprobación"): tabla Necesidad → Qué se hará, "Por qué conviene" y "Lo que
+  queda por definir al aprobarla", seguido de "Detalle A" (capacitador comercial por región, sigue sirviendo
+  `?solo=capacitador`) y "Detalle B" (métrica de cultura). Se retiraron las antiguas propuestas 1 (asistente para
+  el jefe de RRHH, traslado desde Garantías) y 2 (segundo comodín de RRHH) y sus supuestos en propuesta-datos.js;
+  `personasNuevasRRHH` = 0. La conclusión y la portada ("el problema y la propuesta") ya no numeran propuestas. El
+  anexo 6 pasó a "Tamaño de RRHH frente al sector" y dice con honestidad que RRHH sigue por debajo del mínimo.
 - Pendiente detectado (no tocado): el pie de "De dónde salen los datos" del Resumen sigue diciendo que no se
   usan las pestañas de altas ni la base de datos general; desde el 2026-09-09 sí se leen (solo conteos).
 

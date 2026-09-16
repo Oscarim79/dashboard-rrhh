@@ -38,8 +38,7 @@ export const DATOS = {
   // ── 1b. Cifras del documento "Propuesta de estructuración de RRHH" (sep 2026) ──
   documento: {
     personasRRHH: 3,                  // jefe + dos asistentes
-    personasNuevasRRHH: 2,            // asistente del jefe (traslado) + segundo comodín
-    personasNuevasRRHHAlt: 0,         // Alternativa 2: el comodín actual vuelve a ser asistente; comodines y capacitador los pone Comercial
+    personasNuevasRRHH: 0,            // propuesta acordada (2026-09-16): sin plazas nuevas en RRHH; el comodín actual vuelve a ser asistente, comodines y capacitador los pone Comercial
     tiendas: 43,
     ssoPresupuesto: 202595,           // cerrar TODOS los hallazgos de SSO, una sola vez (cotizado jun 2025)
     ssoTiendasCumplen: 0,
@@ -55,16 +54,10 @@ export const DATOS = {
   supuestos: {
     factorPrestaciones: 1.4,          // sueldo × 1.4 ≈ costo con prestaciones (igual que la propuesta anterior)
 
-    // Propuesta 1: asistente para el jefe de RRHH (traslado interno desde Garantías).
-    // El sueldo de la persona se mantiene, así que el costo nuevo es reemplazarla
-    // en Garantías (si se decide reemplazar).
-    reemplazarEnGarantias: true,
-    sueldoReemplazoGarantias: 4500,
+    // (Las antiguas propuestas 1 y 2 —asistente para el jefe de RRHH y segundo comodín de RRHH— se
+    // retiraron el 2026-09-16: la propuesta acordada las sustituye. Se quitaron sus supuestos.)
 
-    // Propuesta 2: segundo comodín (mismo perfil que la asistente de RRHH actual).
-    sueldoComodin: 4500,
-
-    // Propuesta 3: vendedor capacitador oficial por región.
+    // Capacitador comercial por región.
     regiones: 5,                      // Chiquimula, Morales, Capital, Jalapa y Zacapa (pestaña de capacitaciones del sheet)
     bonoCapacitador: 500,             // Q por mes por la función de capacitador (fijado por Gerencia)
     sueldoBaseVendedor: 4500,         // sueldo base de un vendedor
