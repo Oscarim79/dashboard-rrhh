@@ -43,6 +43,8 @@
   /* propuestas */
   .propuesta { background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 12px; padding: 16px; margin-bottom: 14px; }
   .propuesta h3 { margin-top: 0; font-size: 17px; }
+  .propuesta h3 .estado { display: inline-block; vertical-align: middle; margin-left: 8px; font-size: 11.5px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--verde); background: var(--verde-suave); border: 1px solid var(--verde); border-radius: 999px; padding: 2px 9px; }
+  .propuesta.acordada { border-color: var(--verde); box-shadow: 0 0 0 2px var(--verde-suave); }
   .objetivo { font-size: 14px; color: var(--tinta-suave); margin-bottom: 10px; }
   .objetivo b { color: var(--tinta); }
   .hoy { background: #F4F3EE; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; }
@@ -259,10 +261,11 @@
       <p class="pie">Los desgloses por supervisor y por tienda se comparten solo internamente; este sitio público no los publica.</p>
     </div>
 
-    <!-- Alternativa de Gerencia (Oscar, 2026-09-08): mismas necesidades, otro reparto. Sin nombres. -->
-    <div class="propuesta solo-oculto" id="alternativa">
-      <h3>Alternativa 2: lo mismo, con otro reparto</h3>
-      <p class="objetivo">Planteada por Gerencia: cubrir las mismas necesidades <b>sin abrir plazas nuevas en RRHH</b>, poniendo en Comercial lo que es de Comercial y automatizando lo que se puede automatizar.</p>
+    <!-- Alternativa de Gerencia (Oscar, 2026-09-08): mismas necesidades, otro reparto. Sin nombres.
+         Oscar, 2026-09-16: es la versión que ya se discutió con Gerencia; solo falta la aprobación. -->
+    <div class="propuesta solo-oculto acordada" id="alternativa">
+      <h3>Alternativa 2: lo mismo, con otro reparto <span class="estado">Discutida · pendiente de aprobación</span></h3>
+      <p class="objetivo"><b>Es la versión que ya se discutió con Gerencia y solo falta su aprobación.</b> Cubre las mismas necesidades <b>sin abrir plazas nuevas en RRHH</b>, poniendo en Comercial lo que es de Comercial y automatizando lo que se puede automatizar.</p>
       <div class="tabla-scroll">
         <table class="comparativa">
           <thead><tr><th>Necesidad</th><th>Propuesta de RRHH (1 a 4)</th><th>Alternativa de Gerencia</th></tr></thead>
@@ -283,7 +286,7 @@
         <li>Hoy esa persona pasa buena parte del tiempo cubriendo tiendas; al devolverla a la asistencia, el seguimiento a los nuevos y SSO dejan de competir con la tienda vacía.</li>
         <li>La inducción automatizada libera horas de RRHH y garantiza que todos los nuevos reciban lo mismo, sin depender de quién esté disponible ese día.</li>
       </ul>
-      <h4 style="font-size:14.5px; margin:14px 0 6px">Lo que hay que definir para que funcione</h4>
+      <h4 style="font-size:14.5px; margin:14px 0 6px">Lo que queda por definir al aprobarla</h4>
       <ul>
         <li>Que los comodines y el capacitador designados por Comercial tengan <b>tiempo real</b> para esa función y una remuneración definida con Gerencia, no solo el nombre.</li>
         <li>Que Comercial reemplace de verdad al comodín de RRHH: si los dos comodines designados no tienen tiempo real, la tienda vacía vuelve a caer sobre la asistente y se pierde lo ganado.</li>
@@ -316,7 +319,7 @@
         <li><b>Bajo rendimiento y abandono.</b> Definir qué es un "vendedor capacitado" (3) y dar seguimiento a los nuevos (2 y 4) permite detectar a tiempo a quien no va a funcionar, en vez de descubrirlo con un despido o con una silla vacía.</li>
       </ul>
     </div>
-    <p style="margin-top:12px">Ninguna de estas propuestas sube un sueldo ni cambia a un jefe por decreto. Atacan el momento en que se decide quedarse o irse, <b>los primeros seis meses</b>: el capacitador (3) acompaña al nuevo desde el primer día hasta que puede quedarse solo y comisionar, y el segundo comodín (2) le da seguimiento en tienda mientras se asienta, en vez de dejarlo aprender solo con un jefe de agencia que también tiene que vender. Y le ponen <b>dueño</b> a las dos causas que hoy nadie gestiona: el clima y la actitud pasan a ser responsabilidad del <b>gerente comercial y de cada supervisor</b> en sus tiendas, con una métrica que se revisa cada mes (4); el salario y la retención pasan a tener quién los diseñe en RRHH, el <b>jefe de RRHH</b> con su asistente (1). Sin eso, cualquier ajuste de salario se va por la misma puerta. La Alternativa 2 cubre los mismos frentes con otro reparto: vale igual mientras cada frente tenga dueño y tiempo real.</p>
+    <p style="margin-top:12px">Ninguna de estas propuestas sube un sueldo ni cambia a un jefe por decreto. Atacan el momento en que se decide quedarse o irse, <b>los primeros seis meses</b>: el capacitador (3) acompaña al nuevo desde el primer día hasta que puede quedarse solo y comisionar, y el segundo comodín (2) le da seguimiento en tienda mientras se asienta, en vez de dejarlo aprender solo con un jefe de agencia que también tiene que vender. Y le ponen <b>dueño</b> a las dos causas que hoy nadie gestiona: el clima y la actitud pasan a ser responsabilidad del <b>gerente comercial y de cada supervisor</b> en sus tiendas, con una métrica que se revisa cada mes (4); el salario y la retención pasan a tener quién los diseñe en RRHH, el <b>jefe de RRHH</b> con su asistente (1). Sin eso, cualquier ajuste de salario se va por la misma puerta. La <b>Alternativa 2</b>, ya discutida con Gerencia y pendiente solo de aprobación, cubre los mismos frentes con otro reparto: vale igual mientras cada frente tenga dueño y tiempo real.</p>
   </section>
 
   <p class="pie" id="pie-datos" style="margin-top:28px"></p>
