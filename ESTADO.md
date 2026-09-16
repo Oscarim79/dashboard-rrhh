@@ -570,6 +570,14 @@ Pedido de Oscar en cuatro puntos, todo en `public/js/modelo.js` y `public/js/pag
   el jefe de RRHH, traslado desde Garantías) y 2 (segundo comodín de RRHH) y sus supuestos en propuesta-datos.js;
   `personasNuevasRRHH` = 0. La conclusión y la portada ("el problema y la propuesta") ya no numeran propuestas. El
   anexo 6 pasó a "Tamaño de RRHH frente al sector" y dice con honestidad que RRHH sigue por debajo del mínimo.
+- **Lugar fijo de capacitación fuera de la tienda (Oscar, 2026-09-16, tercera ronda):** nuevo punto 1.3 del
+  problema ("Capacitar dentro de la tienda: el nuevo termina haciendo de todo, menos aprender a vender"): el jefe
+  de agencia y el supervisor le piden al nuevo tareas ajenas a su inducción (caso típico: lo mandan a volantear sin
+  aviso, sin enseñarle y sin zapatos cómodos) y luego lo despiden por "no es pilas"; la página lo llama injusto con
+  la persona y caro para la empresa. Razones de salida pasó a 1.4. El detalle A (capacitador) suma el bloque "Un
+  lugar fijo para capacitar, fuera de la tienda" (espacio por región fuera del piso de venta; solo el capacitador
+  dispone del tiempo del nuevo; las tareas de campo se enseñan y se avisan; nadie se evalúa por lo que no se le
+  enseñó), la tabla de la propuesta y "Lo que queda por definir" lo mencionan, y la conclusión lo cierra.
 - Pendiente detectado (no tocado): el pie de "De dónde salen los datos" del Resumen sigue diciendo que no se
   usan las pestañas de altas ni la base de datos general; desde el 2026-09-09 sí se leen (solo conteos).
 

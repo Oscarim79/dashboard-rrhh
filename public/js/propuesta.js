@@ -23,7 +23,7 @@ const [salidasTodo, rotacion, meta] = await Promise.all([carga('salidas.json'), 
 const salidas = salidasTodo ? { ...salidasTodo, ...(salidasTodo.porDepartamento?.comercial ?? {}) } : null;
 const DOC = DATOS.documento;
 
-// ── 1.3 permanencia (Comercial, cifras vivas) ─────────────────────────────────
+// ── 1.4 permanencia (Comercial, cifras vivas) ─────────────────────────────────
 try {
   if (salidas?.total?.n) {
     const D = salidas.total, U = salidas.ult12m;
@@ -39,7 +39,7 @@ try {
   }
 } catch (e) { console.warn('permanencia', e); }
 
-// ── 1.3 motivos de salida: TODAS las salidas del departamento Comercial (renuncias
+// ── 1.4 motivos de salida: TODAS las salidas del departamento Comercial (renuncias
 // y despidos), tal como las registra RRHH en el Sheet; cada motivo por separado.
 // Selector de período propio (pedido del CEO): todo · 12 meses · año · mes ────────
 try {
