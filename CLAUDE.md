@@ -129,6 +129,9 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   su jefe y su supervisor desvían al nuevo a otras tareas, p. ej. volantear sin aviso, y lo despiden por "no es pilas")
   y bloque propio en el detalle A. NO es un lugar fuera de la tienda (Oscar lo corrigió): sigue siendo una tienda real,
   pero distinta a la que va a ocupar. Es un reclamo de justicia con la persona además de costo; mantener ese tono.
+  **Sugerencia: rango de salario por región (Oscar, 2026-09-24):** bloque aparte `#garantia-region` después del
+  detalle B, rotulado "Sugerencia" (no es parte de lo discutido con Gerencia): al menos la garantía de entrada con
+  mínimo y máximo distintos por región. Sin montos en la página (se definen con Gerencia).
 
 ## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 
