@@ -131,7 +131,8 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   pero distinta a la que va a ocupar. Es un reclamo de justicia con la persona además de costo; mantener ese tono.
   **Sugerencia: rango de salario por región (Oscar, 2026-09-24):** bloque aparte `#garantia-region` después del
   detalle B, rotulado "Sugerencia" (no es parte de lo discutido con Gerencia): al menos la garantía de entrada con
-  mínimo y máximo distintos por región. Sin montos en la página (se definen con Gerencia).
+  mínimo y máximo distintos por región. Sin montos en la página (se definen con Gerencia). También figura como
+  punto condicional ("si se acepta") en "Lo que queda por definir al aprobarla".
 
 ## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 
