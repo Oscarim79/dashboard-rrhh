@@ -133,6 +133,13 @@ Q76,101); el dashboard implementa el modelo acordado, no ese residuo.
   detalle B, rotulado "Sugerencia" (no es parte de lo discutido con Gerencia): al menos la garantía de entrada con
   mínimo y máximo distintos por región. Sin montos en la página (se definen con Gerencia). También figura como
   punto condicional ("si se acepta") en "Lo que queda por definir al aprobarla".
+  **Sugerencia: descuentos de uniformes hasta después de los tres meses (Oscar, 2026-10-02):** bloque
+  `#descuentos-tres-meses` después de `#garantia-region`, también rotulado "Sugerencia": el uniforme y cualquier
+  otro cargo de entrada se descuentan a partir del cuarto mes, porque en el primer mes el nuevo comisiona poco y
+  además le descuentan el uniforme; ha sido otra razón de salida en el primer mes. Cifra viva en propuesta.js
+  (sub-motivo DESCUENTOS del registro, Comercial; si no hay casos el bloque de cifras se oculta). Sin montos ni
+  cuotas (se definen con Gerencia). También va como punto condicional en "Lo que queda por definir" y en la
+  viñeta "Salario" de la conclusión.
 
 ## Friotec fuera de todo; Abi Q dentro de salidas, rotación y vacantes pero SIN costo (Oscar, 2026-09-16)
 

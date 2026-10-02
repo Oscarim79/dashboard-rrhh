@@ -87,6 +87,28 @@ try {
   }
 } catch (e) { console.warn('cultura', e); }
 
+// ── Sugerencia: descuentos hasta después de los tres meses (Oscar, 2026-10-02). Salidas comerciales
+// cuyo motivo registrado es "descuentos" (el pipeline ya unifica "descuentos en salario" → DESCUENTOS),
+// todo el registro y 12 meses, y cuántas de esas se fueron antes de cumplir el mes. Si el registro no
+// trae ninguna, el bloque de cifras queda oculto y vale solo el argumento. ────────────────────────────
+try {
+  const DESC = ['DESCUENTOS', 'DESCUENTOS EN SALARIO'];
+  const cuenta = (d) => DESC.reduce((s, k) => s + (d?.subMotivo?.[k] ?? 0), 0);
+  const cont = q('descuentos-cifras');
+  if (cont && salidas?.total?.n) {
+    const T = salidas.total, U = salidas.ult12m ?? { n: 0, subMotivo: {} };
+    const dT = cuenta(T), dU = cuenta(U);
+    const temp1 = (T.rango?.['MENOS 1 MES'] ?? 0) + (T.rango?.['DE 1 A 2 MESES'] ?? 0);
+    if (dT) {
+      cont.innerHTML = `
+        <div><div class="cifra">${fmtNum(dT)} de ${fmtNum(T.n)}</div>salidas comerciales de todo el registro (${pct(dT, T.n)}%) dieron los descuentos como motivo${dU ? `; ${fmtNum(dU)} en los últimos 12 meses` : ''}</div>
+        <div><div class="cifra">${fmtNum(temp1)}</div>salidas comerciales de todo el registro ocurrieron antes de cumplir dos meses: es el tramo donde el primer pago, con comisión baja y descuento, decide</div>`;
+    } else {
+      cont.style.display = 'none';
+    }
+  } else if (cont) cont.style.display = 'none';
+} catch (e) { console.warn('descuentos', e); }
+
 // ── Conclusión: una sola línea con cifras vivas (Comercial, últimos 12 meses) ──
 try {
   if (salidas?.ult12m?.n) {
