@@ -26,6 +26,12 @@
   en 19. Salen unas 24 personas al mes; el mes más alto fue…") y en "Bajas por departamento" ("82% de las bajas
   son de las tiendas (Comercial): 234 de 285…"). Con un mes elegido, las líneas del acumulado y de Comercial vs.
   total se cortan en ese mes para que la gráfica diga lo mismo que el titular y los KPI.
+- **Cuarta ronda (Oscar: "no creo que haga sentido esta gráfica"):** la tabla "Rotación por marca" queda SOLO con
+  Americana y Abi Q. Se quitaron las filas "Total empresa" y "Área comercial": mezclaban un corte por marca con uno
+  por departamento y repetían, con otra cifra (indicador calculado), lo que los KPI ya muestran con el indicador
+  oficial del sheet. Lleva titular ("Americana rota más que Abi Q: 41% vs. 35%…") y aviso cuando una marca tiene
+  menos de 30 personas (cada salida mueve el % varios puntos). Pendiente si Oscar lo pide: matriz marca × área
+  (tiendas vs. resto por marca), que requiere dos series más en el pipeline.
 - `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia`,
   `etiquetasFinales`, `nombresFinales`, `paso`, `tituloY` y `nombreCorto` por serie. Todo sigue siendo
   conteos agregados.
