@@ -149,6 +149,26 @@ h2 { font-size: 16px; margin: 26px 0 10px; color: var(--tinta); }
 .titular b.verde { color: var(--verde); }
 .titular:empty { display: none; }
 
+/* ── avance del proceso en "Abiertas hoy" (Vacantes): descripción y nota a mano bajo el estado ── */
+td.proceso { min-width: 220px; max-width: 320px; white-space: normal; }
+.proceso-desc { font-size: 12px; color: var(--tinta-suave); line-height: 1.4; margin-top: 4px; }
+.proceso-nota { font-size: 12px; line-height: 1.4; margin-top: 6px; padding: 5px 8px; border-radius: 6px; background: var(--ambar-suave); color: var(--tinta); border-left: 3px solid var(--ambar); }
+.proceso-nota b { color: var(--ambar); }
+.proceso-nota .fuente { color: var(--tinta-suave); }
+
+/* En el teléfono, cada vacante abierta es una tarjeta (la tabla no cabe y el avance quedaba fuera de pantalla) */
+@media (max-width: 639px) {
+  #abiertas table, #abiertas tbody, #abiertas tr, #abiertas td { display: block; width: 100%; }
+  #abiertas thead { display: none; }
+  #abiertas tr { padding: 10px 0 12px; border-bottom: 1px solid var(--borde); }
+  #abiertas tr:last-child { border-bottom: none; }
+  #abiertas td { padding: 2px 0; border: none; }
+  #abiertas td::before { content: attr(data-eti); display: block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--tinta-suave); margin-top: 6px; }
+  #abiertas td.n { text-align: left; }
+  #abiertas td.n b { font-size: 18px; }
+  #abiertas td.proceso { min-width: 0; max-width: none; }
+}
+
 /* ── tarjetas ── */
 .tarjeta {
   background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px;
