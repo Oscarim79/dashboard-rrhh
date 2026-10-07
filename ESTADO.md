@@ -1,5 +1,16 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-07: "Avance del proceso" de las vacantes abiertas, con descripción y nota a mano (Oscar)
+
+- Bajo cada estado de la columna "Avance del proceso" (tabla "Abiertas hoy" de Vacantes) va una línea que explica
+  qué significa (`DESCRIPCION_PROCESO` en `public/js/vacantes-notas.js`).
+- **Notas a mano por puesto** (`NOTAS_PUESTO` en el mismo archivo): contexto que el sheet no trae sobre por qué una
+  plaza cuesta llenarse. Primera nota (Oscar, 2026-10-07): **gestores de cobros**, "el salario ofrecido es muy bajo
+  para el mercado y no atrae candidatos". Se muestra en recuadro ámbar "Por qué cuesta llenarla" con fuente y fecha.
+  Solo cargos, sin montos ni personas. Cuando deje de aplicar, quitarla del archivo.
+- En el teléfono (< 640 px) la tabla de abiertas se muestra como tarjetas (una por vacante, campos apilados): antes
+  la columna de avance quedaba fuera de pantalla al desplazarse de lado.
+
 ## ✅ HECHO 2026-10-07: gráficas de Rotación con más información (pedido de Oscar)
 
 - **Legibles en el teléfono:** las gráficas SVG se dibujan al ancho real del contenedor (`anchoDe` en graficas.js)

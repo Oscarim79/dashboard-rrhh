@@ -5,6 +5,7 @@ import { cargarDatos, pintarPie, marcarNavActiva, fmtNum,
   pintarSelectorDepto, vacantesDe, notaAlcance,
   pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses, fmtYmCorto } from './comun.js';
 import { barrasH, columnas } from './graficas.js';
+import { DESCRIPCION_PROCESO, notaDePuesto } from './vacantes-notas.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -48,16 +49,16 @@ function pintar(depto, periodo) {
       <thead><tr><th>Tienda / lugar</th><th>Puesto</th><th>Empresa</th>${depto === 'general' ? '<th>Departamento</th>' : ''}<th>Avance del proceso</th><th class="n">Días abierta</th></tr></thead>
       <tbody>${filasAb.map((r) => `
         <tr>
-          <td>${r.lugar ?? '—'} ${r.tipo ? `<span class="pill gris">${r.tipo}</span>` : ''}</td>
-          <td>${titulo(r.puesto) ?? '—'}</td>
-          <td>${r.empresa ?? '—'}</td>
-          ${depto === 'general' ? `<td>${titulo(r.departamento ?? '') || '—'}</td>` : ''}
-          <td>${r.proceso ? `<span class="pill ${COLOR_PROCESO[r.proceso] ?? 'gris'}">${r.proceso}</span>` : '—'}</td>
-          <td class="n"><b style="${(r.diasAbierta ?? 0) > 30 ? 'color:var(--rojo)' : ''}">${r.diasAbierta ?? '—'}</b></td>
+          <td data-eti="Tienda / lugar">${r.lugar ?? '—'} ${r.tipo ? `<span class="pill gris">${r.tipo}</span>` : ''}</td>
+          <td data-eti="Puesto">${titulo(r.puesto) ?? '—'}</td>
+          <td data-eti="Empresa">${r.empresa ?? '—'}</td>
+          ${depto === 'general' ? `<td data-eti="Departamento">${titulo(r.departamento ?? '') || '—'}</td>` : ''}
+          <td class="proceso" data-eti="Avance del proceso">${r.proceso ? `<span class="pill ${COLOR_PROCESO[r.proceso] ?? 'gris'}">${r.proceso}</span>${DESCRIPCION_PROCESO[r.proceso] ? `<div class="proceso-desc">${DESCRIPCION_PROCESO[r.proceso]}</div>` : ''}` : '—'}${(() => { const n = notaDePuesto(r.puesto); return n ? `<div class="proceso-nota"><b>Por qué cuesta llenarla:</b> ${n.nota} <span class="fuente">(${n.fuente})</span></div>` : ''; })()}</td>
+          <td class="n" data-eti="Días abierta"><b style="${(r.diasAbierta ?? 0) > 30 ? 'color:var(--rojo)' : ''}">${r.diasAbierta ?? '—'}</b></td>
         </tr>`).join('')}
       </tbody>
     </table>
-    <p class="pie">Las abiertas son las de hoy, sin importar el período elegido. El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado). "Candidatos vistos, sin elegido" significa que sí hubo gestiones pero los perfiles no cuajaron; "en gestión, sin etapa anotada" es que la nota describe la causa de la vacante, no el proceso. Las notas completas no se publican por privacidad.</p>`
+    <p class="pie">Las abiertas son las de hoy, sin importar el período elegido. El avance se deriva automáticamente de las notas internas de RRHH (publicada → entrevistas → propuesta → polígrafo → contratado) y debajo de cada estado se explica qué significa. El recuadro "Por qué cuesta llenarla" es contexto que agrega RRHH a mano para los puestos difíciles de cubrir. Las notas completas del sheet no se publican por privacidad.</p>`
     : '<p class="sub">No hay vacantes abiertas registradas con este alcance.</p>';
 
   // ── días por tipo ──────────────────────────────────────────────────────────
