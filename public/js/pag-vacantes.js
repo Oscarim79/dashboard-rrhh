@@ -4,7 +4,7 @@
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum,
   pintarSelectorDepto, vacantesDe, notaAlcance,
   pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses, fmtYmCorto } from './comun.js';
-import { barrasH, columnas } from './graficas.js';
+import { barrasH, columnas, anchoDe } from './graficas.js';
 import { DESCRIPCION_PROCESO, notaDePuesto } from './vacantes-notas.js';
 
 marcarNavActiva();
@@ -37,8 +37,8 @@ function pintar(depto, periodo) {
   const masVieja = abiertas.reduce((m, r) => Math.max(m, r.diasAbierta ?? 0), 0);
   document.getElementById('kpis').innerHTML = `
     <div class="kpi"><div class="kpi-valor">${fmtNum(abiertas.length)}</div><div class="kpi-eti">abiertas hoy</div></div>
-    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div><div class="kpi-nota">${A.diasCobertura.global.n === 1 ? '1 cerrada' : `${fmtNum(A.diasCobertura.global.n)} cerradas`} con dato · ${etiP}</div></div>
-    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.promedio ?? '—'} días</div><div class="kpi-eti">promedio para cerrar</div><div class="kpi-nota">${etiP}</div></div>
+    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.mediana ?? '—'} días</div><div class="kpi-eti">mediana para cerrar (real)</div><div class="kpi-nota">valor del medio: la mitad de las vacantes se cubrió en menos días y la otra mitad en más · ${A.diasCobertura.global.n === 1 ? '1 cerrada' : `${fmtNum(A.diasCobertura.global.n)} cerradas`} con dato · ${etiP}</div></div>
+    <div class="kpi"><div class="kpi-valor">${A.diasCobertura.global.promedio ?? '—'} días</div><div class="kpi-eti">promedio para cerrar</div><div class="kpi-nota">suma de días ÷ vacantes; sube mucho si una se atasca · ${etiP}</div></div>
     <div class="kpi"><div class="kpi-valor ${masVieja > 30 ? 'rojo' : ''}">${fmtNum(masVieja)} días</div><div class="kpi-eti">la vacante abierta más antigua</div></div>`;
 
   // ── abiertas hoy ───────────────────────────────────────────────────────────
@@ -67,20 +67,23 @@ function pintar(depto, periodo) {
     .map((t) => ({
       eti: t === '(sin dato)' ? 'Sin tipo / no tienda' : `Tipo ${t}`,
       valor: A.diasCobertura.porTipo[t].mediana,
-      extra: `(n=${A.diasCobertura.porTipo[t].n})`,
+      extra: `· ${A.diasCobertura.porTipo[t].n === 1 ? '1 vacante cerrada' : `${fmtNum(A.diasCobertura.porTipo[t].n)} vacantes cerradas`}`,
     }));
-  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días` }) : `<p class="sub">Sin vacantes cerradas con dato en ${etiP}.</p>`;
-
+  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días`, ancho: anchoDe('dias-tipo') }) : `<p class="sub">Sin vacantes cerradas con dato en ${etiP}.</p>`;
+  document.getElementById('dias-tipo-nota').innerHTML =
+    `<b>Qué es la mediana:</b> el valor del medio. Si se ordenan las vacantes de la que se cubrió más rápido a la más lenta, la mediana es la que queda justo en el centro: la mitad se cubrió en menos días y la otra mitad en más. Ejemplo: cinco vacantes que tardaron 8, 10, 15, 20 y 90 días tienen mediana de 15 días; el promedio sería 29, arrastrado por la de 90. Por eso se usa la mediana: una vacante atascada no distorsiona la cifra. <b>Cómo leer la gráfica:</b> la barra es la mediana de días para cubrir una vacante de ese tipo de tienda, y el número junto a ella es cuántas vacantes cerradas, con fechas registradas, hay detrás de esa mediana: con pocas, la cifra es menos confiable. Período: ${etiP}.`;
   // ── días por puesto (top 8 por frecuencia) ─────────────────────────────────
   const puestos = Object.entries(A.diasCobertura.porPuesto)
     .filter(([k, v]) => k !== '(sin dato)' && v.n >= 3)
     .sort((a, b) => b[1].n - a[1].n).slice(0, 8)
-    .map(([k, v]) => ({ eti: titulo(k), valor: v.mediana, extra: `(n=${v.n})` }));
-  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días` }) : `<p class="sub">Ningún puesto con 3 o más vacantes cerradas en ${etiP}.</p>`;
+    .map(([k, v]) => ({ eti: titulo(k), valor: v.mediana, extra: `· ${fmtNum(v.n)} vacantes cerradas` }));
+  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días`, ancho: anchoDe('dias-puesto') }) : `<p class="sub">Ningún puesto con 3 o más vacantes cerradas en ${etiP}.</p>`;
+  document.getElementById('dias-puesto-nota').textContent =
+    'Misma lectura: la barra es la mediana de días para cubrir el puesto (el valor del medio: la mitad de esas vacantes se cubrió en menos días y la otra mitad en más) y, al lado, cuántas vacantes cerradas la respaldan. Solo aparecen puestos con 3 o más vacantes cerradas en el período, para no sacar conclusiones de un caso suelto.';
 
   // ── cierres por mes (de las vacantes del período; hasta 18 meses) ──────────
   const cierres = Object.entries(A.cierresPorMes).slice(-18).map(([ym, n]) => ({ eti: fmtYmCorto(ym), valor: n }));
-  document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum });
+  document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum, ancho: anchoDe('cierres-mes') });
 
   // "Cómo se cubren" (interno vs. externo) y "Canales de atracción" se QUITARON del sitio (Oscar, 2026-10-07):
   // el registro tiene pocas vacantes con esos campos y la lectura era parcial. Los agregados siguen en
@@ -94,3 +97,9 @@ let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ vacantes: datos.vacantes 
   (p) => { periodo = p; pintar(depto, periodo); });
 pintar(depto, periodo);
 pintarPie(meta);
+// Las gráficas se dibujan al ancho real del contenedor (legibles en el teléfono); si cambia, se redibujan.
+let anchoPrevio = window.innerWidth, temporizador = null;
+window.addEventListener('resize', () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => { if (Math.abs(window.innerWidth - anchoPrevio) > 40) { anchoPrevio = window.innerWidth; pintar(depto, periodo); } }, 150);
+});

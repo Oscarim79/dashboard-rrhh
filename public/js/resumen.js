@@ -101,7 +101,7 @@ function pintar(depto, periodo) {
     const anual = noTienda.renuncia * cR.total + noTienda.despido * cD.total;
     costoAnual += anual;
     salidasCosteadas += salidasNoTienda;
-    detallePorTipo.push({ tipo: 'NT', salidas: noTienda, cR, cD, anual, cal: { dias, fuente: A.diasCobertura.global.mediana != null ? `mediana global (n=${A.diasCobertura.global.n})` : 'supuesto del modelo' } });
+    detallePorTipo.push({ tipo: 'NT', salidas: noTienda, cR, cD, anual, cal: { dias, fuente: A.diasCobertura.global.mediana != null ? `mediana de ${A.diasCobertura.global.n} vacantes cerradas (todas)` : 'supuesto del modelo' } });
   }
   // Marcas sin modelo de costo propio (Oscar, 2026-09-16: Abi Q): sus renuncias y despidos cuentan
   // como salidas (y en el % de plantilla reemplazada) pero no se multiplican por ningún costo.
