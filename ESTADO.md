@@ -6,6 +6,9 @@
   "· 12 vacantes cerradas", y cada tarjeta lleva un pie "Cómo leerla": la barra es la mediana de días (la mitad
   se cubrió en menos, la otra mitad en más; mediana y no promedio para que una vacante atascada no distorsione),
   y el número al lado es cuántas vacantes cerradas con fechas respaldan esa cifra (con pocas, menos confiable).
+  **Qué es la mediana (Oscar: "para que no haya dudas sin importar quién lo lea"):** el pie la define como "el
+  valor del medio" con ejemplo (8, 10, 15, 20 y 90 días → mediana 15, promedio 29) y el KPI "mediana para cerrar"
+  lleva la misma definición corta; el KPI "promedio" dice que sube mucho si una vacante se atasca.
 - La misma jerga se cambió en la fuente de calibración que muestra el Resumen (`diasCalibrados` en comun.js y la
   tarjeta NT en resumen.js): "mediana de 12 vacantes cerradas tipo A" en vez de "mediana tipo A (n=12)".
 - Las tres gráficas de Vacantes se dibujan ahora al ancho real del contenedor (`anchoDe`), como las de Rotación:
