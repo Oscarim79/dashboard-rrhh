@@ -1,5 +1,16 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-07: el "n=" de las gráficas de Vacantes, explicado (Oscar)
+
+- Las barras "Días para cubrir una vacante" (por tipo de tienda y por puesto) ya no dicen "(n=12)" sino
+  "· 12 vacantes cerradas", y cada tarjeta lleva un pie "Cómo leerla": la barra es la mediana de días (la mitad
+  se cubrió en menos, la otra mitad en más; mediana y no promedio para que una vacante atascada no distorsione),
+  y el número al lado es cuántas vacantes cerradas con fechas respaldan esa cifra (con pocas, menos confiable).
+- La misma jerga se cambió en la fuente de calibración que muestra el Resumen (`diasCalibrados` en comun.js y la
+  tarjeta NT en resumen.js): "mediana de 12 vacantes cerradas tipo A" en vez de "mediana tipo A (n=12)".
+- Las tres gráficas de Vacantes se dibujan ahora al ancho real del contenedor (`anchoDe`), como las de Rotación:
+  antes en el teléfono el texto quedaba ilegible.
+
 ## Retirado 2026-10-07: "Cómo se cubren" (interno vs. externo) y "Canales de atracción" en Vacantes (Oscar)
 
 - Poca información aún: los campos se llenan en pocas vacantes y la lectura era parcial. Se quitaron las dos

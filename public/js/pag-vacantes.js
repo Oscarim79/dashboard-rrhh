@@ -4,7 +4,7 @@
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum,
   pintarSelectorDepto, vacantesDe, notaAlcance,
   pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, etiquetaPeriodo, aniosYMeses, fmtYmCorto } from './comun.js';
-import { barrasH, columnas } from './graficas.js';
+import { barrasH, columnas, anchoDe } from './graficas.js';
 import { DESCRIPCION_PROCESO, notaDePuesto } from './vacantes-notas.js';
 
 marcarNavActiva();
@@ -67,20 +67,24 @@ function pintar(depto, periodo) {
     .map((t) => ({
       eti: t === '(sin dato)' ? 'Sin tipo / no tienda' : `Tipo ${t}`,
       valor: A.diasCobertura.porTipo[t].mediana,
-      extra: `(n=${A.diasCobertura.porTipo[t].n})`,
+      extra: `· ${A.diasCobertura.porTipo[t].n === 1 ? '1 vacante cerrada' : `${fmtNum(A.diasCobertura.porTipo[t].n)} vacantes cerradas`}`,
     }));
-  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días` }) : `<p class="sub">Sin vacantes cerradas con dato en ${etiP}.</p>`;
+  document.getElementById('dias-tipo').innerHTML = porTipo.length ? barrasH(porTipo, { formato: (v) => `${v} días`, ancho: anchoDe('dias-tipo') }) : `<p class="sub">Sin vacantes cerradas con dato en ${etiP}.</p>`;
+  document.getElementById('dias-tipo-nota').textContent =
+    `Cómo leerla: la barra es la mediana de días que tardó en cubrirse una vacante de ese tipo de tienda (la mitad se cubrió en menos días y la otra mitad en más; se usa la mediana y no el promedio para que una vacante atascada no distorsione la cifra). El número junto a la barra es cuántas vacantes cerradas, con fechas registradas, hay detrás de esa mediana: con pocas, la cifra es menos confiable. Período: ${etiP}.`;
 
   // ── días por puesto (top 8 por frecuencia) ─────────────────────────────────
   const puestos = Object.entries(A.diasCobertura.porPuesto)
     .filter(([k, v]) => k !== '(sin dato)' && v.n >= 3)
     .sort((a, b) => b[1].n - a[1].n).slice(0, 8)
-    .map(([k, v]) => ({ eti: titulo(k), valor: v.mediana, extra: `(n=${v.n})` }));
-  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días` }) : `<p class="sub">Ningún puesto con 3 o más vacantes cerradas en ${etiP}.</p>`;
+    .map(([k, v]) => ({ eti: titulo(k), valor: v.mediana, extra: `· ${fmtNum(v.n)} vacantes cerradas` }));
+  document.getElementById('dias-puesto').innerHTML = puestos.length ? barrasH(puestos, { formato: (v) => `${v} días`, ancho: anchoDe('dias-puesto') }) : `<p class="sub">Ningún puesto con 3 o más vacantes cerradas en ${etiP}.</p>`;
+  document.getElementById('dias-puesto-nota').textContent =
+    'Misma lectura: mediana de días para cubrir el puesto y, al lado, cuántas vacantes cerradas la respaldan. Solo aparecen puestos con 3 o más vacantes cerradas en el período, para no sacar conclusiones de un caso suelto.';
 
   // ── cierres por mes (de las vacantes del período; hasta 18 meses) ──────────
   const cierres = Object.entries(A.cierresPorMes).slice(-18).map(([ym, n]) => ({ eti: fmtYmCorto(ym), valor: n }));
-  document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum });
+  document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum, ancho: anchoDe('cierres-mes') });
 
   // "Cómo se cubren" (interno vs. externo) y "Canales de atracción" se QUITARON del sitio (Oscar, 2026-10-07):
   // el registro tiene pocas vacantes con esos campos y la lectura era parcial. Los agregados siguen en
@@ -94,3 +98,9 @@ let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ vacantes: datos.vacantes 
   (p) => { periodo = p; pintar(depto, periodo); });
 pintar(depto, periodo);
 pintarPie(meta);
+// Las gráficas se dibujan al ancho real del contenedor (legibles en el teléfono); si cambia, se redibujan.
+let anchoPrevio = window.innerWidth, temporizador = null;
+window.addEventListener('resize', () => {
+  clearTimeout(temporizador);
+  temporizador = setTimeout(() => { if (Math.abs(window.innerWidth - anchoPrevio) > 40) { anchoPrevio = window.innerWidth; pintar(depto, periodo); } }, 150);
+});

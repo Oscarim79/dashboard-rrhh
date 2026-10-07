@@ -428,8 +428,8 @@ export function aplicarDesglose(subMotivos, desglose) {
 // Mediana de días calibrada: usa la del tipo si tiene muestra suficiente, si no la global.
 export function diasCalibrados(diasCobertura, tipo, minimo = 8) {
   const t = diasCobertura.porTipo[tipo];
-  if (t && t.n >= minimo && t.mediana != null) return { dias: t.mediana, fuente: `mediana tipo ${tipo} (n=${t.n})` };
-  return { dias: diasCobertura.global.mediana, fuente: `mediana global (n=${diasCobertura.global.n})` };
+  if (t && t.n >= minimo && t.mediana != null) return { dias: t.mediana, fuente: `mediana de ${t.n} vacantes cerradas tipo ${tipo}` };
+  return { dias: diasCobertura.global.mediana, fuente: `mediana de ${diasCobertura.global.n} vacantes cerradas (todas)` };
 }
 
 // ── Globo de detalle sobre filas de gráfica (`data-detalle`) ──────────────────
