@@ -95,10 +95,12 @@ function pintar(depto, periodo) {
   if (!anios.length) anios = aniosTodos;
   if (anios.length === 1 && aniosTodos.includes(anios[0] - 1)) anios = [anios[0] - 1, anios[0]];
   const COLORES_ANIO = ['#9AA8A1', '#46615A', '#0B7A55'];
+  // con un mes elegido, las líneas se cortan en ese mes: así la gráfica dice lo mismo que el titular y los KPI
+  const mesCorte = periodo.startsWith('m:') && ultimo ? ultimo.mesNum : 12;
   const seriesAnios = anios.map((a, i) => ({
     nombre: String(a),
     color: COLORES_ANIO[(i + (3 - anios.length % 3)) % COLORES_ANIO.length],
-    puntos: MES_CORTO.map((_, m) => serie.find((r) => r.anio === a && r.mesNum === m + 1)?.pctAcum ?? null),
+    puntos: MES_CORTO.map((_, m) => (m + 1 > mesCorte ? null : serie.find((r) => r.anio === a && r.mesNum === m + 1)?.pctAcum ?? null)),
   }));
   document.getElementById('h-acum').textContent = `Rotación acumulada del año · ${anios.length > 1 ? 'comparación entre años' : anios[0]}`;
   document.getElementById('acum-titular').innerHTML = titularAcumulado(serie, ultimo, conMarca ? `de ${MARCAS[marca]}` : esCom ? 'de las tiendas (Comercial)' : 'de toda la empresa', generado);
@@ -113,8 +115,8 @@ function pintar(depto, periodo) {
   // ── comercial vs total (el último año del período) — siempre se muestra la comparación ──
   const anioCT = ultimo ? ultimo.anio : aniosTodos.at(-1);
   const seriesCT = [
-    { nombre: 'Total empresa', color: '#46615A', puntos: MES_CORTO.map((_, m) => total.find((r) => r.anio === anioCT && r.mesNum === m + 1)?.pctAcum ?? null) },
-    { nombre: 'Área comercial', color: '#B5741A', puntos: MES_CORTO.map((_, m) => comercial.find((r) => r.anio === anioCT && r.mesNum === m + 1)?.pctAcum ?? null) },
+    { nombre: 'Total empresa', color: '#46615A', puntos: MES_CORTO.map((_, m) => (m + 1 > mesCorte ? null : total.find((r) => r.anio === anioCT && r.mesNum === m + 1)?.pctAcum ?? null)) },
+    { nombre: 'Área comercial', color: '#B5741A', puntos: MES_CORTO.map((_, m) => (m + 1 > mesCorte ? null : comercial.find((r) => r.anio === anioCT && r.mesNum === m + 1)?.pctAcum ?? null)) },
   ];
   document.getElementById('h-ct').textContent = `Comercial vs. total empresa · ${anioCT}`;
   seriesCT[0].nombre = 'Toda la empresa'; seriesCT[0].nombreCorto = 'Empresa'; seriesCT[1].nombre = 'Tiendas';
@@ -150,14 +152,22 @@ function pintar(depto, periodo) {
   document.getElementById('leyenda-bajas').innerHTML = leyenda([{ eti: 'bajas (con cifra)', color: '#B5741A' }, { eti: 'contrataciones', color: '#9CCBB7' }]);
   const ultimoMesK = mesSel && porMes.has(mesSel) ? mesSel : mesesOrden.at(-1);
   const ultimoMes = porMes.get(ultimoMesK);
+  // "En los últimos 12 meses" / "En el año 2025" / "En 2026 a la fecha" / "En todo el registro"
+  const enEtiP = etiP.startsWith('últimos') ? `En los ${etiP}` : etiP.startsWith('año') ? `En el ${etiP}` : `En ${etiP}`;
+  const quienes = conMarca ? `de ${MARCAS[marca]}` : esCom ? 'de las tiendas (Comercial)' : 'de toda la empresa';
   if (ultimoMes) {
     const tot = mesesOrden.reduce((a, k) => { const v = porMes.get(k); a.bajas += v.bajas; a.altas += v.altas; return a; }, { bajas: 0, altas: 0 });
     const pico = mesesOrden.map((k) => [k, porMes.get(k).bajas]).sort((a, b) => b[1] - a[1])[0];
     const saldo = tot.altas - tot.bajas;
+    const cambio = (d) => (d === 0 ? 'el equipo quedó igual' : d > 0 ? `el equipo <b class="verde">creció en ${fmtNum(d)}</b>` : `el equipo <b class="ambar">se redujo en ${fmtNum(-d)}</b>`);
+    document.getElementById('bajas-titular').innerHTML = mesSel
+      ? `<b>En ${fmtYm(ultimoMesK)} se fueron ${fmtNum(ultimoMes.bajas)} personas ${quienes} y entraron ${fmtNum(ultimoMes.altas)}</b>: ${cambio(ultimoMes.altas - ultimoMes.bajas)} y cerró el mes con ${fmtNum(ultimoMes.fin)} colaboradores${ultimoMes.fin > 0 ? ` (salió el ${fmtPct(ultimoMes.bajas / ultimoMes.fin, 0)} del equipo)` : ''}.`
+      : `<b>${enEtiP} se fueron ${fmtNum(tot.bajas)} personas ${quienes} y entraron ${fmtNum(tot.altas)}</b>: ${cambio(saldo)}. Salen unas ${(tot.bajas / mesesOrden.length).toLocaleString('es-GT', { maximumFractionDigits: 0 })} personas al mes; el mes más alto fue ${fmtYm(pico[0])} con ${fmtNum(pico[1])}.`;
     document.getElementById('bajas-nota').textContent = mesSel
-      ? `${fmtYm(ultimoMesK)} (columnas oscuras; los meses anteriores son contexto) · ${nombreSerie}: ${fmtNum(ultimoMes.bajas)} bajas y ${fmtNum(ultimoMes.altas)} contrataciones, con ${fmtNum(ultimoMes.fin)} colaboradores al cierre${pctEquipo(ultimoMes)}. Toca una columna para ver el detalle de ese mes.`
-      : `${nombreSerie}, ${mesesOrden.length} meses graficados: ${fmtNum(tot.bajas)} bajas y ${fmtNum(tot.altas)} contrataciones (saldo ${signo(saldo)} personas), promedio de ${(tot.bajas / mesesOrden.length).toLocaleString('es-GT', { maximumFractionDigits: 1 })} bajas por mes. Mes más alto: ${fmtYm(pico[0])} con ${fmtNum(pico[1])}. Último mes, ${fmtYm(ultimoMesK)}: ${fmtNum(ultimoMes.bajas)} bajas, ${fmtNum(ultimoMes.altas)} contrataciones y ${fmtNum(ultimoMes.fin)} colaboradores al cierre${pctEquipo(ultimoMes)}. Toca una columna para ver el detalle de ese mes.`;
+      ? `Las columnas oscuras son ${fmtYm(ultimoMesK)}; los meses anteriores son contexto. Ámbar = bajas (con cifra), verde = contrataciones. Toca una columna para ver el detalle de ese mes.`
+      : `${mesesOrden.length} meses graficados. Ámbar = bajas (con cifra), verde = contrataciones: si la verde es más alta que la ámbar, ese mes el equipo creció. Último mes, ${fmtYm(ultimoMesK)}: ${fmtNum(ultimoMes.bajas)} bajas, ${fmtNum(ultimoMes.altas)} contrataciones y ${fmtNum(ultimoMes.fin)} colaboradores al cierre${pctEquipo(ultimoMes)}. Toca una columna para ver el detalle de ese mes.`;
   } else {
+    document.getElementById('bajas-titular').innerHTML = '';
     document.getElementById('bajas-nota').textContent = `Sin datos mensuales en ${etiP}.`;
   }
 
@@ -176,6 +186,7 @@ function pintar(depto, periodo) {
       porDepto.set(r.departamento, a);
     }
     const etiTramo = periodo === 'todo' ? 'últimos 12 meses' : etiP;
+    const enTramo = etiTramo.startsWith('últimos') ? `en los ${etiTramo}` : etiTramo.startsWith('año') ? `en el ${etiTramo}` : `en ${etiTramo}`;
     document.getElementById('h-depto').textContent = `Bajas por departamento · ${etiTramo}`;
     const totalBajas = [...porDepto.values()].reduce((a, v) => a + v.bajas, 0);
     const items = [...porDepto.entries()].filter(([, v]) => v.bajas > 0).sort((a, b) => b[1].bajas - a[1].bajas).slice(0, 10)
@@ -184,9 +195,15 @@ function pintar(depto, periodo) {
         extra: totalBajas ? `${fmtPct(v.bajas / totalBajas, 0)} de las bajas` : '',
         detalle: `${fmtNum(v.bajas)} bajas y ${fmtNum(v.altas)} contrataciones en ${etiTramo}${v.fin ? ` · ${fmtNum(v.fin)} colaboradores al cierre de ${fmtYm(v.ultimoYm)}${v.fin > 0 ? ` · las bajas equivalen al ${fmtPct(v.bajas / v.fin, 0)} de ese equipo` : ''}` : ''}`,
       }));
+    const com = porDepto.get('COMERCIAL');
+    const otros = [...porDepto.entries()].filter(([k, v]) => k !== 'COMERCIAL' && v.bajas > 0);
+    document.getElementById('depto-titular').innerHTML = !items.length || !totalBajas ? ''
+      : com && com.bajas > 0
+        ? `<b>${fmtPct(com.bajas / totalBajas, 0)} de las bajas son de las tiendas (Comercial)</b>: ${fmtNum(com.bajas)} de ${fmtNum(totalBajas)} ${enTramo}. ${otros.length ? `El resto, ${fmtNum(totalBajas - com.bajas)}, se reparte entre ${otros.length === 1 ? 'un departamento' : `${otros.length} departamentos`}.` : ''}`
+        : `<b>${titulo(items[0].eti.toUpperCase())} concentra el ${fmtPct(items[0].valor / totalBajas, 0)} de las bajas</b>: ${fmtNum(items[0].valor)} de ${fmtNum(totalBajas)} ${enTramo}.`;
     document.getElementById('bajas-depto').innerHTML = items.length ? barrasH(items, { formato: fmtNum, ancho: anchoDe('bajas-depto') }) : `<p class="sub">Sin bajas registradas en ${etiP}.</p>`;
     document.getElementById('depto-nota').textContent = items.length
-      ? `${fmtNum(totalBajas)} bajas en ${etiTramo}; el porcentaje es la parte de cada departamento en ese total. La barra ámbar es Comercial (tiendas). Toca un departamento para ver sus contrataciones y el tamaño de su equipo. El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.`
+      ? `El porcentaje junto a cada barra es la parte de ese departamento en las ${fmtNum(totalBajas)} bajas del tramo. La barra ámbar es Comercial (tiendas). Toca un departamento para ver sus contrataciones y el tamaño de su equipo. El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.`
       : 'El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.';
   }
 }

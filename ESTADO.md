@@ -21,6 +21,11 @@
   dato unidos con trazo punteado (en el sheet real 2025 no tiene noviembre y quedaba un punto suelto), meses
   futuros en gris y el último mes en negrita. Las series se llaman "Tiendas" y "Toda la empresa" en vez de
   "Área comercial" / "Total empresa".
+- **Tercera ronda (Oscar: "lleva el mismo titular a las columnas"):** titular también en "Bajas y contrataciones
+  por mes" ("En los últimos 12 meses se fueron 285 personas de toda la empresa y entraron 304: el equipo creció
+  en 19. Salen unas 24 personas al mes; el mes más alto fue…") y en "Bajas por departamento" ("82% de las bajas
+  son de las tiendas (Comercial): 234 de 285…"). Con un mes elegido, las líneas del acumulado y de Comercial vs.
+  total se cortan en ese mes para que la gráfica diga lo mismo que el titular y los KPI.
 - `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia`,
   `etiquetasFinales`, `nombresFinales`, `paso`, `tituloY` y `nombreCorto` por serie. Todo sigue siendo
   conteos agregados.
