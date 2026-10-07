@@ -8,6 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import XLSX from 'xlsx';
+import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS } from './lib/estabilidad.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const norm = (s) => String(s ?? '')
@@ -800,6 +801,7 @@ const metaJson = {
 // % acumulado = bajas acumuladas del año ÷ promedio(inicio, fin): la misma fórmula del indicador manual.
 // De estas pestañas JAMÁS se lee nombre, DPI, teléfono, sueldo ni ningún otro dato individual;
 // la marca "A2K, ABIQ" (personal corporativo compartido) se cuenta en Americana y se informa aparte.
+let estabilidadJson = null;
 {
   const ESCOPOS = ['total', 'comercial', 'americana', 'abiq', 'friotec'];
   // ADMINISTRACION = los administrativos del corporativo (antes 'A2K, ABIQ'; Oscar, 2026-09-09): cuentan en Americana
@@ -845,6 +847,17 @@ const metaJson = {
       const m = norm(f[iMarcaB]); if (esAdministracion(m)) compartida++;
       for (const e of escoposDe(m, AREA_NORM(f[iDepB]))) activos[e]++;
     }
+    // "Los que sí se quedan" (Oscar, 2026-10-07): antigüedad del equipo activo, SOLO conteos (ver lib/estabilidad.mjs)
+    const est = calcularEstabilidad({ filas: baseHoja.filas, headers: HB, hoyISO, norm, fechaISO, colIdx, diasEntre, escoposDe, areaNorm: AREA_NORM });
+    estabilidadJson = {
+      generado: hoy.toISOString(), fecha: hoyISO, umbralAnios: UMBRAL_ESTABLE_ANIOS,
+      fuente: `BASE DE DATOS GENERAL: colaboradores con fecha de alta y sin fecha de salida, antigüedad contada hasta hoy. Columnas leídas: ${est.columnasLeidas.join(', ')}. Solo conteos.`,
+      marcasExcluidas: [...MARCAS_EXCLUIDAS],
+      alcances: est.alcances,
+      porQueSeQuedan: null, // se llena abajo si existe la pestaña de PERMANENCIA
+    };
+    console.log(`Estabilidad: ${est.activos} activos con antigüedad (${est.alcances.total?.mas5 ?? 0} con más de ${UMBRAL_ESTABLE_ANIOS} años en total)`);
+    if (est.altaFutura) calidad.push({ tipo: 'aviso', n: est.altaFutura, mensaje: `${est.altaFutura} filas de BASE DE DATOS GENERAL tienen fecha de alta posterior a hoy; no cuentan en la antigüedad.` });
     // bajas por mes (registro de SALIDAS ya leído)
     const bajasMes = {};
     for (const r of regsSalidas) {
@@ -901,6 +914,20 @@ const metaJson = {
   }
 }
 
+// ── PERMANENCIA: por qué se quedan (pestaña opcional; hoy no existe en el sheet) ───
+// Cuando RRHH la cree (una fila por entrevista de permanencia, columna MOTIVO DE PERMANENCIA y, si quiere,
+// DEPARTAMENTO), se cuenta por motivo. Solo conteos: nunca nombres ni respuestas libres.
+{
+  const perm = detectar(wb, [['MOTIVO', 'PERMANENCIA']]) ?? detectar(wb, [['POR QUE SE QUEDA']]);
+  const conteo = contarPermanencia({ hoja: perm, norm, colIdx });
+  if (conteo) {
+    console.log(`Permanencia: pestaña "${conteo.pestana}" (${conteo.n} entrevistas, solo conteos por motivo)`);
+    if (estabilidadJson) estabilidadJson.porQueSeQuedan = { n: conteo.n, motivos: conteo.motivos, porDepartamento: conteo.porDepartamento };
+  } else {
+    calidad.push({ tipo: 'info', mensaje: 'No hay pestaña de PERMANENCIA (motivo por el que se quedan); la sección "Los que sí se quedan" muestra solo antigüedad y dónde están los estables.' });
+  }
+}
+
 // ── VERIFICACIÓN ANTI-FUGAS (última línea de defensa) ──────────────────────
 // Términos prohibidos como palabras completas (así "Benito" no dispara "NIT").
 const RE_PROHIBIDOS = [
@@ -951,6 +978,7 @@ buscarFugas(rotacionJson, 'rotacion', hallazgos);
 buscarFugas(metaJson, 'meta', hallazgos);
 if (salidasJson) buscarFugas(salidasJson, 'salidas', hallazgos);
 if (integracionJson) buscarFugas(integracionJson, 'integracion', hallazgos);
+if (estabilidadJson) buscarFugas(estabilidadJson, 'estabilidad', hallazgos);
 if (hallazgos.length) {
   console.error('\n⛔ VERIFICACIÓN ANTI-FUGAS FALLÓ — NO se publicó nada. Hallazgos:');
   for (const h of hallazgos) console.error('  - ' + h);
@@ -964,10 +992,11 @@ writeFileSync(path.join(outDir, 'vacantes.json'), JSON.stringify(vacantesJson));
 writeFileSync(path.join(outDir, 'rotacion.json'), JSON.stringify(rotacionJson));
 writeFileSync(path.join(outDir, 'salidas.json'), JSON.stringify(salidasJson ?? { generado: hoy.toISOString(), total: null }));
 writeFileSync(path.join(outDir, 'integracion.json'), JSON.stringify(integracionJson ?? { generado: hoy.toISOString(), total: null }));
+writeFileSync(path.join(outDir, 'estabilidad.json'), JSON.stringify(estabilidadJson ?? { generado: hoy.toISOString(), alcances: null }));
 writeFileSync(path.join(outDir, 'meta.json'), JSON.stringify(metaJson, null, 2));
 writeFileSync(path.join(outDir, 'tiendas.json'), JSON.stringify(tiendasJson));
 if (calidad.length) {
   console.log('\nAvisos de calidad (van a meta.json; no se muestran en el sitio):');
   for (const a of calidad) console.log(`  ${a.tipo === 'error' ? '✖' : '•'} ${a.mensaje}`);
 }
-console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), integracion.json (${integracionJson ? integracionJson.total.n + ' nuevos, solo conteos' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);
+console.log(`\n✅ Publicado en public/data/: vacantes.json (${filasVac.length} filas), rotacion.json (${acumulado.length}+${mensual.length}), salidas.json (${salidasJson ? salidasJson.total.n + ' agregadas' : 'sin datos'}), integracion.json (${integracionJson ? integracionJson.total.n + ' nuevos, solo conteos' : 'sin datos'}), estabilidad.json (${estabilidadJson ? (estabilidadJson.alcances.total?.n ?? 0) + ' activos, solo conteos' : 'sin datos'}), meta.json (${calidad.length} avisos de calidad). Verificación anti-fugas: limpia.`);

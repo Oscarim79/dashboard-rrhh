@@ -3,14 +3,16 @@
 // (columna AREA LAB del sheet). Selector de período (global): todo el registro,
 // últimos 12 meses, un año (el año en curso = "a la fecha") o un mes concreto.
 import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE, activarDetalles,
-  pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO } from './comun.js';
+  pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO, marcaActual, MARCAS } from './comun.js';
 import { DATOS } from './propuesta-datos.js';
-import { barrasH, columnas } from './graficas.js';
+import { barrasH, columnas, anchoDe } from './graficas.js';
 
 marcarNavActiva();
-const [salidasTodo, meta] = await Promise.all([
+const [salidasTodo, meta, estabilidad] = await Promise.all([
   fetch('data/salidas.json', { cache: 'no-cache' }).then((r) => r.json()),
   fetch('data/meta.json', { cache: 'no-cache' }).then((r) => r.json()),
+  // "Los que sí se quedan": antigüedad del equipo activo (opcional; si no está publicado, la sección lo dice)
+  fetch('data/estabilidad.json', { cache: 'no-cache' }).then((r) => (r.ok ? r.json() : null)).catch(() => null),
 ]);
 
 if (!salidasTodo.total) {
@@ -283,11 +285,78 @@ if (!salidasTodo.total) {
     }
   }
 
-  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); });
+  // ── Los que sí se quedan (Oscar, 2026-10-07): antigüedad del equipo activo, dónde están los estables y,
+  // cuando el sheet lo registre, por qué se quedan. Alcance: marca elegida > Comercial > toda la empresa. ──
+  const RANGOS_ACTIVOS = ['MENOS 6 MESES', '6 MESES A 1 ANO', 'DE 1 A 2 ANOS', 'DE 2 A 5 ANOS', 'DE 5 A 10 ANOS', 'MAS DE 10 ANOS'];
+  const ETI_ACTIVO = { 'MENOS 6 MESES': 'Menos de 6 meses', '6 MESES A 1 ANO': '6 meses a 1 año', 'DE 1 A 2 ANOS': '1 a 2 años', 'DE 2 A 5 ANOS': '2 a 5 años', 'DE 5 A 10 ANOS': '5 a 10 años', 'MAS DE 10 ANOS': 'Más de 10 años' };
+  const pctDe = (v, n) => (n ? `${Math.round((v / n) * 100)}%` : '—');
+  function pintarEstabilidad(depto, periodo) {
+    const marca = marcaActual();
+    const alcance = marca !== 'todas' ? marca : depto === 'comercial' ? 'comercial' : 'total';
+    const E = estabilidad?.alcances?.[alcance];
+    const deQuien = marca !== 'todas' ? `de ${MARCAS[marca]}` : depto === 'comercial' ? 'de las tiendas (Comercial)' : 'de toda la empresa';
+    const umbral = estabilidad?.umbralAnios ?? 5;
+    const porque = document.getElementById('estab-porque');
+    if (!E || !E.n) {
+      document.getElementById('estab-titular').innerHTML = '';
+      document.getElementById('estab-rangos').innerHTML = `<p class="sub">${estabilidad?.alcances ? `Sin colaboradores activos ${deQuien} en la base de datos.` : 'El pipeline aún no publica la antigüedad del equipo activo (estabilidad.json).'}</p>`;
+      document.getElementById('estab-nota').textContent = '';
+      document.getElementById('card-estab-donde').hidden = true;
+      document.getElementById('card-estab-sup').hidden = true;
+      porque.innerHTML = '';
+      return;
+    }
+    // titular
+    const p5 = Math.round((E.mas5 / E.n) * 100), p10 = Math.round((E.mas10 / E.n) * 100);
+    document.getElementById('estab-titular').innerHTML =
+      `<b>De cada 100 colaboradores ${deQuien}, ${p5} llevan más de ${umbral} años</b> en la empresa (${fmtNum(E.mas5)} de ${fmtNum(E.n)} activos) y ${p10} llevan más de 10 (${fmtNum(E.mas10)}).${E.medianaAnios != null ? ` La antigüedad mediana del equipo es de <b>${E.medianaAnios.toLocaleString('es-GT')} años</b>: la mitad lleva menos y la otra mitad más.` : ''}`;
+    // rangos de antigüedad del equipo activo
+    document.getElementById('estab-rangos').innerHTML = barrasH(RANGOS_ACTIVOS.map((k) => ({
+      eti: ETI_ACTIVO[k], valor: E.porRango[k] ?? 0, extra: pctDe(E.porRango[k] ?? 0, E.n) + ' del equipo',
+      color: k === 'DE 5 A 10 ANOS' || k === 'MAS DE 10 ANOS' ? '#0B7A55' : k === 'DE 2 A 5 ANOS' ? '#8FA69B' : '#C9CFC9',
+    })), { formato: fmtNum, ancho: anchoDe('estab-rangos') });
+    // contraste con las salidas del período: cuántos estables se fueron
+    const D = dimsSalidas(salidasDe(salidasTodo, depto), periodo);
+    const seFueron5 = D.rango?.['MAS DE 5 ANOS'] ?? 0;
+    const etiP = etiquetaPeriodo(periodo, salidasTodo.generado);
+    const enEtiP = etiP.startsWith('últimos') ? `en los ${etiP}` : etiP.startsWith('año') ? `en el ${etiP}` : `en ${etiP}`;
+    document.getElementById('estab-nota').textContent =
+      `Antigüedad contada desde la fecha de alta hasta hoy (${estabilidad.fecha}) para quienes siguen en la empresa, según la BASE DE DATOS GENERAL de RRHH. En verde, los de más de ${umbral} años. Para contrastar: ${enEtiP} salieron ${fmtNum(seFueron5)} personas con más de ${umbral} años de antigüedad${D.n ? ` (${pctDe(seFueron5, D.n)} de las ${fmtNum(D.n)} salidas del período)` : ''}.${estabilidad.marcasExcluidas?.length ? ` ${estabilidad.marcasExcluidas.join(' y ')} quedan fuera, como en el resto del sitio.` : ''} Solo conteos: ningún dato individual.`;
+    // dónde están: por departamento (General) o por puesto (Comercial / marca)
+    const porDep = depto !== 'comercial' && marca === 'todas';
+    const fuente = porDep ? E.porDepartamento : E.porPuesto;
+    const items = Object.entries(fuente ?? {}).filter(([, v]) => v.mas5 > 0).slice(0, 10)
+      .map(([k, v]) => ({ eti: porDep ? (NOMBRE_AREA[k] ?? titulo(k)) : titulo(k), valor: v.mas5, extra: `de ${fmtNum(v.n)} · ${pctDe(v.mas5, v.n)} de ese equipo`, color: '#0B7A55' }));
+    document.getElementById('card-estab-donde').hidden = !items.length;
+    document.getElementById('estab-donde-titulo').textContent = `Dónde están los de más de ${umbral} años · por ${porDep ? 'departamento' : 'puesto'}`;
+    document.getElementById('estab-donde').innerHTML = barrasH(items, { formato: fmtNum, ancho: anchoDe('estab-donde') });
+    document.getElementById('estab-donde-nota').textContent = `La barra es cuántas personas con más de ${umbral} años hay en cada ${porDep ? 'departamento' : 'puesto'}; al lado, de cuántos activos y qué parte de ese equipo son. Un equipo donde casi nadie pasa de ${umbral} años es un equipo que no retiene.`;
+    // por supervisor o jefe
+    const sup = Object.entries(E.porSupervisor ?? {}).filter(([, v]) => v.n >= 3).slice(0, 10)
+      .map(([k, v]) => ({ eti: k, valor: v.mas5, extra: `de ${fmtNum(v.n)} · ${pctDe(v.mas5, v.n)} de su equipo`, color: v.mas5 ? '#0B7A55' : '#C9CFC9' }));
+    document.getElementById('card-estab-sup').hidden = !sup.length;
+    if (sup.length) {
+      document.getElementById('estab-sup').innerHTML = barrasH(sup, { formato: fmtNum, ancho: anchoDe('estab-sup') });
+      document.getElementById('estab-sup-nota').textContent = `Equipos de 3 o más personas, ordenados por cuántas pasan de ${umbral} años. Compara con "Por supervisor o jefe" de las salidas, más arriba: quien tiene más estables suele tener menos bajas.`;
+    }
+    // por qué se quedan: dato del sheet si existe; si no, qué falta para tenerlo
+    const Q = estabilidad.porQueSeQuedan;
+    if (Q && Q.n) {
+      const motivos = Object.entries(Q.motivos).map(([k, v]) => ({ eti: titulo(k), valor: v, extra: pctDe(v, Q.n), color: '#0B7A55' }));
+      porque.innerHTML = `<p class="titular">${fmtNum(Q.n)} entrevistas de permanencia registradas por RRHH. El motivo más mencionado: <b>${motivos[0].eti}</b> (${motivos[0].extra}).</p><div class="grafica" id="estab-motivos"></div><p class="pie">Lo que respondieron los colaboradores con más antigüedad cuando RRHH les preguntó por qué siguen en la empresa. Solo conteos por motivo; las respuestas completas no se publican.</p>`;
+      document.getElementById('estab-motivos').innerHTML = barrasH(motivos, { formato: fmtNum, ancho: anchoDe('estab-motivos') });
+    } else {
+      porque.innerHTML = `<p class="sub" style="margin:0">El registro de RRHH todavía <b>no recoge por qué se quedan</b>: ninguna pestaña del sheet guarda ese dato y el dashboard no lo inventa. Lo que sí muestra esta sección es quiénes son los estables y dónde están (departamentos, puestos y supervisores que retienen gente), que es la pista más firme que hay hoy.</p>
+        <p class="sub" style="margin:10px 0 0">Para responder "por qué", RRHH puede hacer entrevistas cortas de permanencia a quienes llevan más de ${umbral} años y anotarlas en una pestaña <b>PERMANENCIA</b> del sheet: una fila por entrevista con la columna <b>MOTIVO DE PERMANENCIA</b> (por ejemplo: estabilidad del ingreso, ambiente de trabajo, el jefe, horario, cercanía a casa, comisiones, crecimiento) y, si se quiere, DEPARTAMENTO. En cuanto exista, el dashboard la lee solo para contar y la gráfica aparece aquí automáticamente.</p>`;
+    }
+  }
+
+  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); });
   let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado },
-    (p) => { periodo = p; pintar(depto, periodo); pintarComparativa(depto); }); // también al cambiar la marca
+    (p) => { periodo = p; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); }); // también al cambiar la marca
   pintar(depto, periodo);
   pintarComparativa(depto);
+  pintarEstabilidad(depto, periodo);
   activarDetalles();
   pintarPie(meta);
 }
