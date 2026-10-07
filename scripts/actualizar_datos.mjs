@@ -137,10 +137,12 @@ const MESES = ['ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO', 'JULIO', '
 // ── main ───────────────────────────────────────────────────────────────────
 const hoy = new Date();
 const hoyISO = hoy.toISOString().slice(0, 10);
-console.log('Descargando sheet…');
-const buf = await descargar(sheetId());
+// XLSX_LOCAL=ruta.xlsx: en vez de descargar, lee un libro local (solo para probar el pipeline con un
+// libro sintético; la Action nunca lo define). Sin él, se descarga el sheet como siempre.
+const buf = process.env.XLSX_LOCAL ? readFileSync(process.env.XLSX_LOCAL) : await (async () => { console.log('Descargando sheet…'); return descargar(sheetId()); })();
+if (process.env.XLSX_LOCAL) console.log(`Leyendo libro local ${process.env.XLSX_LOCAL} (prueba, sin descargar)`);
 mkdirSync(path.join(ROOT, '.data'), { recursive: true });
-writeFileSync(path.join(ROOT, '.data', 'sheet.xlsx'), buf); // copia local para depurar (gitignoreada)
+if (!process.env.XLSX_LOCAL) writeFileSync(path.join(ROOT, '.data', 'sheet.xlsx'), buf); // copia local para depurar (gitignoreada)
 const wb = XLSX.read(buf);
 
 const calidad = [];
@@ -848,9 +850,10 @@ let estabilidadJson = null;
       for (const e of escoposDe(m, AREA_NORM(f[iDepB]))) activos[e]++;
     }
     // "Los que sí se quedan" (Oscar, 2026-10-07): antigüedad del equipo activo, SOLO conteos (ver lib/estabilidad.mjs)
-    const est = calcularEstabilidad({ filas: baseHoja.filas, headers: HB, hoyISO, norm, fechaISO, colIdx, diasEntre, escoposDe, areaNorm: AREA_NORM });
+    const hoyISOEst = hoy.toISOString().slice(0, 10); // (hoyISO del bloque se declara más abajo)
+    const est = calcularEstabilidad({ filas: baseHoja.filas, headers: HB, hoyISO: hoyISOEst, norm, fechaISO, colIdx, diasEntre, escoposDe, areaNorm: AREA_NORM });
     estabilidadJson = {
-      generado: hoy.toISOString(), fecha: hoyISO, umbralAnios: UMBRAL_ESTABLE_ANIOS,
+      generado: hoy.toISOString(), fecha: hoyISOEst, umbralAnios: UMBRAL_ESTABLE_ANIOS,
       fuente: `BASE DE DATOS GENERAL: colaboradores con fecha de alta y sin fecha de salida, antigüedad contada hasta hoy. Columnas leídas: ${est.columnasLeidas.join(', ')}. Solo conteos.`,
       marcasExcluidas: [...MARCAS_EXCLUIDAS],
       alcances: est.alcances,
