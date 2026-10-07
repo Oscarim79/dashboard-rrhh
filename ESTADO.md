@@ -20,7 +20,7 @@
 - **Qué se añadió en cada bloque:** bloque plegable "¿Cómo se lee la rotación?"; KPIs con nota de cómo sale
   cada cifra (bajas ÷ plantilla promedio, dónde iba el año pasado, cómo empezó el mes, promedio de bajas/mes);
   en las líneas, referencia punteada del 60% anual, valor final de cada serie y nota con los años en el mismo
-  mes, cierres de año y ritmo estimado del año en curso (rotulado como estimación); Comercial vs. total con
+  mes y cierres de año (la proyección "cerraría cerca de X%" se quitó el mismo día a pedido de Oscar); Comercial vs. total con
   nota de brecha, peso de Comercial en plantilla y bajas, y rotación del resto de la empresa; bajas por mes
   ahora con las contrataciones al lado (columna verde clara), totales y saldo del período, y globo de detalle
   al tocar cada mes; bajas por departamento con % del total y globo con contrataciones y tamaño del equipo.

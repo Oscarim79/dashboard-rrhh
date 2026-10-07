@@ -249,7 +249,7 @@ function titularComercialTotal(anio, mesPreferido) {
   return s;
 }
 
-// Nota del acumulado: cómo se lee, cada año en el mismo mes, cierres de año y ritmo del año en curso.
+// Nota del acumulado: cómo se lee, cada año en el mismo mes y cierres de año.
 function notaAcumulado(serie, anios, ultimo, alcance, generado) {
   const partes = [`<b>${alcance}.</b> Cada línea es un año y cada punto, qué parte del equipo se había ido desde enero hasta ese mes (bajas acumuladas ÷ plantilla promedio). Por eso siempre sube: el valor de diciembre es la rotación de todo el año. Para comparar años, mira el mismo mes: la línea que va más arriba rota más rápido. Un tramo punteado une meses sin dato en el registro.`];
   if (!ultimo) return partes.join(' ');
@@ -259,10 +259,7 @@ function notaAcumulado(serie, anios, ultimo, alcance, generado) {
   const anioActual = +String(generado).slice(0, 4);
   const cierres = anios.filter((a) => a < anioActual).map((a) => [a, serie.find((r) => r.anio === a && r.mesNum === 12)]).filter(([, r]) => r);
   if (cierres.length) partes.push(`Cierre de año: ${cierres.map(([a, r]) => `${a} <b>${fmtPct(r.pctAcum, 1)}</b>`).join(' · ')}.`);
-  if (ultimo.anio === anioActual && mesU < 12 && mesU >= 3) {
-    const ritmo = (ultimo.pctAcum / mesU) * 12;
-    partes.push(`Si ${ultimo.anio} sigue al ritmo de estos ${mesU} meses, cerraría cerca de <b>${fmtPct(ritmo, 0)}</b> (estimación simple: acumulado ÷ meses × 12; no es un dato del registro).`);
-  }
+  // Sin proyección a fin de año (Oscar, 2026-10-07): el CEO solo ve datos del registro, no estimaciones.
   return partes.join(' ');
 }
 
