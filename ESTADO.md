@@ -22,9 +22,12 @@
   descargar; la Action nunca lo define) y hay un generador de libro sintético con las 7 pestañas en el scratch de
   la sesión: con él el pipeline corre completo en local y la verificación anti-fugas confirma que los nombres,
   DPI y sueldos falsos del libro no llegan a `public/data/`.
-- **Pendiente de Oscar:** confirmar los nombres reales de las columnas PUESTO / SUPERVISOR / AGENCIA en la BASE DE
-  DATOS GENERAL (si no se detectan, esas tarjetas simplemente no se muestran) y decidir si se hacen las entrevistas
-  de permanencia.
+- **Confirmado por Oscar (2026-10-07, tras el deploy 163):** las tarjetas "Dónde están los de más de 5 años" y "Por
+  supervisor o jefe" sí aparecen (las columnas PUESTO / SUPERVISOR / AGENCIA de la BASE DE DATOS GENERAL se detectan)
+  y los números cuadran: 268 activos en las cifras principales, 42 con más de 5 años (~16 de cada 100), 179 en
+  Comercial, Americana 251 / Abi Q 17.
+- **Pendiente de Oscar:** decidir si se hacen las entrevistas de permanencia (pestaña PERMANENCIA) para responder
+  "por qué se quedan".
 
 ## ✅ HECHO 2026-10-07: el "n=" de las gráficas de Vacantes, explicado (Oscar)
 
