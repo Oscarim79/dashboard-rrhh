@@ -1,5 +1,13 @@
 # Estado del proyecto — Dashboard RRHH
 
+## Retirado 2026-10-07: "Cómo se cubren" (interno vs. externo) y "Canales de atracción" en Vacantes (Oscar)
+
+- Poca información aún: los campos se llenan en pocas vacantes y la lectura era parcial. Se quitaron las dos
+  tarjetas y en su lugar la página deja una observación ("cuando haya más información se mostrará…") con cuántas
+  vacantes del período indican cómo se cubrieron. Los agregados (`ocupadaPor`, `canales`) siguen en
+  `vacantes.json` y en `agregarVacantes` (pipeline y comun.js); para retomarlos, restaurar las tarjetas desde el
+  historial (commit anterior a este cambio en `pag-vacantes.js` y `vacantes.html`).
+
 ## ✅ HECHO 2026-10-07: "Avance del proceso" de las vacantes abiertas, con descripción y nota a mano (Oscar)
 
 - Bajo cada estado de la columna "Avance del proceso" (tabla "Abiertas hoy" de Vacantes) va una línea que explica
@@ -20,7 +28,7 @@
 - **Qué se añadió en cada bloque:** bloque plegable "¿Cómo se lee la rotación?"; KPIs con nota de cómo sale
   cada cifra (bajas ÷ plantilla promedio, dónde iba el año pasado, cómo empezó el mes, promedio de bajas/mes);
   en las líneas, referencia punteada del 60% anual, valor final de cada serie y nota con los años en el mismo
-  mes, cierres de año y ritmo estimado del año en curso (rotulado como estimación); Comercial vs. total con
+  mes y cierres de año (la proyección "cerraría cerca de X%" se quitó el mismo día a pedido de Oscar); Comercial vs. total con
   nota de brecha, peso de Comercial en plantilla y bajas, y rotación del resto de la empresa; bajas por mes
   ahora con las contrataciones al lado (columna verde clara), totales y saldo del período, y globo de detalle
   al tocar cada mes; bajas por departamento con % del total y globo con contrataciones y tamaño del equipo.
