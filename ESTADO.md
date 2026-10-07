@@ -1,5 +1,25 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-07: "Los que sí se quedan" al final de Salidas (pedido de Oscar; el CEO quiere saber por qué se quedan)
+
+- **Qué hay en el sheet y qué no:** la BASE DE DATOS GENERAL da antigüedad (fecha de alta), marca, departamento y, si
+  las columnas existen, puesto, supervisor y agencia de cada activo. **Ninguna pestaña registra por qué alguien se
+  queda**, así que eso no se puede mostrar hoy sin inventar; la sección lo dice y explica qué pestaña hace falta.
+- **Pipeline:** `scripts/lib/estabilidad.mjs` (funciones puras, probadas con filas sintéticas) cuenta activos por
+  rango de antigüedad (< 6 m, 6 m–1 a, 1–2 a, 2–5 a, 5–10 a, > 10 a), cuántos pasan de 5 y de 10 años, antigüedad
+  mediana, y por departamento / puesto / supervisor / agencia (n y cuántos > 5 años), por alcance (total, comercial,
+  americana, abiq; Friotec fuera). Publica `public/data/estabilidad.json`; pasa por la verificación anti-fugas.
+  Además busca una pestaña de PERMANENCIA (`MOTIVO` + `PERMANENCIA` o `POR QUE SE QUEDA`) y, si existe, cuenta por
+  motivo (`porQueSeQuedan`). Hoy no existe → aviso tipo info en meta.json.
+- **Sitio (final de Salidas):** titular ("De cada 100 colaboradores, 19 llevan más de 5 años… antigüedad mediana
+  1.9 años"), barras por rango con los de > 5 años en verde, nota con el contraste "en el período salieron N con
+  más de 5 años"; "Dónde están los de más de 5 años" por departamento (General) o por puesto (Comercial/marca);
+  por supervisor (equipos de 3+); y "Por qué se quedan": gráfica de motivos si el sheet la trae, si no, texto con
+  lo que falta (entrevistas de permanencia → pestaña PERMANENCIA con columna MOTIVO DE PERMANENCIA).
+- **Pendiente de Oscar:** confirmar los nombres reales de las columnas PUESTO / SUPERVISOR / AGENCIA en la BASE DE
+  DATOS GENERAL (si no se detectan, esas tarjetas simplemente no se muestran) y decidir si se hacen las entrevistas
+  de permanencia.
+
 ## ✅ HECHO 2026-10-07: el "n=" de las gráficas de Vacantes, explicado (Oscar)
 
 - Las barras "Días para cubrir una vacante" (por tipo de tienda y por puesto) ya no dicen "(n=12)" sino

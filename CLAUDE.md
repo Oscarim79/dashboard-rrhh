@@ -28,7 +28,13 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    **Tercera excepción (Oscar, 2026-09-09, para la rotación por marca):** las pestañas ALTAS y BASE DE
    DATOS GENERAL se leen SOLO para contar (altas por mes, marca y área; activos por marca y departamento);
    jamás se lee nombre, DPI, teléfono, sueldo ni otro dato individual. Con eso el pipeline calcula el
-   indicador de rotación por marca (`rotacion.json → calculado`). Excepción acordada con
+   indicador de rotación por marca (`rotacion.json → calculado`). **Ampliación (Oscar, 2026-10-07, "los que sí
+   se quedan"):** de la BASE DE DATOS GENERAL también se cuenta la **antigüedad de los activos** (fecha de alta →
+   hoy) por rango, departamento, puesto, supervisor y agencia (`public/data/estabilidad.json`,
+   `scripts/lib/estabilidad.mjs`); siguen siendo solo conteos, ninguna fila individual. La sección "Los que sí se
+   quedan" va al final de Salidas. El "por qué se quedan" NO existe en el sheet: el pipeline lee una pestaña
+   PERMANENCIA (columna MOTIVO DE PERMANENCIA) si algún día RRHH la crea; mientras, la página dice qué falta.
+   Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados
    (razón, sub-motivo, género, área, marca, agencia, rangos de antigüedad) — jamás filas
    individuales. **Cambio (Oscar, 2026-09-09, pedido del CEO):** el desglose de salidas **por supervisor
