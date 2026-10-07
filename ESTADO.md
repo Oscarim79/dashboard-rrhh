@@ -1,5 +1,35 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-07: gráficas de Rotación con más información (pedido de Oscar)
+
+- **Legibles en el teléfono:** las gráficas SVG se dibujan al ancho real del contenedor (`anchoDe` en graficas.js)
+  en vez de un viewBox fijo de 800 px que encogía los textos a ~5 px. Se redibujan al girar el teléfono.
+  Las barras horizontales en pantalla angosta ponen la etiqueta encima de la barra. Otras páginas siguen
+  usando el ancho por defecto (sin cambio).
+- **Qué se añadió en cada bloque:** bloque plegable "¿Cómo se lee la rotación?"; KPIs con nota de cómo sale
+  cada cifra (bajas ÷ plantilla promedio, dónde iba el año pasado, cómo empezó el mes, promedio de bajas/mes);
+  en las líneas, referencia punteada del 60% anual, valor final de cada serie y nota con los años en el mismo
+  mes, cierres de año y ritmo estimado del año en curso (rotulado como estimación); Comercial vs. total con
+  nota de brecha, peso de Comercial en plantilla y bajas, y rotación del resto de la empresa; bajas por mes
+  ahora con las contrataciones al lado (columna verde clara), totales y saldo del período, y globo de detalle
+  al tocar cada mes; bajas por departamento con % del total y globo con contrataciones y tamaño del equipo.
+- **Segunda ronda (misma fecha, Oscar: "se entienden muy poco a primera vista"):** las dos gráficas de líneas
+  llevan un **titular** en lenguaje llano con la conclusión ("De cada 100 personas, 48 se han ido en lo que va de
+  2026… a esta altura de 2025 iban 49: rota más despacio"; "Las tiendas rotan más que el resto de la empresa:
+  55% vs. 48%; fuera de tiendas va en 31%"), eje Y con pasos redondos (0–20–40–60–80%) y rótulo de qué mide,
+  nombre + valor al final de cada línea ("2026 · 48%", "Tiendas · 55%"), alerta del 60% rotulada, meses sin
+  dato unidos con trazo punteado (en el sheet real 2025 no tiene noviembre y quedaba un punto suelto), meses
+  futuros en gris y el último mes en negrita. Las series se llaman "Tiendas" y "Toda la empresa" en vez de
+  "Área comercial" / "Total empresa".
+- **Tercera ronda (Oscar: "lleva el mismo titular a las columnas"):** titular también en "Bajas y contrataciones
+  por mes" ("En los últimos 12 meses se fueron 285 personas de toda la empresa y entraron 304: el equipo creció
+  en 19. Salen unas 24 personas al mes; el mes más alto fue…") y en "Bajas por departamento" ("82% de las bajas
+  son de las tiendas (Comercial): 234 de 285…"). Con un mes elegido, las líneas del acumulado y de Comercial vs.
+  total se cortan en ese mes para que la gráfica diga lo mismo que el titular y los KPI.
+- `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia`,
+  `etiquetasFinales`, `nombresFinales`, `paso`, `tituloY` y `nombreCorto` por serie. Todo sigue siendo
+  conteos agregados.
+
 ## ✅ PUBLICADO Y FUNCIONANDO (2026-08-31)
 
 - **Dashboard en vivo:** https://oscarim79.github.io/dashboard-rrhh/

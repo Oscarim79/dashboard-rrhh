@@ -133,6 +133,22 @@ h2 { font-size: 16px; margin: 26px 0 10px; color: var(--tinta); }
 .kpi .ambar { color: var(--ambar); }
 .kpi .rojo { color: var(--rojo); }
 
+/* ── "¿Cómo se lee?" plegable (Rotación) ── */
+.explica { font-size: 13px; color: var(--tinta-suave); margin: 10px 0 16px; line-height: 1.5; }
+.explica summary { cursor: pointer; font-weight: 600; color: var(--verde); list-style-position: inside; }
+.explica ul { margin: 6px 0 0 18px; }
+.explica li { margin-bottom: 4px; }
+.explica li b { color: var(--tinta); }
+.tarjeta .pie b { color: var(--tinta); }
+
+/* ── titular de una gráfica: la conclusión en una frase (Rotación) ── */
+.titular { font-size: 15px; line-height: 1.5; margin: 0 0 10px; color: var(--tinta); }
+.titular b { font-weight: 700; }
+.titular b.rojo { color: var(--rojo); }
+.titular b.ambar { color: var(--ambar); }
+.titular b.verde { color: var(--verde); }
+.titular:empty { display: none; }
+
 /* ── tarjetas ── */
 .tarjeta {
   background: var(--tarjeta); border: 1px solid var(--borde); border-radius: 10px;
