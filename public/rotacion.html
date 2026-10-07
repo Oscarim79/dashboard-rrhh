@@ -28,6 +28,15 @@
   <p class="alcance" id="alcance"></p>
 
   <div class="kpis" id="kpis"></div>
+  <details class="explica">
+    <summary>¿Cómo se lee la rotación?</summary>
+    <ul>
+      <li><b>Rotación acumulada</b> = bajas desde enero hasta el mes ÷ plantilla promedio de ese mes. Por eso sube mes a mes y la cifra de diciembre es la rotación del año.</li>
+      <li><b>Referencia:</b> RRHH usa ~60% anual como línea de alerta (la línea punteada de las gráficas). Por encima aparece en rojo.</li>
+      <li><b>Cómo comparar años:</b> mira el mismo mes en cada año; si este año va más arriba, el equipo está rotando más rápido.</li>
+      <li><b>Bajas y contrataciones:</b> si las contrataciones superan a las bajas el equipo crece; si no, se encoge. Toca una columna o una barra para ver el detalle.</li>
+    </ul>
+  </details>
 
   <h2 id="h-marcas">Rotación por marca (calculada automáticamente)</h2>
   <div class="tarjeta">
@@ -46,11 +55,13 @@
   <div class="tarjeta">
     <div class="grafica" id="comercial-total"></div>
     <div id="leyenda-ct"></div>
+    <p class="pie" id="ct-nota"></p>
   </div>
 
-  <h2 id="h-bajas">Bajas por mes y tamaño del equipo</h2>
+  <h2 id="h-bajas">Bajas y contrataciones por mes</h2>
   <div class="tarjeta">
     <div class="grafica" id="bajas-mes"></div>
+    <div id="leyenda-bajas"></div>
     <p class="pie" id="bajas-nota"></p>
   </div>
 
@@ -58,7 +69,7 @@
     <h2 id="h-depto">Bajas por departamento</h2>
     <div class="tarjeta">
       <div class="grafica" id="bajas-depto"></div>
-      <p class="pie">El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.</p>
+      <p class="pie" id="depto-nota">El indicador del sheet se lleva por departamento, no por empresa (Americana/Abi Q); por eso la comparación es entre áreas.</p>
     </div>
   </div>
 </main>

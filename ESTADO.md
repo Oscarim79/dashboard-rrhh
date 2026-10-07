@@ -1,5 +1,21 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-07: gráficas de Rotación con más información (pedido de Oscar)
+
+- **Legibles en el teléfono:** las gráficas SVG se dibujan al ancho real del contenedor (`anchoDe` en graficas.js)
+  en vez de un viewBox fijo de 800 px que encogía los textos a ~5 px. Se redibujan al girar el teléfono.
+  Las barras horizontales en pantalla angosta ponen la etiqueta encima de la barra. Otras páginas siguen
+  usando el ancho por defecto (sin cambio).
+- **Qué se añadió en cada bloque:** bloque plegable "¿Cómo se lee la rotación?"; KPIs con nota de cómo sale
+  cada cifra (bajas ÷ plantilla promedio, dónde iba el año pasado, cómo empezó el mes, promedio de bajas/mes);
+  en las líneas, referencia punteada del 60% anual, valor final de cada serie y nota con los años en el mismo
+  mes, cierres de año y ritmo estimado del año en curso (rotulado como estimación); Comercial vs. total con
+  nota de brecha, peso de Comercial en plantilla y bajas, y rotación del resto de la empresa; bajas por mes
+  ahora con las contrataciones al lado (columna verde clara), totales y saldo del período, y globo de detalle
+  al tocar cada mes; bajas por departamento con % del total y globo con contrataciones y tamaño del equipo.
+- `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia` y
+  `etiquetasFinales`. Todo sigue siendo conteos agregados.
+
 ## ✅ PUBLICADO Y FUNCIONANDO (2026-08-31)
 
 - **Dashboard en vivo:** https://oscarim79.github.io/dashboard-rrhh/
