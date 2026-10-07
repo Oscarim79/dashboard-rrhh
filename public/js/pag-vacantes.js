@@ -1,4 +1,4 @@
-// Página Vacantes: cobertura, abiertas hoy, cierres por mes, interno/externo, canales.
+// Página Vacantes: cobertura, abiertas hoy, cierres por mes (interno/externo y canales: retirados, ver abajo).
 // Se redibuja con los selectores General / Comercial y de período. Una vacante
 // pertenece al período por su fecha de solicitud; "abiertas hoy" no depende del período.
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum,
@@ -31,7 +31,6 @@ function pintar(depto, periodo) {
     ? ' El departamento de cada vacante se deduce del puesto: la pestaña del sheet no lo trae.' : '');
   document.getElementById('h-dias').textContent = `Días para cubrir una vacante (mediana, cerradas · ${etiP})`;
   document.getElementById('h-cierres').textContent = `Cierres por mes · vacantes solicitadas en ${etiP}`;
-  document.getElementById('h-como').textContent = `Cómo se cubren · ${etiP}`;
 
   // ── KPIs (abiertas hoy: siempre todas, sin importar el período) ───────────
   const abiertas = vacantes.filas.filter((r) => r.estatus === 'ABIERTA');
@@ -83,22 +82,11 @@ function pintar(depto, periodo) {
   const cierres = Object.entries(A.cierresPorMes).slice(-18).map(([ym, n]) => ({ eti: fmtYmCorto(ym), valor: n }));
   document.getElementById('cierres-mes').innerHTML = columnas(cierres, { formato: fmtNum });
 
-  // ── interno vs externo ─────────────────────────────────────────────────────
-  const ocupada = Object.entries(A.ocupadaPor).sort((a, b) => b[1] - a[1])
-    .map(([k, v]) => ({ eti: k, valor: v, color: k.startsWith('Interno') ? '#0B7A55' : k === 'Referido' ? '#8FA69B' : '#46615A' }));
-  document.getElementById('ocupada-por').innerHTML = ocupada.length ? barrasH(ocupada, { formato: fmtNum }) : '<p class="sub">Sin datos en este período.</p>';
-  const totalOcupada = ocupada.reduce((s, o) => s + o.valor, 0);
-  document.getElementById('ocupada-nota').textContent =
-    `Registrado en ${fmtNum(totalOcupada)} de ${fmtNum(filasP.length)} vacantes de ${etiP}; el resto no indica cómo se cubrió.`;
-
-  // ── canales ────────────────────────────────────────────────────────────────
-  const NOMBRE_CANAL = { redes: 'Redes de la empresa', facebook: 'Grupos de Facebook', volanteo: 'Volanteo', referidos: 'Programa de referidos', anuncios: 'Anuncios pagados', perifoneo: 'Perifoneo' };
-  const canales = Object.entries(A.canales)
-    .map(([k, c]) => ({ eti: NOMBRE_CANAL[k], valor: c.si, extra: c.diasConCanal.n >= 3 ? `— con canal: ${c.diasConCanal.mediana} días (n=${c.diasConCanal.n})` : '' }))
-    .sort((a, b) => b.valor - a.valor);
-  document.getElementById('canales').innerHTML = canales.some((c) => c.valor) ? barrasH(canales, { formato: (v) => `${fmtNum(v)} usos` }) : `<p class="sub">Sin canales registrados en ${etiP}.</p>`;
-  document.getElementById('canales-nota').textContent =
-    'Los canales se registran en pocas vacantes (empezó a llenarse en 2026), así que esta lectura es parcial: dice cuáles se usan, no todavía cuál cierra más rápido.';
+  // "Cómo se cubren" (interno vs. externo) y "Canales de atracción" se QUITARON del sitio (Oscar, 2026-10-07):
+  // el registro tiene pocas vacantes con esos campos y la lectura era parcial. Los agregados siguen en
+  // vacantes.json / agregarVacantes (ocupadaPor, canales) por si se retoman; la página deja una observación.
+  document.getElementById('como-nota').textContent =
+    `Observación: el sheet también registra cómo se cubrió cada vacante (interno, externo, referido) y qué canales de atracción se usaron, pero todavía en pocas filas (${fmtNum(Object.values(A.ocupadaPor).reduce((a, v) => a + v, 0))} de ${fmtNum(filasP.length)} vacantes del período indican cómo se cubrieron). Cuando haya más información se mostrará aquí qué canal cierra más rápido y cuánto se cubre desde adentro.`;
 }
 
 let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); });

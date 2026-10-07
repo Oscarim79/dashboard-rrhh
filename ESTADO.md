@@ -1,5 +1,13 @@
 # Estado del proyecto — Dashboard RRHH
 
+## Retirado 2026-10-07: "Cómo se cubren" (interno vs. externo) y "Canales de atracción" en Vacantes (Oscar)
+
+- Poca información aún: los campos se llenan en pocas vacantes y la lectura era parcial. Se quitaron las dos
+  tarjetas y en su lugar la página deja una observación ("cuando haya más información se mostrará…") con cuántas
+  vacantes del período indican cómo se cubrieron. Los agregados (`ocupadaPor`, `canales`) siguen en
+  `vacantes.json` y en `agregarVacantes` (pipeline y comun.js); para retomarlos, restaurar las tarjetas desde el
+  historial (commit anterior a este cambio en `pag-vacantes.js` y `vacantes.html`).
+
 ## ✅ HECHO 2026-10-07: "Avance del proceso" de las vacantes abiertas, con descripción y nota a mano (Oscar)
 
 - Bajo cada estado de la columna "Avance del proceso" (tabla "Abiertas hoy" de Vacantes) va una línea que explica
