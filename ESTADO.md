@@ -13,8 +13,17 @@
   nota de brecha, peso de Comercial en plantilla y bajas, y rotación del resto de la empresa; bajas por mes
   ahora con las contrataciones al lado (columna verde clara), totales y saldo del período, y globo de detalle
   al tocar cada mes; bajas por departamento con % del total y globo con contrataciones y tamaño del equipo.
-- `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia` y
-  `etiquetasFinales`. Todo sigue siendo conteos agregados.
+- **Segunda ronda (misma fecha, Oscar: "se entienden muy poco a primera vista"):** las dos gráficas de líneas
+  llevan un **titular** en lenguaje llano con la conclusión ("De cada 100 personas, 48 se han ido en lo que va de
+  2026… a esta altura de 2025 iban 49: rota más despacio"; "Las tiendas rotan más que el resto de la empresa:
+  55% vs. 48%; fuera de tiendas va en 31%"), eje Y con pasos redondos (0–20–40–60–80%) y rótulo de qué mide,
+  nombre + valor al final de cada línea ("2026 · 48%", "Tiendas · 55%"), alerta del 60% rotulada, meses sin
+  dato unidos con trazo punteado (en el sheet real 2025 no tiene noviembre y quedaba un punto suelto), meses
+  futuros en gris y el último mes en negrita. Las series se llaman "Tiendas" y "Toda la empresa" en vez de
+  "Área comercial" / "Total empresa".
+- `columnas()` admite `valor2`/`color2` (segunda columna) y `detalle`; `lineas()` admite `referencia`,
+  `etiquetasFinales`, `nombresFinales`, `paso`, `tituloY` y `nombreCorto` por serie. Todo sigue siendo
+  conteos agregados.
 
 ## ✅ PUBLICADO Y FUNCIONANDO (2026-08-31)
 

@@ -83,27 +83,48 @@ export function columnas(items, { formato = (v) => v, ancho = 800, alto = 240, c
 }
 
 // Líneas por serie: series = [{nombre, color, puntos:[valor|null]}] — eje X compartido.
-// Opciones: `referencia` = {valor, eti, color?} dibuja una línea punteada horizontal (p. ej. la meta);
-// `etiquetasFinales` escribe el último valor de cada serie junto a su último punto, con su color.
-export function lineas(etiquetasX, series, { formato = (v) => v, ancho = 800, alto = 260, referencia = null, etiquetasFinales = false } = {}) {
+// Opciones pensadas para que la gráfica se entienda sola:
+//   `referencia` = {valor, eti, color?}: línea punteada horizontal (p. ej. la alerta del 60%).
+//   `etiquetasFinales`: el último valor de cada serie junto a su último punto, con su color;
+//   con `nombresFinales` también el nombre de la serie ("2026 · 50%"), así no hace falta buscar la leyenda.
+//   `paso`: separación de la rejilla en unidades del dato (0.2 → 0%, 20%, 40%…) para que los ejes sean redondos.
+//   `tituloY`: qué mide el eje vertical, escrito arriba a la izquierda en lenguaje llano.
+//   Los huecos (meses sin dato) se unen con un trazo punteado para que no queden puntos sueltos; los meses
+//   sin dato en ninguna serie se rotulan en gris claro; el último mes con dato va en negrita.
+export function lineas(etiquetasX, series, { formato = (v) => v, ancho = 800, alto = 260, referencia = null, etiquetasFinales = false, nombresFinales = false, paso = null, tituloY = null } = {}) {
   const valores = series.flatMap((s) => s.puntos.filter((p) => p != null));
   if (!valores.length) return '<p class="sub">Sin datos.</p>';
-  const max = Math.max(...valores, referencia?.valor ?? 0, 0.0001) * (etiquetasFinales ? 1.08 : 1);
-  const fuente = ancho < 480 ? 11 : 10.5;
-  const margen = { arr: 16, aba: 34, izq: 44, der: etiquetasFinales ? 46 : 10 };
+  const angosto = ancho < 480;
+  const maxDato = Math.max(...valores, referencia?.valor ?? 0, 0.0001);
+  const max = paso ? Math.ceil((maxDato + paso * 0.05) / paso) * paso : maxDato * (etiquetasFinales ? 1.08 : 1);
+  const fuente = angosto ? 11 : 10.5;
+  // en pantalla angosta se usa `nombreCorto` si la serie lo trae; el margen derecho se ajusta al rótulo más largo
+  const nombreDe = (sr) => (angosto && sr.nombreCorto) || sr.nombre;
+  const rotuloFinal = (sr, v) => (nombresFinales ? `${nombreDe(sr)} · ${formato(v)}` : formato(v));
+  const largoMax = etiquetasFinales ? Math.max(...series.map((sr) => { const v = [...sr.puntos].reverse().find((x) => x != null); return v == null ? 0 : String(rotuloFinal(sr, v)).length; })) : 0;
+  const anchoFinal = etiquetasFinales ? Math.min(Math.round(largoMax * (angosto ? 6.9 : 6.4)) + 12, ancho * 0.45) : 10;
+  const margen = { arr: tituloY ? 34 : 16, aba: 34, izq: 44, der: anchoFinal };
   const zw = ancho - margen.izq - margen.der;
   const zh = alto - margen.arr - margen.aba;
   const px = (i) => margen.izq + (etiquetasX.length === 1 ? zw / 2 : (i / (etiquetasX.length - 1)) * zw);
   const py = (v) => margen.arr + zh - (v / max) * zh;
   let s = `<svg viewBox="0 0 ${ancho} ${alto}" xmlns="http://www.w3.org/2000/svg" role="img">`;
-  // rejilla horizontal ligera (4 líneas) con etiqueta
-  for (let g = 0; g <= 4; g++) {
-    const v = (max / 4) * g, y = py(v);
+  if (tituloY) s += `<text x="${margen.izq - 40}" y="14" font-size="${fuente + 1}" font-weight="600" fill="#5A6660">${esc(tituloY)}</text>`;
+  // rejilla horizontal con etiqueta (pasos redondos si se dio `paso`)
+  const nTicks = paso ? Math.round(max / paso) : 4;
+  for (let g = 0; g <= nTicks; g++) {
+    const v = (max / nTicks) * g, y = py(v);
     s += `<line x1="${margen.izq}" y1="${y}" x2="${ancho - margen.der}" y2="${y}" stroke="#E3E1DB" stroke-width="1"/>`;
     s += `<text x="${margen.izq - 6}" y="${y + 4}" text-anchor="end" font-size="${fuente}" fill="#5A6660" style="font-variant-numeric:tabular-nums">${esc(formato(v))}</text>`;
   }
+  const conDato = etiquetasX.map((_, i) => series.some((sr) => sr.puntos[i] != null));
+  const iUltimoDato = conDato.lastIndexOf(true);
+  const pasoX = etiquetasX.length > 1 ? zw / (etiquetasX.length - 1) : zw;
+  const saltar = pasoX < 22; // en pantalla angosta, un mes sí y otro no (el último siempre)
   etiquetasX.forEach((e, i) => {
-    s += `<text x="${px(i)}" y="${alto - 12}" text-anchor="middle" font-size="${fuente}" fill="#5A6660">${esc(e)}</text>`;
+    if (saltar && i !== iUltimoDato && (i % 2 === 1 || i === iUltimoDato - 1)) return; // tampoco el vecino del último
+    const esUlt = i === iUltimoDato;
+    s += `<text x="${px(i)}" y="${alto - 12}" text-anchor="middle" font-size="${fuente}" font-weight="${esUlt ? 700 : 400}" fill="${conDato[i] ? (esUlt ? '#17251F' : '#5A6660') : '#B8BDB8'}">${esc(e)}</text>`;
   });
   if (referencia && referencia.valor != null) {
     const y = py(referencia.valor), c = referencia.color ?? '#A33B2E';
@@ -112,21 +133,23 @@ export function lineas(etiquetasX, series, { formato = (v) => v, ancho = 800, al
   }
   const finales = [];
   for (const serie of series) {
-    const pts = serie.puntos.map((v, i) => (v == null ? null : `${px(i)},${py(v)}`));
+    const pts = serie.puntos.map((v, i) => (v == null ? null : [px(i), py(v)]));
     const trazos = [];
     let seg = [];
     for (const p of pts) { if (p == null) { if (seg.length) trazos.push(seg); seg = []; } else seg.push(p); }
     if (seg.length) trazos.push(seg);
-    for (const t of trazos) {
-      if (t.length > 1) s += `<polyline points="${t.join(' ')}" fill="none" stroke="${serie.color}" stroke-width="2.5" stroke-linejoin="round"/>`;
-      for (const p of t) { const [x, y] = p.split(','); s += `<circle cx="${x}" cy="${y}" r="3" fill="${serie.color}"/>`; }
-    }
+    trazos.forEach((t, k) => {
+      if (t.length > 1) s += `<polyline points="${t.map((p) => p.join(',')).join(' ')}" fill="none" stroke="${serie.color}" stroke-width="2.5" stroke-linejoin="round"/>`;
+      // hueco entre este trazo y el siguiente: unión punteada (mes sin dato)
+      if (trazos[k + 1]) { const a = t.at(-1), b = trazos[k + 1][0]; s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${serie.color}" stroke-width="2" stroke-dasharray="3 5" opacity="0.7"/>`; }
+      for (const [x, y] of t) s += `<circle cx="${x}" cy="${y}" r="3" fill="${serie.color}"/>`;
+    });
     const iUlt = serie.puntos.map((v, i) => (v == null ? -1 : i)).reduce((a, b) => Math.max(a, b), -1);
-    if (etiquetasFinales && iUlt >= 0) finales.push({ x: px(iUlt), y: py(serie.puntos[iUlt]), texto: formato(serie.puntos[iUlt]), color: serie.color });
+    if (etiquetasFinales && iUlt >= 0) finales.push({ x: px(iUlt), y: py(serie.puntos[iUlt]), texto: rotuloFinal(serie, serie.puntos[iUlt]), color: serie.color });
   }
-  // etiquetas finales: separadas al menos 13px para que no se pisen
+  // etiquetas finales: separadas al menos 14px para que no se pisen
   finales.sort((a, b) => a.y - b.y);
-  for (let i = 1; i < finales.length; i++) if (finales[i].y - finales[i - 1].y < 13) finales[i].y = finales[i - 1].y + 13;
+  for (let i = 1; i < finales.length; i++) if (finales[i].y - finales[i - 1].y < 14) finales[i].y = finales[i - 1].y + 14;
   for (const f of finales) {
     s += `<text x="${f.x + 7}" y="${f.y + 4}" font-size="${fuente + 1}" font-weight="700" fill="${f.color}" style="font-variant-numeric:tabular-nums">${esc(f.texto)}</text>`;
   }

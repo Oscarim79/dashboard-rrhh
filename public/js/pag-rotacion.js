@@ -101,9 +101,10 @@ function pintar(depto, periodo) {
     puntos: MES_CORTO.map((_, m) => serie.find((r) => r.anio === a && r.mesNum === m + 1)?.pctAcum ?? null),
   }));
   document.getElementById('h-acum').textContent = `Rotación acumulada del año · ${anios.length > 1 ? 'comparación entre años' : anios[0]}`;
+  document.getElementById('acum-titular').innerHTML = titularAcumulado(serie, ultimo, conMarca ? `de ${MARCAS[marca]}` : esCom ? 'de las tiendas (Comercial)' : 'de toda la empresa', generado);
   document.getElementById('acumulado-anios').innerHTML = lineas(MES_CORTO, seriesAnios,
-    { formato: pct0, ancho: anchoDe('acumulado-anios'), referencia: { valor: REFERENCIA, eti: `referencia ${pct0(REFERENCIA)} anual` }, etiquetasFinales: true });
-  document.getElementById('leyenda-anios').innerHTML = leyenda([...seriesAnios.map((s) => ({ eti: s.nombre, color: s.color })), { eti: `línea punteada: referencia ${pct0(REFERENCIA)} anual`, color: '#A33B2E' }]);
+    { formato: pct0, ancho: anchoDe('acumulado-anios'), paso: 0.2, tituloY: '% del equipo que se ha ido desde enero (acumulado)', referencia: { valor: REFERENCIA, eti: `alerta RRHH: ${pct0(REFERENCIA)} al año` }, etiquetasFinales: true, nombresFinales: true });
+  document.getElementById('leyenda-anios').innerHTML = leyenda([...seriesAnios.map((s) => ({ eti: `${s.nombre}${s.nombre === String(+String(generado).slice(0, 4)) ? ' (en curso)' : ''}`, color: s.color })), { eti: `punteada roja: alerta del ${pct0(REFERENCIA)} anual`, color: '#A33B2E' }]);
   document.getElementById('acumulado-nota').innerHTML = notaAcumulado(serie, anios, ultimo, conMarca ? `Marca ${MARCAS[marca]}, indicador calculado` : esCom ? 'Área comercial' : 'Total empresa', generado);
 
   // ── rotación por marca (calculada) y validación contra el manual ──────────
@@ -116,9 +117,11 @@ function pintar(depto, periodo) {
     { nombre: 'Área comercial', color: '#B5741A', puntos: MES_CORTO.map((_, m) => comercial.find((r) => r.anio === anioCT && r.mesNum === m + 1)?.pctAcum ?? null) },
   ];
   document.getElementById('h-ct').textContent = `Comercial vs. total empresa · ${anioCT}`;
+  seriesCT[0].nombre = 'Toda la empresa'; seriesCT[0].nombreCorto = 'Empresa'; seriesCT[1].nombre = 'Tiendas';
+  document.getElementById('ct-titular').innerHTML = titularComercialTotal(anioCT, ultimo && !conMarca ? ultimo.mesNum : null);
   document.getElementById('comercial-total').innerHTML = lineas(MES_CORTO, seriesCT,
-    { formato: pct0, ancho: anchoDe('comercial-total'), referencia: { valor: REFERENCIA, eti: `referencia ${pct0(REFERENCIA)} anual` }, etiquetasFinales: true });
-  document.getElementById('leyenda-ct').innerHTML = leyenda(seriesCT.map((s) => ({ eti: `${s.nombre} ${anioCT}`, color: s.color })));
+    { formato: pct0, ancho: anchoDe('comercial-total'), paso: 0.2, tituloY: `% del equipo que se ha ido desde enero de ${anioCT}`, referencia: { valor: REFERENCIA, eti: `alerta RRHH: ${pct0(REFERENCIA)} al año` }, etiquetasFinales: true, nombresFinales: true });
+  document.getElementById('leyenda-ct').innerHTML = leyenda([{ eti: `Tiendas (departamento Comercial) ${anioCT}`, color: '#B5741A' }, { eti: `Toda la empresa ${anioCT}, tiendas incluidas`, color: '#46615A' }, { eti: `punteada roja: alerta del ${pct0(REFERENCIA)} anual`, color: '#A33B2E' }]);
   document.getElementById('ct-nota').innerHTML = notaComercialTotal(anioCT, ultimo && !conMarca ? ultimo.mesNum : null);
 
   // ── bajas y contrataciones por mes (suma de departamentos, o solo Comercial) ─
@@ -188,9 +191,50 @@ function pintar(depto, periodo) {
   }
 }
 
+// Titular del acumulado: la conclusión en una frase, para entender la gráfica sin leer la nota.
+function titularAcumulado(serie, ultimo, deQuien, generado) {
+  if (!ultimo) return '';
+  const anioActual = +String(generado).slice(0, 4);
+  const mesU = MES_LARGO[ultimo.mesNum - 1];
+  const n = Math.round(ultimo.pctAcum * 100);
+  const clase = ultimo.pctAcum >= REFERENCIA ? 'rojo' : '';
+  const alerta = ultimo.pctAcum >= REFERENCIA ? ` Ya pasó la línea de alerta del ${pct0(REFERENCIA)} anual.` : '';
+  if (ultimo.mesNum === 12 || ultimo.anio < anioActual) {
+    const t = `En ${ultimo.anio} se fue el <b class="${clase}">${fmtPct(ultimo.pctAcum, 0)}</b> del equipo ${deQuien}${ultimo.mesNum < 12 ? ` (dato hasta ${mesU})` : ''}.`;
+    const ant = serie.find((r) => r.anio === ultimo.anio - 1 && r.mesNum === ultimo.mesNum);
+    return t + (ant ? ` En ${ultimo.anio - 1} fue el ${fmtPct(ant.pctAcum, 0)}.` : '') + alerta;
+  }
+  const ant = serie.find((r) => r.anio === ultimo.anio - 1 && r.mesNum === ultimo.mesNum);
+  let t = `<b class="${clase}">De cada 100 personas ${deQuien}, ${n} se han ido</b> en lo que va de ${ultimo.anio} (enero a ${mesU}).`;
+  if (ant) {
+    const d = ultimo.pctAcum - ant.pctAcum;
+    t += ` A esta misma altura de ${ultimo.anio - 1} iban ${Math.round(ant.pctAcum * 100)}: ${Math.abs(d) < 0.005 ? 'va igual que el año pasado' : d > 0 ? `este año <b class="ambar">rota más rápido</b> (${puntos(d)})` : `este año <b class="verde">rota más despacio</b> (${puntos(d)})`}.`;
+  }
+  return t + alerta;
+}
+
+// Titular de Comercial vs. total: quién rota más y cuánto, en una frase.
+function titularComercialTotal(anio, mesPreferido) {
+  const t = total.filter((r) => r.anio === anio), c = comercial.filter((r) => r.anio === anio);
+  const meses = t.map((r) => r.mesNum).filter((m) => c.some((r) => r.mesNum === m)).sort((a, b) => a - b);
+  if (!meses.length) return '';
+  const m = mesPreferido && meses.includes(mesPreferido) ? mesPreferido : meses.at(-1);
+  const rt = t.find((r) => r.mesNum === m), rc = c.find((r) => r.mesNum === m);
+  const d = rc.pctAcum - rt.pctAcum;
+  let s = Math.abs(d) < 0.005
+    ? `<b>Las tiendas rotan igual que el conjunto de la empresa</b>: `
+    : d > 0 ? `<b>Las tiendas rotan más que el resto de la empresa</b>: ` : `<b>Las tiendas rotan menos que el resto de la empresa</b>: `;
+  s += `a ${MES_LARGO[m - 1]} de ${anio}, en Comercial se ha ido el <b class="ambar">${fmtPct(rc.pctAcum, 0)}</b> del equipo y en toda la empresa el <b>${fmtPct(rt.pctAcum, 0)}</b>.`;
+  const promT = promedio(rt), promC = promedio(rc);
+  if (rt.bajasAcum != null && rc.bajasAcum != null && promT && promC && promT - promC > 0) {
+    s += ` Fuera de las tiendas (oficinas, CEDI, otras áreas) va en ${fmtPct((rt.bajasAcum - rc.bajasAcum) / (promT - promC), 0)}.`;
+  }
+  return s;
+}
+
 // Nota del acumulado: cómo se lee, cada año en el mismo mes, cierres de año y ritmo del año en curso.
 function notaAcumulado(serie, anios, ultimo, alcance, generado) {
-  const partes = [`<b>${alcance}.</b> Cada punto es la rotación de enero a ese mes (bajas acumuladas ÷ plantilla promedio); por eso cada línea sube durante el año y el valor de diciembre es la rotación anual. Compara los años en el mismo mes: la línea que va más arriba rota más rápido. La línea punteada es la referencia de ${pct0(REFERENCIA)} anual que usa RRHH.`];
+  const partes = [`<b>${alcance}.</b> Cada línea es un año y cada punto, qué parte del equipo se había ido desde enero hasta ese mes (bajas acumuladas ÷ plantilla promedio). Por eso siempre sube: el valor de diciembre es la rotación de todo el año. Para comparar años, mira el mismo mes: la línea que va más arriba rota más rápido. Un tramo punteado une meses sin dato en el registro.`];
   if (!ultimo) return partes.join(' ');
   const mesU = ultimo.mesNum, etiMes = MES_CORTO[mesU - 1];
   const mismoMes = anios.map((a) => [a, serie.find((r) => r.anio === a && r.mesNum === mesU)]).filter(([, r]) => r);
@@ -209,7 +253,7 @@ function notaAcumulado(serie, anios, ultimo, alcance, generado) {
 function notaComercialTotal(anio, mesPreferido) {
   const t = total.filter((r) => r.anio === anio), c = comercial.filter((r) => r.anio === anio);
   const meses = t.map((r) => r.mesNum).filter((m) => c.some((r) => r.mesNum === m)).sort((a, b) => a - b);
-  const base = 'Las dos líneas son el acumulado del año (enero al mes). La ámbar es solo el departamento Comercial (tiendas); la gris, toda la empresa, tiendas incluidas: cuando la ámbar va por encima, el resto de la empresa (oficinas, CEDI, otras áreas) rota menos que las tiendas y baja el promedio.';
+  const base = 'Las dos líneas son el acumulado del año (qué parte del equipo se ha ido desde enero). La ámbar es solo el departamento Comercial (tiendas); la gris es toda la empresa, tiendas incluidas, así que la separación entre ambas la pone el resto de la empresa (oficinas, CEDI, otras áreas).';
   if (!meses.length) return `${base} Sin meses de ${anio} con las dos series.`;
   const m = mesPreferido && meses.includes(mesPreferido) ? mesPreferido : meses.at(-1);
   const rt = t.find((r) => r.mesNum === m), rc = c.find((r) => r.mesNum === m);
