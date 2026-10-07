@@ -16,6 +16,12 @@
   más de 5 años"; "Dónde están los de más de 5 años" por departamento (General) o por puesto (Comercial/marca);
   por supervisor (equipos de 3+); y "Por qué se quedan": gráfica de motivos si el sheet la trae, si no, texto con
   lo que falta (entrevistas de permanencia → pestaña PERMANENCIA con columna MOTIVO DE PERMANENCIA).
+- **Primera corrida real (2026-10-07, 19:50 UTC) falló** por un error de programación (`hoyISO` usado antes de
+  declararse en el bloque del indicador calculado); el deploy abortó antes de publicar, el sitio no se afectó.
+  Corregido y, para no repetirlo, el pipeline admite `XLSX_LOCAL=ruta.xlsx` (lee un libro local en vez de
+  descargar; la Action nunca lo define) y hay un generador de libro sintético con las 7 pestañas en el scratch de
+  la sesión: con él el pipeline corre completo en local y la verificación anti-fugas confirma que los nombres,
+  DPI y sueldos falsos del libro no llegan a `public/data/`.
 - **Pendiente de Oscar:** confirmar los nombres reales de las columnas PUESTO / SUPERVISOR / AGENCIA en la BASE DE
   DATOS GENERAL (si no se detectan, esas tarjetas simplemente no se muestran) y decidir si se hacen las entrevistas
   de permanencia.
