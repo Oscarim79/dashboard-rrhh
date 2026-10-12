@@ -3,6 +3,7 @@
 // De cada fila se lee únicamente: fecha de alta, fecha de salida (vacía = activo), marca, departamento y,
 // si existen, puesto, supervisor o jefe y agencia. Jamás nombre, DPI, teléfono, sueldo ni ningún dato
 // individual, y no se publica ninguna fila: solo totales. Funciones puras para poder probarlas aparte.
+// De aquí sale también el "Equipo activo hoy" del Resumen (activos por tipo de puesto, `porGrupoPuesto`).
 
 export const RANGOS_ACTIVOS = ['MENOS 6 MESES', '6 MESES A 1 ANO', 'DE 1 A 2 ANOS', 'DE 2 A 5 ANOS', 'DE 5 A 10 ANOS', 'MAS DE 10 ANOS'];
 export const UMBRAL_ESTABLE_ANIOS = 5;
@@ -31,6 +32,31 @@ function resumen(regs) {
   return { n: regs.length, porRango, mas5, mas10, medianaAnios: med == null ? null : +(med / 365.25).toFixed(1) };
 }
 
+// "Equipo activo hoy" del Resumen (pedido de Oscar, 2026-10-12): cuántos vendedores, jefes de tienda y
+// supervisores hay, y "administrativo" = todos los demás puestos. Se deduce del texto del puesto (ya
+// normalizado: mayúsculas, sin acentos ni la palabra "DE"); null si la fila no trae puesto.
+export const GRUPOS_PUESTO = ['vendedores', 'jefesTienda', 'supervisores', 'administrativo'];
+export function grupoPuesto(puesto, departamento) {
+  if (!puesto) return null;
+  const com = departamento === 'COMERCIAL';
+  if (/\bSUPERVISOR/.test(puesto) && (com || /TIENDA|AGENCIA|REGION|ZONA|VENTA|COMERCIAL/.test(puesto))) return 'supervisores';
+  if (/\b(JEF[EA]|ENCARGAD[OA]|GERENTE|ADMINISTRADORA?) (AGENCIA|TIENDA|SALA)\b/.test(puesto)) return 'jefesTienda';
+  if (/\bVENDED/.test(puesto) || (/\bASESOR/.test(puesto) && !/CREDITO|COBRO/.test(puesto) && (com || /VENTA|COMERCIAL/.test(puesto)))) return 'vendedores';
+  return 'administrativo';
+}
+function porGrupoPuesto(regs) {
+  const grupos = Object.fromEntries(GRUPOS_PUESTO.map((g) => [g, { n: 0, puestos: {} }]));
+  let sinPuesto = 0;
+  for (const r of regs) {
+    const g = grupoPuesto(r.puesto, r.departamento);
+    if (!g) { sinPuesto++; continue; }
+    grupos[g].n++;
+    grupos[g].puestos[r.puesto] = (grupos[g].puestos[r.puesto] ?? 0) + 1;
+  }
+  for (const g of GRUPOS_PUESTO) grupos[g].puestos = Object.fromEntries(Object.entries(grupos[g].puestos).sort((a, b) => b[1] - a[1]));
+  return { ...grupos, sinPuesto };
+}
+
 // Conteo por una clave (departamento, puesto…): n y cuántos pasan de 5 años, ordenado por estables.
 function porClave(regs, clave) {
   const g = new Map();
@@ -44,7 +70,7 @@ export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, co
   const iAlta = colIdx(headers, 'FECHA DE ALTA'), iSal = colIdx(headers, 'FECHA DE SALIDA');
   const iMarca = headers.findIndex((h) => h === 'MARCA');
   const iDep = headers.findIndex((h) => h === 'DEPARTAMENTO') >= 0 ? headers.findIndex((h) => h === 'DEPARTAMENTO') : colIdx(headers, 'DEPARTAMENTO');
-  const iPuesto = colIdx(headers, 'PUESTO');
+  const iPuesto = colIdx(headers, 'PUESTO') >= 0 ? colIdx(headers, 'PUESTO') : headers.findIndex((h) => h === 'CARGO');
   const iSup = headers.findIndex((h) => h.includes('SUPERVISOR') || h.includes('JEFE INMEDIATO'));
   const iAgencia = headers.findIndex((h) => h === 'AGENCIA' || h === 'TIENDA' || h.includes('LUGAR DE TRABAJO'));
   const columnasLeidas = ['FECHA DE ALTA', 'FECHA DE SALIDA', 'MARCA', 'DEPARTAMENTO', iPuesto >= 0 && 'PUESTO', iSup >= 0 && 'SUPERVISOR', iAgencia >= 0 && 'AGENCIA'].filter(Boolean);
@@ -71,6 +97,7 @@ export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, co
     ...resumen(regs),
     porDepartamento: porClave(regs, 'departamento'),
     porPuesto: porClave(regs, 'puesto'),
+    porGrupoPuesto: iPuesto >= 0 ? porGrupoPuesto(regs) : null,
     porSupervisor: iSup >= 0 ? porClave(regs, 'supervisor') : null,
     porAgencia: iAgencia >= 0 ? porClave(regs, 'agencia') : null,
   }]));

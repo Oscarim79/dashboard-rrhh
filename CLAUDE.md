@@ -32,7 +32,10 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    se quedan"):** de la BASE DE DATOS GENERAL también se cuenta la **antigüedad de los activos** (fecha de alta →
    hoy) por rango, departamento, puesto, supervisor y agencia (`public/data/estabilidad.json`,
    `scripts/lib/estabilidad.mjs`); siguen siendo solo conteos, ninguna fila individual. La sección "Los que sí se
-   quedan" va al final de Salidas. El "por qué se quedan" NO existe en el sheet: el pipeline lee una pestaña
+   quedan" va al final de Salidas. **"Equipo activo hoy" en el Resumen (Oscar, 2026-10-12):** de los mismos activos se
+   cuenta cuántos son vendedores, jefes de tienda, supervisores y "administrativo" (= todos los demás puestos), deducido
+   del texto del puesto (`grupoPuesto` en `scripts/lib/estabilidad.mjs` → `porGrupoPuesto` por alcance); el log del
+   pipeline lista qué puestos cayeron en cada grupo para revisarlo. Foto de hoy: no depende del período. El "por qué se quedan" NO existe en el sheet: el pipeline lee una pestaña
    PERMANENCIA (columna MOTIVO DE PERMANENCIA) si algún día RRHH la crea; mientras, la página dice qué falta.
    Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados

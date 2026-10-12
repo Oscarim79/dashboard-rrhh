@@ -3,13 +3,16 @@
 // Todo se pinta con pintar(depto, periodo) y se redibuja al cambiar los selectores
 // General / Comercial y de período (pedidos del CEO, 2026-09-07).
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
-import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, diasCalibrados,
+import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, fmtFecha, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
   pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca, MARCAS_SIN_COSTO } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
 const salidasTodo = await fetch('data/salidas.json', { cache: 'no-cache' })
+  .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+// equipo activo de hoy (BASE DE DATOS GENERAL, solo conteos); si falta, la sección no se muestra
+const estabilidad = await fetch('data/estabilidad.json', { cache: 'no-cache' })
   .then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const { rotacion, meta } = datos;
 
@@ -21,6 +24,10 @@ const NOMBRE_TIPO = {
   NT: 'Oficinas, CEDI y regiones · sin ventas perdidas',
 };
 const NOMBRE_CORTO = { AA: 'tipo AA', A: 'tipo A', B: 'tipo B', C: 'tipo C', NT: 'de oficinas, CEDI y regiones' };
+const kpi = (valor, eti, nota, clase = '', tam = '') =>
+  `<div class="kpi"><div class="kpi-valor ${clase} ${tam}">${valor}</div><div class="kpi-eti">${eti}</div>${nota ? `<div class="kpi-nota">${nota}</div>` : ''}</div>`;
+// grupos de puesto del equipo activo (estabilidad.json → porGrupoPuesto; regla en scripts/lib/estabilidad.mjs)
+const GRUPOS_PUESTO = [['vendedores', 'vendedores'], ['jefesTienda', 'jefes de tienda'], ['supervisores', 'supervisores'], ['administrativo', 'administrativo']];
 
 function pintar(depto, periodo) {
   // Cómo se llaman las salidas fuera de tienda según el alcance: en Comercial solo pueden ser
@@ -119,8 +126,6 @@ function pintar(depto, periodo) {
   // Calculadas en vivo de los JSON publicados — nunca escritas a mano — y cada
   // tarjeta dice qué período cubre. Va en try/catch: si algo falta, el resto se pinta igual.
   try {
-    const kpi = (valor, eti, nota, clase = '', tam = '') =>
-      `<div class="kpi"><div class="kpi-valor ${clase} ${tam}">${valor}</div><div class="kpi-eti">${eti}</div>${nota ? `<div class="kpi-nota">${nota}</div>` : ''}</div>`;
     const tiles = [];
 
     // 1. qué parte de la plantilla se reemplazó en el período (salidas con vacante / colaboradores al cierre)
@@ -193,6 +198,49 @@ function pintar(depto, periodo) {
   } catch (e) {
     console.warn('Cifras clave no disponibles:', e);
     document.getElementById('cifras-clave').innerHTML = '';
+  }
+
+  // ── Equipo activo hoy (Oscar, 2026-10-12): cuántos colaboradores activos hay y cuántos son vendedores,
+  // jefes de tienda, supervisores y administrativo (todos los demás puestos). Sale de la BASE DE DATOS
+  // GENERAL (solo conteos, estabilidad.json). Es una foto de hoy: no depende del período. Alcance como el
+  // resto de la página: marca elegida > Comercial > toda la empresa.
+  try {
+    const marca = marcaActual();
+    const E = estabilidad?.alcances?.[marca !== 'todas' ? marca : esCom ? 'comercial' : 'total'];
+    const T = estabilidad?.alcances?.total, C = estabilidad?.alcances?.comercial;
+    document.getElementById('sec-equipo').hidden = !E?.n;
+    if (E?.n) {
+      const G = E.porGrupoPuesto;
+      const pct = (v) => `${Math.round((v / E.n) * 100)}%`;
+      const nomPuesto = (p) => (p.charAt(0) + p.slice(1).toLowerCase()).replace(/\b(rrhh|cedi|it)\b/g, (m) => m.toUpperCase());
+      const deQuien = marca !== 'todas' ? `marca ${etiquetaMarca()}` : esCom ? 'departamento Comercial' : 'toda la empresa';
+      const contexto = marca === 'todas' && !esCom
+        ? (C?.n ? `${fmtNum(C.n)} en el departamento Comercial y ${fmtNum(E.n - C.n)} en las demás áreas` : '')
+        : (T?.n ? `de ${fmtNum(T.n)} en toda la empresa` : '');
+      const notaTotal = [contexto, G?.sinPuesto ? `${fmtNum(G.sinPuesto)} sin puesto anotado en la base` : ''].filter(Boolean).join(' · ');
+      const total = `<div class="kpi" style="margin-bottom:10px"><div class="kpi-valor grande">${fmtNum(E.n)}</div>
+        <div class="kpi-eti">colaboradores activos · <b>${deQuien}</b></div>${notaTotal ? `<div class="kpi-nota">${notaTotal}</div>` : ''}</div>`;
+      const tiles = [];
+      if (G) {
+        for (const [k, eti] of GRUPOS_PUESTO) {
+          const puestos = Object.entries(G[k].puestos);
+          tiles.push(kpi(fmtNum(G[k].n), eti, k === 'administrativo'
+            ? `${pct(G[k].n)} · todos los demás puestos${puestos.length ? `: ${puestos.slice(0, 3).map(([p, n]) => `${nomPuesto(p).toLowerCase()} (${fmtNum(n)})`).join(', ')}${puestos.length > 3 ? ` y ${puestos.length - 3} puestos más` : ''}` : ''}`
+            : `${pct(G[k].n)} del equipo`));
+        }
+      }
+      document.getElementById('equipo').innerHTML = total + (tiles.length ? `<div class="kpis">${tiles.join('')}</div>` : '');
+      document.getElementById('equipo-sub').textContent = `Foto al ${fmtFecha(estabilidad.fecha)}: quienes tienen fecha de alta y no de salida en la base de datos general de RRHH. No depende del período elegido.`
+        + (G ? '' : ' La base todavía no trae el puesto de cada colaborador; en cuanto lo traiga, aquí se separan vendedores, jefes de tienda, supervisores y administrativo.');
+      const det = document.getElementById('equipo-puestos');
+      det.hidden = !G;
+      if (G) det.innerHTML = `<summary>¿Qué puestos entran en cada grupo?</summary>
+        <ul>${GRUPOS_PUESTO.map(([k, eti]) => `<li><b>${eti.charAt(0).toUpperCase() + eti.slice(1)}:</b> ${Object.entries(G[k].puestos).map(([p, n]) => `${nomPuesto(p)} (${fmtNum(n)})`).join(' · ') || 'ninguno'}</li>`).join('')}</ul>
+        <p style="margin:6px 0 0">El grupo sale del puesto anotado en la base: vendedores y asesores de venta; jefes o encargados de agencia o tienda; supervisores de las tiendas; y administrativo es todo lo demás (oficinas, CEDI, cobros, logística, asistentes y apoyo de tienda).</p>`;
+    }
+  } catch (e) {
+    console.warn('Equipo activo no disponible:', e);
+    document.getElementById('sec-equipo').hidden = true;
   }
 
   // ── SUPUESTO: reparto de las salidas sin clasificar (pedido de Oscar 2026-09-01)
@@ -378,6 +426,9 @@ function pintar(depto, periodo) {
         <li><b>Selector de período</b>: una vacante pertenece al período por su fecha de solicitud; una salida, por su fecha de baja;
           la rotación, por el mes del indicador. "Año a la fecha" es el año en curso hasta la última lectura. Las plazas abiertas hoy
           no dependen del período.</li>
+        <li><b>Base de datos general</b>${estabilidad?.alcances?.total ? ` (${fmtNum(estabilidad.alcances.total.n)} colaboradores activos hoy)` : ''}: se cuenta quién sigue activo (fecha de alta sin
+          fecha de salida) por marca, departamento y puesto → <b>equipo activo hoy</b> (vendedores, jefes de tienda, supervisores y
+          administrativo) y antigüedad del equipo. Solo conteos.</li>
         <li><b>Indicador de rotación mensual</b> (${fmtNum(meta.filasRotacionAcumulada)} filas): colaboradores al inicio y cierre de cada mes
           y % de rotación acumulada — de ahí sale la plantilla con la que se compara (total empresa o área comercial, según el selector).</li>
         <li><b>Privacidad</b>: del registro de salidas jamás se publican filas individuales ni nombres; los valores con menos de 3 casos
@@ -391,7 +442,8 @@ function pintar(depto, periodo) {
         <li><b>Actualización</b>: automática todos los días a las 6:00 (Guatemala) y en cada publicación. Antes de publicar corre una
           verificación anti-fugas: si detecta un dato personal, no publica nada.</li>
       </ul>
-      <p class="pie">No se usan las pestañas de altas ni la base de datos general (contienen datos personales). Las pestañas se
+      <p class="pie">De las pestañas de altas y de la base de datos general solo se cuenta (altas por mes, activos, antigüedad, puesto):
+        jamás se lee nombre, DPI, teléfono ni sueldo. Las pestañas se
         reconocen por sus encabezados, no por su nombre ni posición, así que mover o renombrar hojas no rompe el tablero.</p>`;
   } catch (e) {
     console.warn('Fuente de datos no disponible:', e);
