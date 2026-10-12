@@ -12,10 +12,16 @@
   administrativo); jefe de tienda = jefe/encargado/gerente/administrador de agencia, tienda o sala; vendedor = VENDEDOR o
   ASESOR (de ventas, o en Comercial; no de créditos/cobros); administrativo = todo lo demás. Activos sin puesto no entran
   en ningún grupo (el total los menciona) y van como aviso a meta.json.
-- **Pendiente de verificar con la primera corrida real:** no se ha visto aún la columna de puesto de la BASE (sigue el
-  pendiente del 2026-10-07). El log de la Action imprime "Equipo activo por puesto" y la lista de puestos por grupo; si un
-  puesto cae en el grupo equivocado, se ajusta la regla. Si la BASE no trae PUESTO (ni CARGO), el Resumen muestra solo el
-  total y explica que falta el puesto.
+- **Primera corrida real (2026-10-12, 17:30 UTC):** la BASE sí trae PUESTO (queda resuelto el pendiente del 2026-10-07).
+  Toda la empresa, 268 activos: vendedores 104 (asesor ventas 101, asesor online 2, asesor ruta 1) · jefes de tienda 39
+  (jefe agencia) · supervisores 5 · administrativo 120 (53 puestos; los más grandes: servicios varios 14, piloto 8,
+  asistente garantías 8). Ninguno sin puesto. El log de la Action imprime "Equipo activo por puesto" en cada corrida.
+- **Decisiones de Oscar (2026-10-12):** el **jefe rotativo** (1) es el comodín, de RRHH o de Comercial, que cubre la plaza
+  que alguien dejó: se queda en administrativo (no es jefe fijo de una tienda) y el plegable lo explica (`NOTA_PUESTO` en
+  resumen.js). **Servicios varios** (14) también se queda en administrativo. El supervisor de cobros es administrativo.
+- El sheet trae erratas en algunos puestos ("AUXLIAR BODEGA" aparte de "AUXILIAR BODEGA", "GERENTE FINACIERO",
+  "CONSULTOR TEGNOLOGICO"); el plegable las muestra tal cual. Si la BASE pierde la columna PUESTO (ni CARGO), el Resumen
+  muestra solo el total y explica que falta el puesto.
 - Probado con un libro sintético (`XLSX_LOCAL`): nombres, DPI y teléfonos falsos no llegan a `public/data/`; capturas en
   teléfono y escritorio sin desbordes. En "De dónde salen los datos" se corrigió la línea que decía que la base de datos
   general no se usa (se lee solo para contar desde 2026-09-09).

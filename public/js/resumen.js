@@ -28,6 +28,9 @@ const kpi = (valor, eti, nota, clase = '', tam = '') =>
   `<div class="kpi"><div class="kpi-valor ${clase} ${tam}">${valor}</div><div class="kpi-eti">${eti}</div>${nota ? `<div class="kpi-nota">${nota}</div>` : ''}</div>`;
 // grupos de puesto del equipo activo (estabilidad.json → porGrupoPuesto; regla en scripts/lib/estabilidad.mjs)
 const GRUPOS_PUESTO = [['vendedores', 'vendedores'], ['jefesTienda', 'jefes de tienda'], ['supervisores', 'supervisores'], ['administrativo', 'administrativo']];
+// Puestos que necesitan explicación en el plegable. Jefe rotativo (Oscar, 2026-10-12): el comodín, de RRHH o de
+// Comercial, que cubre la plaza que alguien dejó; no es jefe fijo de una tienda, así que cuenta en administrativo.
+const NOTA_PUESTO = { 'JEFE ROTATIVO': 'comodín que cubre plazas vacantes; no es jefe fijo de una tienda' };
 
 function pintar(depto, periodo) {
   // Cómo se llaman las salidas fuera de tienda según el alcance: en Comercial solo pueden ser
@@ -235,7 +238,7 @@ function pintar(depto, periodo) {
       const det = document.getElementById('equipo-puestos');
       det.hidden = !G;
       if (G) det.innerHTML = `<summary>¿Qué puestos entran en cada grupo?</summary>
-        <ul>${GRUPOS_PUESTO.map(([k, eti]) => `<li><b>${eti.charAt(0).toUpperCase() + eti.slice(1)}:</b> ${Object.entries(G[k].puestos).map(([p, n]) => `${nomPuesto(p)} (${fmtNum(n)})`).join(' · ') || 'ninguno'}</li>`).join('')}</ul>
+        <ul>${GRUPOS_PUESTO.map(([k, eti]) => `<li><b>${eti.charAt(0).toUpperCase() + eti.slice(1)}:</b> ${Object.entries(G[k].puestos).map(([p, n]) => `${nomPuesto(p)} (${fmtNum(n)}${NOTA_PUESTO[p] ? `: ${NOTA_PUESTO[p]}` : ''})`).join(' · ') || 'ninguno'}</li>`).join('')}</ul>
         <p style="margin:6px 0 0">El grupo sale del puesto anotado en la base: vendedores y asesores de venta; jefes o encargados de agencia o tienda; supervisores de las tiendas; y administrativo es todo lo demás (oficinas, CEDI, cobros, logística, asistentes y apoyo de tienda).</p>`;
     }
   } catch (e) {
