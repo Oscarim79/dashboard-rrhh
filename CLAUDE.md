@@ -70,13 +70,16 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   pestaña de tiendas (Tienda · Marca (A2K = Americana) · Tipo · Estado · Supervisor / región · Departamento ·
   Municipio…). El pipeline la detecta por encabezados al inicio (`columnasTiendas` en `scripts/lib/tiendas.mjs`) y
   `unirRegistro` la empareja con config/tiendas.json por nombre o alias dentro de la misma marca ("Tienda X" → X; en
-  Abi Q también "ABIQ X"). **Manda la pestaña** en qué tiendas hay y en su marca, tipo, estado, supervisor y ubicación;
+  Abi Q también "ABIQ X"). **Manda la pestaña** en qué tiendas hay y en su marca, estado, supervisor y ubicación;
   config/tiendas.json queda para lo que la pestaña no trae: coordenadas, nombre canónico (con el que se cruzan las
-  salidas por tienda) y alias. Ese registro unido alimenta el reconocimiento de tiendas en vacantes y salidas (y el tipo
+  salidas por tienda) y alias. **El tipo AA/A/B/C NO sale de la pestaña** para tiendas ya clasificadas: manda la
+  clasificación por ventas de config/tiendas.json (Oscar, 2026-10-12, "dejar la clasificación de antes"); el tipo de
+  la pestaña solo se usa si la tienda no tiene tipo en el JSON (p. ej. Santa Cruz) o es nueva. Para reclasificar una
+  tienda, cambiar `tipo` en config/tiendas.json. Ese registro unido alimenta el reconocimiento de tiendas en vacantes y salidas (y el tipo
   para el costo), el mapa (`tiendas.json`) y el conteo del Resumen (`tiendas.json → conteo`). Tiendas de config que no
   están en la pestaña quedan inactivas (no salen en el mapa; su historial sigue resolviendo). Avisos en meta.json:
   tienda nueva sin pareja (se ubica por su municipio si hay coordenadas), activa en config pero no en la pestaña,
-  ubicación cambiada sin coordenadas, tipo distinto (manda la pestaña). Sin la pestaña, todo sale de config/tiendas.json.
+  ubicación cambiada sin coordenadas, tipo distinto en la pestaña (se mantiene el del JSON). Sin la pestaña, todo sale de config/tiendas.json.
 
 ## Modelo de costo — valores de control
 

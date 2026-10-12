@@ -60,9 +60,12 @@ export function contarTiendas(filas, i, norm) {
 }
 
 // Registro de tiendas que usa el pipeline y el mapa (Oscar, 2026-10-12: "que el mapa también lea la pestaña
-// TIENDAS"). La pestaña manda en qué tiendas hay y en su marca, tipo, estado y, si trae esas columnas, supervisor,
+// TIENDAS"). La pestaña manda en qué tiendas hay y en su marca, estado y, si trae esas columnas, supervisor,
 // departamento y municipio. config/tiendas.json aporta lo que la pestaña no trae: coordenadas, el nombre con que
 // se cruzan las salidas por tienda y los nombres con que cada tienda aparece en vacantes y salidas (alias).
+// El TIPO (AA/A/B/C) de una tienda ya clasificada sale de config/tiendas.json, la clasificación por ventas de Oscar
+// (decisión de Oscar, 2026-10-12: "dejar la clasificación de antes"); el de la pestaña solo se usa para tiendas sin
+// tipo en el registro (p. ej. Santa Cruz, por definir) o tiendas nuevas.
 // Cada fila de la pestaña se empareja con su tienda de config/tiendas.json de la misma marca por nombre o alias
 // (sin el prefijo "Tienda "; en Abi Q también con "ABIQ " delante, p. ej. "Tienda Online" → "ABIQ ONLINE").
 // - Tienda de la pestaña sin pareja: entra con el nombre de la pestaña; toma coordenadas de otra tienda del mismo
@@ -71,7 +74,7 @@ export function contarTiendas(filas, i, norm) {
 //   alias siguen resolviendo las salidas históricas); si estaba activa va en `faltan`.
 // - Si la pestaña pone otro departamento o municipio que config/tiendas.json, se buscan coordenadas de ese
 //   municipio en otra tienda; si no hay, la tienda queda sin punto en el mapa (va en `sinUbicacion`).
-// - `difTipo`: tiendas con tipo distinto en la pestaña y en config/tiendas.json (manda la pestaña).
+// - `difTipo`: tiendas clasificadas cuyo tipo en la pestaña es otro (se mantiene el de config/tiendas.json).
 const TIPOS_AAC = ['AA', 'A', 'B', 'C'];
 const tituloNombre = (s) => s.toLowerCase().replace(/(^|[\s-])(\S)/g, (m, sep, c) => sep + c.toUpperCase());
 export function unirRegistro({ filas, cols, cfgTiendas, norm, deptosMapa = [] }) {
@@ -103,7 +106,8 @@ export function unirRegistro({ filas, cols, cfgTiendas, norm, deptosMapa = [] })
     const est = cols.estado >= 0 ? norm(f[cols.estado]) : 'ACTIVA';
     const activa = /^(ACTIV|ABIERT)/.test(est) || est === 'SI';
     const tipoN = cols.tipo >= 0 ? norm(f[cols.tipo]) : null;
-    const tipo = tipoN == null ? (cfg?.tipo ?? null) : (TIPOS_AAC.includes(tipoN) ? tipoN : null);
+    const tipoPestana = tipoN != null && TIPOS_AAC.includes(tipoN) ? tipoN : null;
+    const tipo = cfg?.tipo ?? tipoPestana;
     const supCrudo = celda(f, cols.supervisor);
     const supervisor = supCrudo ? (supCanon.get(norm(supCrudo)) ?? tituloNombre(supCrudo)) : (cfg?.supervisor ?? null);
     const depCrudo = celda(f, cols.departamento);
@@ -120,7 +124,7 @@ export function unirRegistro({ filas, cols, cfgTiendas, norm, deptosMapa = [] })
     }
     if (!cfg) sinPareja.push({ nombre: crudo.replace(/^tienda\s+/i, ''), marca, ubicada: lat != null });
     else {
-      if (activa && (cfg.tipo ?? null) !== tipo) difTipo.push({ nombre: cfg.nombre, pestana: tipo ?? 'por definir', registro: cfg.tipo ?? 'por definir' });
+      if (activa && cfg.tipo && tipoN != null && tipoPestana !== cfg.tipo) difTipo.push({ nombre: cfg.nombre, pestana: tipoPestana ?? 'por definir', registro: cfg.tipo });
       if (activa && seMovio && lat == null) sinUbicacion.push(`${cfg.nombre} (${[municipio, departamento].filter(Boolean).join(', ')})`);
     }
     tiendas.push({
