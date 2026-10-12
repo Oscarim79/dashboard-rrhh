@@ -5,7 +5,7 @@
 import { costoSalida, PARAMS_DEFECTO, VENTAS_TIPO, ORDEN_TIPOS, fmtQ } from './modelo.js';
 import { cargarDatos, pintarPie, marcarNavActiva, fmtNum, fmtFecha, diasCalibrados,
   pintarSelectorDepto, vacantesDe, salidasDe, etiquetaDepto, notaAlcance,
-  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca, MARCAS_SIN_COSTO } from './comun.js';
+  pintarSelectorPeriodo, vacantesEnPeriodo, agregarVacantes, dimsSalidas, etiquetaPeriodo, rangoPeriodo, aniosYMeses, MES_CORTO, fmtYm, aplicarDesglose, COLOR_SUPERVISOR, marcaActual, etiquetaMarca, MARCAS_SIN_COSTO, MARCAS_OCULTAS } from './comun.js';
 
 marcarNavActiva();
 const datos = await cargarDatos();
@@ -13,6 +13,9 @@ const salidasTodo = await fetch('data/salidas.json', { cache: 'no-cache' })
   .then((r) => (r.ok ? r.json() : null)).catch(() => null);
 // equipo activo de hoy (BASE DE DATOS GENERAL, solo conteos); si falta, la sección no se muestra
 const estabilidad = await fetch('data/estabilidad.json', { cache: 'no-cache' })
+  .then((r) => (r.ok ? r.json() : null)).catch(() => null);
+// tiendas activas por marca (conteo de la pestaña de tiendas del sheet); si falta, la sección no se muestra
+const tiendasReg = await fetch('data/tiendas.json', { cache: 'no-cache' })
   .then((r) => (r.ok ? r.json() : null)).catch(() => null);
 const { rotacion, meta } = datos;
 
@@ -246,6 +249,31 @@ function pintar(depto, periodo) {
     document.getElementById('sec-equipo').hidden = true;
   }
 
+  // ── Tiendas activas por marca (Oscar, 2026-10-12): de la pestaña de tiendas del sheet de RRHH (tiendas.json →
+  // conteo). Foto de hoy, no depende del período; todas las tiendas son de Comercial, así que General y
+  // Comercial muestran lo mismo. Con una marca elegida, solo esa marca. Las marcas ocultas no se muestran.
+  try {
+    const PM = Object.entries(tiendasReg?.conteo?.porMarca ?? {}).filter(([m, v]) => !MARCAS_OCULTAS.includes(m) && v.activas > 0);
+    const marca = marcaActual();
+    const visibles = marca === 'todas' ? PM : PM.filter(([m]) => m === etiquetaMarca());
+    document.getElementById('sec-tiendas').hidden = !visibles.length;
+    if (visibles.length) {
+      const total = PM.reduce((s, [, v]) => s + v.activas, 0);
+      const porTipo = (v) => ['AA', 'A', 'B', 'C'].filter((t) => v.porTipo[t]).map((t) => `${t} ${fmtNum(v.porTipo[t])}`)
+        .concat(v.porTipo['por definir'] ? [`${fmtNum(v.porTipo['por definir'])} por definir`] : []).join(' · ');
+      const cabeza = marca === 'todas' && PM.length > 1 ? `<div class="kpi" style="margin-bottom:10px"><div class="kpi-valor grande">${fmtNum(total)}</div>
+        <div class="kpi-eti">tiendas activas · <b>todas las marcas</b></div></div>` : '';
+      const tiles = visibles.map(([m, v]) => kpi(fmtNum(v.activas), `tiendas ${m}`, `por tipo: ${porTipo(v)}${marca !== 'todas' && PM.length > 1 ? ` · de ${fmtNum(total)} tiendas en total` : ''}`));
+      document.getElementById('tiendas-marca').innerHTML = cabeza + `<div class="kpis">${tiles.join('')}</div>`;
+      const c = tiendasReg.conteo;
+      const cerradas = visibles.reduce((s, [, v]) => s + v.cerradas, 0);
+      document.getElementById('tiendas-sub').textContent = `${c.fuente === 'sheet' ? `Según la pestaña de tiendas del archivo de RRHH, al ${fmtFecha(c.fecha)}` : `Según el registro de tiendas del dashboard (actualizado el ${fmtFecha(c.fecha)})`}: tiendas con estado "Activa"${cerradas ? ` (no se ${cerradas === 1 ? 'cuenta 1 cerrada' : `cuentan ${fmtNum(cerradas)} cerradas`})` : ''}. Tipo por venta mensual: AA arriba de Q1M, A de Q500k a Q1M, B de Q300k a Q500k, C abajo de Q300k. No depende del período elegido.`;
+    }
+  } catch (e) {
+    console.warn('Tiendas por marca no disponibles:', e);
+    document.getElementById('sec-tiendas').hidden = true;
+  }
+
   // ── SUPUESTO: reparto de las salidas sin clasificar (pedido de Oscar 2026-09-01)
   // No hay dato de tipo para estas tiendas; se estima con un reparto EDITABLE y
   // claramente rotulado como supuesto. Por defecto: 80% tipo B y el resto C.
@@ -437,7 +465,8 @@ function pintar(depto, periodo) {
         <li><b>Privacidad</b>: del registro de salidas jamás se publican filas individuales ni nombres; los valores con menos de 3 casos
           se agrupan en "otros" dentro de cada período.</li>
         <li><b>Tipo de tienda (AA / A / B / C)</b>: archivo de clasificación de tiendas de RRHH; las ventas por tipo son puntos medios
-          del rango de cada tipo y se pueden cambiar en el Simulador.</li>
+          del rango de cada tipo y se pueden cambiar en el Simulador. Las <b>tiendas activas por marca</b> se cuentan de la pestaña
+          de tiendas del archivo de RRHH (estado "Activa").</li>
         <li><b>Costo por salida</b>: modelo "Costo de rotación por tipo de tienda" (ago 2025) implementado en el Simulador — ventas
           perdidas, curva de aprendizaje, tiempo de jefatura y RRHH, publicidad y finiquito/indemnización — con los días de vacante
           reales. Sus valores de control se verifican en cada publicación. Las salidas de oficinas, CEDI y regiones se costean con el

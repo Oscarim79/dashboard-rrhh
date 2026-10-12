@@ -1,5 +1,23 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-12: "Tiendas activas por marca" en el Resumen (pedido de Oscar)
+
+- Oscar agregó al sheet de RRHH (el mismo que descarga el pipeline) una pestaña **TIENDAS** con la información de las
+  tiendas. El pipeline la reconoce por sus encabezados (columna de tienda, de marca y de estado o tipo, sin fechas ni
+  DPI; `columnasTiendas` en `scripts/lib/tiendas.mjs`) y cuenta tiendas activas y cerradas por marca y activas por
+  tipo (`contarTiendas`). Se publica en `tiendas.json → conteo` (`fuente: 'sheet'`). Solo conteos.
+- Resumen: sección "Tiendas activas por marca" debajo de "Equipo activo hoy": total de tiendas activas y una tarjeta
+  por marca con su desglose por tipo (AA/A/B/C/por definir). Friotec no se muestra (oculta en todo el sitio). Con una
+  marca elegida, solo esa marca y "de N tiendas en total". No depende del período.
+- **Respaldo:** si la pestaña no aparece (o cambian sus encabezados), se cuenta desde config/tiendas.json
+  (`fuente: 'registro'`; hoy 44 Americana + 5 Abi Q = 49 activas, 2 cerradas) y meta.json lo avisa.
+- **Pendiente de verificar con la primera corrida real:** el log imprime `Tiendas por marca: pestaña "…" → …`. Si dice
+  que usó config/tiendas.json, revisar los encabezados de la pestaña TIENDAS. Si la pestaña y config/tiendas.json no
+  cuadran, meta.json lo avisa: el mapa, los alias y el costo por tipo siguen con config/tiendas.json (pendiente: que
+  el pipeline tome todo el registro de la pestaña y retirar el flujo manual).
+- En el registro de Drive, "Santa Catarina Mita" tiene Estado "Activa" pero su observación dice "Cerrada"; si la
+  pestaña TIENDAS trae lo mismo, cuenta como activa (manda la columna Estado).
+
 ## ✅ HECHO 2026-10-12: "Equipo activo hoy" en el Resumen (pedido de Oscar)
 
 - **Qué muestra:** bajo "Lo esencial en 6 cifras", cuántos colaboradores activos hay (fecha de alta sin fecha de salida en
