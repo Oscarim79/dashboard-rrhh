@@ -962,6 +962,8 @@ let conteoTiendas;
     const c = contarTiendas(hoja.filas, hoja.cols, norm);
     conteoTiendas = { fuente: 'sheet', fecha: hoyISO, porMarca: c.porMarca };
     console.log(`Tiendas por marca: pestaña "${hoja.nombre}" → ${resumen(c)} activas`);
+    for (const [m, nombres] of Object.entries(c.activasPorMarca)) console.log(`  ${m} (${nombres.length}): ${nombres.join(' · ')}`);
+    if (c.sinNombre) calidad.push({ tipo: 'aviso', n: c.sinNombre, mensaje: `${c.sinNombre} filas de la pestaña de tiendas tienen marca o estado pero no nombre de tienda; no se cuentan.` });
     if (c.sinMarca) calidad.push({ tipo: 'aviso', n: c.sinMarca, mensaje: `${c.sinMarca} tiendas de la pestaña de tiendas no tienen marca; no entran en las tiendas por marca.` });
     if (c.sinEstado) calidad.push({ tipo: 'aviso', n: c.sinEstado, mensaje: `${c.sinEstado} tiendas de la pestaña de tiendas tienen un estado que no es "Activa" ni "Cerrada"; no se cuentan.` });
     if (c.repetidas) calidad.push({ tipo: 'aviso', n: c.repetidas, mensaje: `${c.repetidas} tiendas aparecen repetidas en la pestaña de tiendas; se cuentan una vez.` });

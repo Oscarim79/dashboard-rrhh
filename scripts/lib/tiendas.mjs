@@ -26,14 +26,16 @@ export function columnasTiendas(headers) {
 // Tiendas activas y cerradas por marca, y activas por tipo. Sin columna de estado, todas cuentan como activas.
 // Las filas sin marca o con un estado que no es activa/cerrada no se cuentan (van como aviso); una tienda
 // repetida (mismo nombre y misma marca) cuenta una sola vez. Dos marcas pueden tener una tienda con el mismo
-// nombre (p. ej. "Tienda en línea" de Americana y de Abi Q): son dos tiendas.
+// nombre (p. ej. "Tienda en línea" de Americana y de Abi Q): son dos tiendas. Una fila con marca o estado pero
+// sin nombre de tienda no se cuenta y va como aviso (sinNombre). `activasPorMarca` lista los nombres contados,
+// solo para el log del pipeline (no se publica).
 export function contarTiendas(filas, i, norm) {
-  const porMarca = {};
+  const porMarca = {}, activasPorMarca = {};
   const vistas = new Set();
-  let sinMarca = 0, sinEstado = 0, repetidas = 0;
+  let sinMarca = 0, sinEstado = 0, repetidas = 0, sinNombre = 0;
   for (const f of filas) {
     const tienda = norm(f[i.tienda]);
-    if (!tienda) continue;
+    if (!tienda) { if (norm(f[i.marca]) || (i.estado >= 0 && norm(f[i.estado]))) sinNombre++; continue; }
     const marcaN = norm(f[i.marca]);
     if (!marcaN) { sinMarca++; continue; }
     const marca = MARCA_TIENDA[marcaN] ?? marcaN.charAt(0) + marcaN.slice(1).toLowerCase();
@@ -45,8 +47,9 @@ export function contarTiendas(filas, i, norm) {
     const m = porMarca[marca] ??= { activas: 0, cerradas: 0, porTipo: Object.fromEntries(TIPOS_TIENDA.map((t) => [t, 0])) };
     if (!activa) { m.cerradas++; continue; }
     m.activas++;
+    (activasPorMarca[marca] ??= []).push(String(f[i.tienda]).trim());
     const tipo = i.tipo >= 0 ? norm(f[i.tipo]) : '';
     m.porTipo[TIPOS_TIENDA.includes(tipo) ? tipo : 'por definir']++;
   }
-  return { porMarca, sinMarca, sinEstado, repetidas };
+  return { porMarca, sinMarca, sinEstado, repetidas, sinNombre, activasPorMarca };
 }
