@@ -25,7 +25,8 @@ export function columnasTiendas(headers) {
 
 // Tiendas activas y cerradas por marca, y activas por tipo. Sin columna de estado, todas cuentan como activas.
 // Las filas sin marca o con un estado que no es activa/cerrada no se cuentan (van como aviso); una tienda
-// repetida cuenta una sola vez.
+// repetida (mismo nombre y misma marca) cuenta una sola vez. Dos marcas pueden tener una tienda con el mismo
+// nombre (p. ej. "Tienda en línea" de Americana y de Abi Q): son dos tiendas.
 export function contarTiendas(filas, i, norm) {
   const porMarca = {};
   const vistas = new Set();
@@ -33,11 +34,11 @@ export function contarTiendas(filas, i, norm) {
   for (const f of filas) {
     const tienda = norm(f[i.tienda]);
     if (!tienda) continue;
-    if (vistas.has(tienda)) { repetidas++; continue; }
-    vistas.add(tienda);
     const marcaN = norm(f[i.marca]);
     if (!marcaN) { sinMarca++; continue; }
     const marca = MARCA_TIENDA[marcaN] ?? marcaN.charAt(0) + marcaN.slice(1).toLowerCase();
+    if (vistas.has(`${marca}|${tienda}`)) { repetidas++; continue; }
+    vistas.add(`${marca}|${tienda}`);
     const est = i.estado >= 0 ? norm(f[i.estado]) : 'ACTIVA';
     const activa = /^(ACTIV|ABIERT)/.test(est) || est === 'SI' ? true : /^(CERRAD|INACTIV)/.test(est) || est === 'NO' ? false : null;
     if (activa == null) { sinEstado++; continue; }

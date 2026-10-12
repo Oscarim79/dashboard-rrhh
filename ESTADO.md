@@ -14,7 +14,10 @@
 - **Primera corrida real (2026-10-12, 18:32 UTC):** la pestaña "TIENDAS" se reconoce por sus encabezados. Las tiendas
   Americana vienen con marca **"A2K"** (Americana 2000): salieron como una marca "A2k" aparte hasta que se mapeó A2K →
   Americana en `MARCA_TIENDA` (lib/tiendas.mjs). Conteo: Americana (A2K) 44 · Abi Q 4 · Friotec 2 activas. Abi Q trae 4
-  en la pestaña y 5 en config/tiendas.json: meta.json lo avisa. El mapa, los alias y el costo por tipo siguen con
+  en la pestaña y 5 en config/tiendas.json: meta.json lo avisa. Oscar (2026-10-12): Abi Q en línea sí opera (hay una
+  persona); probablemente está anotada solo como "tienda en línea". Para que cuente, la pestaña TIENDAS necesita su
+  fila con Marca "Abi Q" y Estado "Activa". Las repetidas se detectan por marca + nombre, así una "Tienda en línea"
+  de Americana y otra de Abi Q son dos tiendas. El mapa, los alias y el costo por tipo siguen con
   config/tiendas.json (pendiente: que el pipeline tome todo el registro de la pestaña y retirar el flujo manual).
 - En el registro de Drive, "Santa Catarina Mita" tiene Estado "Activa" pero su observación dice "Cerrada"; si la
   pestaña TIENDAS trae lo mismo, cuenta como activa (manda la columna Estado).
