@@ -66,6 +66,12 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   y costo estimado (mismo cálculo que el Resumen). El Resumen enlaza al mapa con `mapa.html#sup=Nombre`.
   Las fichas muestran motivos de salida por tienda/departamento (`porAgencia` en salidas.json; Oscar
   2026-09-09). En escritorio la página Mapa lleva el menú arriba (`body.pagina-mapa`).
+- **Pestaña TIENDAS del sheet de RRHH (Oscar, 2026-10-12):** Oscar agregó al sheet una pestaña de tiendas con las
+  columnas del registro (Tienda · Marca · Tipo · Estado · …). El pipeline la detecta por encabezados
+  (`scripts/lib/tiendas.mjs`) y publica en `tiendas.json → conteo` las tiendas activas por marca y tipo (solo
+  conteos) para la sección "Tiendas activas por marca" del Resumen (Friotec oculta, como en todo el sitio). Si no la
+  encuentra, cuenta desde config/tiendas.json y lo avisa en meta.json. El mapa, los alias y el costo por tipo SIGUEN
+  usando config/tiendas.json; si la pestaña y el JSON no cuadran en tiendas activas por marca, meta.json lo avisa.
 
 ## Modelo de costo — valores de control
 

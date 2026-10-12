@@ -9,6 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import XLSX from 'xlsx';
 import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS, GRUPOS_PUESTO } from './lib/estabilidad.mjs';
+import { columnasTiendas, contarTiendas } from './lib/tiendas.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const norm = (s) => String(s ?? '')
@@ -940,6 +941,40 @@ let estabilidadJson = null;
   }
 }
 
+// ── TIENDAS POR MARCA (Oscar, 2026-10-12): pestaña de tiendas del sheet de RRHH ───
+// Para el Resumen: tiendas activas por marca (y por tipo), contadas de la pestaña de tiendas que Oscar agregó
+// al sheet (ver lib/tiendas.mjs; solo tienda, marca, tipo y estado, solo conteos). Si la pestaña no aparece,
+// se cuenta desde config/tiendas.json (el espejo del registro de tiendas) y se avisa. El mapa y el costo por
+// tipo siguen usando config/tiendas.json: si la pestaña y el JSON no cuadran, se avisa para sincronizarlos.
+let conteoTiendas;
+{
+  let hoja = null;
+  for (const nombre of wb.SheetNames) {
+    const filas = filasDe(wb.Sheets[nombre]);
+    if (!filas.length) continue;
+    const { idx, headers } = encabezadosDe(filas);
+    const cols = columnasTiendas(headers);
+    if (cols) { hoja = { nombre, filas: filas.slice(idx + 1), cols }; break; }
+  }
+  const delRegistro = contarTiendas(TIENDAS_CFG.tiendas.map((t) => [t.nombre, t.marca, t.tipo, t.activa ? 'ACTIVA' : 'CERRADA']), { tienda: 0, marca: 1, tipo: 2, estado: 3 }, norm);
+  const resumen = (c) => Object.entries(c.porMarca).map(([m, v]) => `${m} ${v.activas}${v.cerradas ? ` (+${v.cerradas} cerradas)` : ''}`).join(' · ');
+  if (hoja) {
+    const c = contarTiendas(hoja.filas, hoja.cols, norm);
+    conteoTiendas = { fuente: 'sheet', fecha: hoyISO, porMarca: c.porMarca };
+    console.log(`Tiendas por marca: pestaña "${hoja.nombre}" → ${resumen(c)} activas`);
+    if (c.sinMarca) calidad.push({ tipo: 'aviso', n: c.sinMarca, mensaje: `${c.sinMarca} tiendas de la pestaña de tiendas no tienen marca; no entran en las tiendas por marca.` });
+    if (c.sinEstado) calidad.push({ tipo: 'aviso', n: c.sinEstado, mensaje: `${c.sinEstado} tiendas de la pestaña de tiendas tienen un estado que no es "Activa" ni "Cerrada"; no se cuentan.` });
+    if (c.repetidas) calidad.push({ tipo: 'aviso', n: c.repetidas, mensaje: `${c.repetidas} tiendas aparecen repetidas en la pestaña de tiendas; se cuentan una vez.` });
+    const distintas = [...new Set([...Object.keys(c.porMarca), ...Object.keys(delRegistro.porMarca)])]
+      .filter((m) => (c.porMarca[m]?.activas ?? 0) !== (delRegistro.porMarca[m]?.activas ?? 0));
+    if (distintas.length) calidad.push({ tipo: 'aviso', mensaje: `La pestaña de tiendas y config/tiendas.json no cuadran en tiendas activas de ${distintas.map((m) => `${m} (${c.porMarca[m]?.activas ?? 0} vs ${delRegistro.porMarca[m]?.activas ?? 0})`).join(', ')}: el Resumen usa la pestaña; el mapa y el costo por tipo siguen con config/tiendas.json hasta sincronizarlo.` });
+  } else {
+    conteoTiendas = { fuente: 'registro', fecha: TIENDAS_CFG.actualizado, porMarca: delRegistro.porMarca };
+    console.log(`Tiendas por marca: no se encontró la pestaña de tiendas; se usa config/tiendas.json → ${resumen(delRegistro)} activas`);
+    calidad.push({ tipo: 'aviso', mensaje: 'No se encontró la pestaña de tiendas del sheet (busqué columnas TIENDA, MARCA y ESTADO o TIPO, sin fechas): las tiendas por marca del Resumen salen de config/tiendas.json.' });
+  }
+}
+
 // ── VERIFICACIÓN ANTI-FUGAS (última línea de defensa) ──────────────────────
 // Términos prohibidos como palabras completas (así "Benito" no dispara "NIT").
 const RE_PROHIBIDOS = [
@@ -982,6 +1017,7 @@ const tiendasJson = {
   actualizado: TIENDAS_CFG.actualizado,
   tiendas: TIENDAS_CFG.tiendas.map((t) => ({ nombre: t.nombre, tipo: t.tipo ?? null, marca: t.marca, activa: !!t.activa, supervisor: t.supervisor ?? null,
     departamento: t.departamento ?? null, municipio: t.municipio ?? null, lat: t.lat ?? null, lon: t.lon ?? null, observacion: t.observacion ?? null })),
+  conteo: conteoTiendas, // tiendas activas por marca para el Resumen (pestaña de tiendas del sheet, o este registro si no está)
 };
 const hallazgos = [];
 buscarFugas(tiendasJson, 'tiendas', hallazgos);
