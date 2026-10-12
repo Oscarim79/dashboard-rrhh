@@ -55,10 +55,10 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
 
 ## Registro de tiendas y mapa (2026-09-09)
 
-- El registro maestro de tiendas es el Google Sheet "Registro de tiendas — Corporación Americana" (Drive
-  de Oscar). `config/tiendas.json` lo espeja y lleva por tienda: tipo, marca, activa, alias, supervisor,
-  departamento, municipio, lat/lon (centroide INE). Cambios del Sheet → editar el JSON (flujo manual por
-  ahora). `scripts/exportar_tiendas.mjs` genera el Excel desde el JSON.
+- Hasta el 2026-10-12 el registro maestro era el Google Sheet "Registro de tiendas — Corporación Americana" (Drive
+  de Oscar), espejado a mano en `config/tiendas.json` (tipo, marca, activa, alias, supervisor, departamento,
+  municipio, lat/lon del centroide INE). **Desde el 2026-10-12 manda la pestaña TIENDAS del sheet de RRHH** (ver
+  abajo); el JSON sigue aportando coordenadas y alias. `scripts/exportar_tiendas.mjs` genera el Excel desde el JSON.
 - `public/mapa.html`: mapa por departamentos (contornos en `public/geo/mapa-gt.json`, generados por
   `scripts/generar_mapa.mjs`) coloreado por supervisor, con un punto por tienda; el pipeline publica
   `public/data/tiendas.json` para alimentarlo. Colores por supervisor en `COLOR_SUPERVISOR` (comun.js).
@@ -66,12 +66,17 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   y costo estimado (mismo cálculo que el Resumen). El Resumen enlaza al mapa con `mapa.html#sup=Nombre`.
   Las fichas muestran motivos de salida por tienda/departamento (`porAgencia` en salidas.json; Oscar
   2026-09-09). En escritorio la página Mapa lleva el menú arriba (`body.pagina-mapa`).
-- **Pestaña TIENDAS del sheet de RRHH (Oscar, 2026-10-12):** Oscar agregó al sheet una pestaña de tiendas con las
-  columnas del registro (Tienda · Marca · Tipo · Estado · …). El pipeline la detecta por encabezados
-  (`scripts/lib/tiendas.mjs`) y publica en `tiendas.json → conteo` las tiendas activas por marca y tipo (solo
-  conteos) para la sección "Tiendas activas por marca" del Resumen (Friotec oculta, como en todo el sitio). Si no la
-  encuentra, cuenta desde config/tiendas.json y lo avisa en meta.json. El mapa, los alias y el costo por tipo SIGUEN
-  usando config/tiendas.json; si la pestaña y el JSON no cuadran en tiendas activas por marca, meta.json lo avisa.
+- **Pestaña TIENDAS del sheet de RRHH (Oscar, 2026-10-12) = registro maestro de tiendas.** Oscar agregó al sheet una
+  pestaña de tiendas (Tienda · Marca (A2K = Americana) · Tipo · Estado · Supervisor / región · Departamento ·
+  Municipio…). El pipeline la detecta por encabezados al inicio (`columnasTiendas` en `scripts/lib/tiendas.mjs`) y
+  `unirRegistro` la empareja con config/tiendas.json por nombre o alias dentro de la misma marca ("Tienda X" → X; en
+  Abi Q también "ABIQ X"). **Manda la pestaña** en qué tiendas hay y en su marca, tipo, estado, supervisor y ubicación;
+  config/tiendas.json queda para lo que la pestaña no trae: coordenadas, nombre canónico (con el que se cruzan las
+  salidas por tienda) y alias. Ese registro unido alimenta el reconocimiento de tiendas en vacantes y salidas (y el tipo
+  para el costo), el mapa (`tiendas.json`) y el conteo del Resumen (`tiendas.json → conteo`). Tiendas de config que no
+  están en la pestaña quedan inactivas (no salen en el mapa; su historial sigue resolviendo). Avisos en meta.json:
+  tienda nueva sin pareja (se ubica por su municipio si hay coordenadas), activa en config pero no en la pestaña,
+  ubicación cambiada sin coordenadas, tipo distinto (manda la pestaña). Sin la pestaña, todo sale de config/tiendas.json.
 
 ## Modelo de costo — valores de control
 
