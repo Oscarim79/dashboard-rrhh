@@ -1,5 +1,25 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-12: "Equipo activo hoy" en el Resumen (pedido de Oscar)
+
+- **Qué muestra:** bajo "Lo esencial en 6 cifras", cuántos colaboradores activos hay (fecha de alta sin fecha de salida en
+  la BASE DE DATOS GENERAL) y cuántos son **vendedores, jefes de tienda, supervisores y administrativo** (todos los demás
+  puestos), con su % del equipo. Respeta el selector General / Comercial / marca (con Comercial o una marca dice además el
+  total de la empresa; con General, cuántos son de Comercial y cuántos de las demás áreas). Es una foto de hoy: no cambia
+  con el período. Un plegable "¿Qué puestos entran en cada grupo?" lista los puestos de cada grupo con su conteo.
+- **Regla de clasificación** (`grupoPuesto` en `scripts/lib/estabilidad.mjs`, sobre el puesto normalizado sin "DE"):
+  supervisor = SUPERVISOR en Comercial (o con tienda/agencia/región/zona/venta en el puesto; "supervisor de bodega" es
+  administrativo); jefe de tienda = jefe/encargado/gerente/administrador de agencia, tienda o sala; vendedor = VENDEDOR o
+  ASESOR (de ventas, o en Comercial; no de créditos/cobros); administrativo = todo lo demás. Activos sin puesto no entran
+  en ningún grupo (el total los menciona) y van como aviso a meta.json.
+- **Pendiente de verificar con la primera corrida real:** no se ha visto aún la columna de puesto de la BASE (sigue el
+  pendiente del 2026-10-07). El log de la Action imprime "Equipo activo por puesto" y la lista de puestos por grupo; si un
+  puesto cae en el grupo equivocado, se ajusta la regla. Si la BASE no trae PUESTO (ni CARGO), el Resumen muestra solo el
+  total y explica que falta el puesto.
+- Probado con un libro sintético (`XLSX_LOCAL`): nombres, DPI y teléfonos falsos no llegan a `public/data/`; capturas en
+  teléfono y escritorio sin desbordes. En "De dónde salen los datos" se corrigió la línea que decía que la base de datos
+  general no se usa (se lee solo para contar desde 2026-09-09).
+
 ## ✅ HECHO 2026-10-07: "Los que sí se quedan" al final de Salidas (pedido de Oscar; el CEO quiere saber por qué se quedan)
 
 - **Qué hay en el sheet y qué no:** la BASE DE DATOS GENERAL da antigüedad (fecha de alta), marca, departamento y, si

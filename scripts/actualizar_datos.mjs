@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import XLSX from 'xlsx';
-import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS } from './lib/estabilidad.mjs';
+import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS, GRUPOS_PUESTO } from './lib/estabilidad.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const norm = (s) => String(s ?? '')
@@ -859,7 +859,16 @@ let estabilidadJson = null;
       alcances: est.alcances,
       porQueSeQuedan: null, // se llena abajo si existe la pestaña de PERMANENCIA
     };
-    console.log(`Estabilidad: ${est.activos} activos con antigüedad (${est.alcances.total?.mas5 ?? 0} con más de ${UMBRAL_ESTABLE_ANIOS} años en total)`);
+    console.log(`Estabilidad: ${est.activos} activos con antigüedad (${est.alcances.total?.mas5 ?? 0} con más de ${UMBRAL_ESTABLE_ANIOS} años en total) · columnas leídas: ${est.columnasLeidas.join(', ')}`);
+    // Equipo activo por tipo de puesto (Resumen, Oscar 2026-10-12): se loguea qué puestos cayeron en cada grupo para revisarlo
+    const GP = est.alcances.total?.porGrupoPuesto;
+    if (GP) {
+      console.log(`Equipo activo por puesto (toda la empresa): ${GRUPOS_PUESTO.map((g) => `${g} ${GP[g].n}`).join(' · ')}${GP.sinPuesto ? ` · sin puesto ${GP.sinPuesto}` : ''}`);
+      for (const g of GRUPOS_PUESTO) console.log(`  ${g}: ${Object.entries(GP[g].puestos).map(([p, n]) => `${p} ${n}`).join(' · ') || '—'}`);
+      if (GP.sinPuesto) calidad.push({ tipo: 'aviso', n: GP.sinPuesto, mensaje: `${GP.sinPuesto} colaboradores activos de BASE DE DATOS GENERAL no tienen puesto; no entran en vendedores, jefes de tienda, supervisores ni administrativo.` });
+    } else {
+      calidad.push({ tipo: 'aviso', n: 1, mensaje: 'BASE DE DATOS GENERAL no tiene columna PUESTO: el Resumen muestra solo el total de activos, sin separar vendedores, jefes de tienda, supervisores y administrativo.' });
+    }
     if (est.altaFutura) calidad.push({ tipo: 'aviso', n: est.altaFutura, mensaje: `${est.altaFutura} filas de BASE DE DATOS GENERAL tienen fecha de alta posterior a hoy; no cuentan en la antigüedad.` });
     // bajas por mes (registro de SALIDAS ya leído)
     const bajasMes = {};
