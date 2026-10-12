@@ -11,10 +11,11 @@
   marca elegida, solo esa marca y "de N tiendas en total". No depende del período.
 - **Respaldo:** si la pestaña no aparece (o cambian sus encabezados), se cuenta desde config/tiendas.json
   (`fuente: 'registro'`; hoy 44 Americana + 5 Abi Q = 49 activas, 2 cerradas) y meta.json lo avisa.
-- **Pendiente de verificar con la primera corrida real:** el log imprime `Tiendas por marca: pestaña "…" → …`. Si dice
-  que usó config/tiendas.json, revisar los encabezados de la pestaña TIENDAS. Si la pestaña y config/tiendas.json no
-  cuadran, meta.json lo avisa: el mapa, los alias y el costo por tipo siguen con config/tiendas.json (pendiente: que
-  el pipeline tome todo el registro de la pestaña y retirar el flujo manual).
+- **Primera corrida real (2026-10-12, 18:32 UTC):** la pestaña "TIENDAS" se reconoce por sus encabezados. Las tiendas
+  Americana vienen con marca **"A2K"** (Americana 2000): salieron como una marca "A2k" aparte hasta que se mapeó A2K →
+  Americana en `MARCA_TIENDA` (lib/tiendas.mjs). Conteo: Americana (A2K) 44 · Abi Q 4 · Friotec 2 activas. Abi Q trae 4
+  en la pestaña y 5 en config/tiendas.json: meta.json lo avisa. El mapa, los alias y el costo por tipo siguen con
+  config/tiendas.json (pendiente: que el pipeline tome todo el registro de la pestaña y retirar el flujo manual).
 - En el registro de Drive, "Santa Catarina Mita" tiene Estado "Activa" pero su observación dice "Cerrada"; si la
   pestaña TIENDAS trae lo mismo, cuenta como activa (manda la columna Estado).
 

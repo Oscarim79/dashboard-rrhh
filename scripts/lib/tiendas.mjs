@@ -4,7 +4,9 @@
 // tienda, marca, tipo y estado; la pestaña no trae datos personales y no se publica ninguna fila: solo conteos.
 // Funciones puras para poder probarlas aparte.
 
-export const MARCA_TIENDA = { AMERICANA: 'Americana', 'ABI Q': 'Abi Q', ABIQ: 'Abi Q', FRIOTEC: 'Friotec' };
+// En la pestaña TIENDAS las tiendas Americana vienen con la marca "A2K" (Americana 2000), como en la BASE DE DATOS
+// GENERAL; se cuentan como Americana (primera corrida real, 2026-10-12).
+export const MARCA_TIENDA = { AMERICANA: 'Americana', A2K: 'Americana', 'AMERICANA 2000': 'Americana', 'ABI Q': 'Abi Q', ABIQ: 'Abi Q', FRIOTEC: 'Friotec' };
 export const TIPOS_TIENDA = ['AA', 'A', 'B', 'C', 'por definir'];
 
 // ¿Es la pestaña de tiendas? Debe traer columna de tienda, de marca y de estado o tipo, y ninguna de fechas,
