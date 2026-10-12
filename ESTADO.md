@@ -1,5 +1,13 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-12: el tipo de tienda vuelve a la clasificación de antes (Oscar)
+
+- La primera corrida con la pestaña TIENDAS como registro maestro cambió el tipo de 4 tiendas porque la pestaña los
+  trae distintos: Santa Catarina Mita C → B, Abi Q Cayalá AA → A, Abi Q Pradera Concepción A → B, Abi Q Online A → C.
+  Oscar decidió "dejar la clasificación de antes": el tipo de una tienda ya clasificada sale de config/tiendas.json
+  (también para el costo, el mapa y el desglose por tipo del Resumen); el de la pestaña solo cuenta para tiendas sin
+  tipo en el JSON o nuevas. Las diferencias quedan como aviso informativo en meta.json.
+
 ## ✅ HECHO 2026-10-12: el mapa (y todo el pipeline) lee la pestaña TIENDAS (pedido de Oscar)
 
 - La pestaña TIENDAS del sheet de RRHH pasa a ser el registro maestro de tiendas: `unirRegistro` (lib/tiendas.mjs) la

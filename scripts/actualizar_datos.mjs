@@ -167,7 +167,7 @@ if (unido) {
   if (unido.sinPareja.length) calidad.push({ tipo: 'aviso', n: unido.sinPareja.length, mensaje: `Tiendas de la pestaña TIENDAS que no están en config/tiendas.json: ${unido.sinPareja.map((t) => `${t.nombre} (${t.marca}${t.ubicada ? ', ubicada por su municipio' : ', sin coordenadas: no sale como punto en el mapa'})`).join('; ')}. Para reconocer sus salidas y vacantes, agrega en la pestaña los nombres con que aparece en el sheet de RRHH.` });
   if (unido.faltan.length) calidad.push({ tipo: 'aviso', n: unido.faltan.length, mensaje: `Tiendas activas en config/tiendas.json que no están en la pestaña TIENDAS (no salen en el mapa): ${unido.faltan.join(', ')}.` });
   if (unido.sinUbicacion.length) calidad.push({ tipo: 'aviso', n: unido.sinUbicacion.length, mensaje: `La pestaña TIENDAS cambia la ubicación de estas tiendas y no hay coordenadas para el municipio nuevo (no salen como punto en el mapa): ${unido.sinUbicacion.join('; ')}.` });
-  if (unido.difTipo.length) calidad.push({ tipo: 'info', n: unido.difTipo.length, mensaje: `Tipo de tienda distinto en la pestaña TIENDAS y en config/tiendas.json (manda la pestaña, también para el costo): ${unido.difTipo.map((d) => `${d.nombre} ${d.registro} → ${d.pestana}`).join(', ')}.` });
+  if (unido.difTipo.length) calidad.push({ tipo: 'info', n: unido.difTipo.length, mensaje: `La pestaña TIENDAS pone otro tipo a estas tiendas; se mantiene la clasificación de config/tiendas.json (decisión de Oscar, 2026-10-12): ${unido.difTipo.map((d) => `${d.nombre} ${d.registro} (pestaña: ${d.pestana})`).join(', ')}.` });
 } else {
   console.log('Registro de tiendas: no se encontró la pestaña TIENDAS; se usa config/tiendas.json');
 }
@@ -979,7 +979,9 @@ let conteoTiendas;
   const resumen = (c) => Object.entries(c.porMarca).map(([m, v]) => `${m} ${v.activas}${v.cerradas ? ` (+${v.cerradas} cerradas)` : ''}`).join(' · ');
   if (hoja) {
     const c = contarTiendas(hoja.filas, hoja.cols, norm);
-    conteoTiendas = { fuente: 'sheet', fecha: hoyISO, porMarca: c.porMarca };
+    // lo publicado sale del registro unido (mismo tipo que el mapa y el costo); `c` queda para el log y los avisos
+    const delUnido = contarTiendas(REGISTRO.filter((t) => t.enPestana).map((t) => [t.nombre, t.marca, t.tipo, t.activa ? 'ACTIVA' : 'CERRADA']), { tienda: 0, marca: 1, tipo: 2, estado: 3 }, norm);
+    conteoTiendas = { fuente: 'sheet', fecha: hoyISO, porMarca: delUnido.porMarca };
     console.log(`Tiendas por marca: pestaña "${hoja.nombre}" → ${resumen(c)} activas`);
     for (const [m, nombres] of Object.entries(c.activasPorMarca)) console.log(`  ${m} (${nombres.length}): ${nombres.join(' · ')}`);
     if (c.sinNombre) calidad.push({ tipo: 'aviso', n: c.sinNombre, mensaje: `${c.sinNombre} filas de la pestaña de tiendas tienen marca o estado pero no nombre de tienda; no se cuentan.` });
