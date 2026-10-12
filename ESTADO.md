@@ -1,5 +1,21 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-12: el mapa (y todo el pipeline) lee la pestaña TIENDAS (pedido de Oscar)
+
+- La pestaña TIENDAS del sheet de RRHH pasa a ser el registro maestro de tiendas: `unirRegistro` (lib/tiendas.mjs) la
+  une con config/tiendas.json (coordenadas, nombre canónico y alias). Manda la pestaña en tiendas, marca, tipo, estado,
+  supervisor, departamento y municipio. Con ese registro se reconocen las tiendas en vacantes y salidas (tipo para el
+  costo), se publica `tiendas.json` para el mapa y se cuenta "Tiendas activas por marca" del Resumen.
+- Emparejamiento probado con los nombres reales de la pestaña ("Tienda Jocotan", "Tienda Online" de A2K y de Abi Q,
+  "Pradera CSV", "Cayala"…): 44 + 5 + 2 emparejan con config/tiendas.json. Con una pestaña igual al registro, salidas,
+  vacantes, rotación, estabilidad y el mapa salen idénticos a antes. El nombre de la pestaña solo se agrega como alias en
+  tiendas nuevas (si no, "Tienda Online" de Abi Q le robaría el alias ONLINE a la tienda en línea de Americana).
+- Cambios que ahora se toman solos de la pestaña: tienda nueva (se ubica en el mapa por su municipio si otra tienda ya
+  tiene coordenadas ahí; si no, sale en las listas pero sin punto), cierre, cambio de tipo (también cambia el costo),
+  de supervisor o de ubicación. Avisos en meta.json para revisar cada caso. Para que las salidas y vacantes de una tienda
+  nueva se reconozcan, su nombre en el sheet de RRHH debe coincidir con el de la pestaña o venir en una columna de
+  nombres/alias ("Nombres con que aparece en el Sheet de RRHH").
+
 ## ✅ HECHO 2026-10-12: "Tiendas activas por marca" en el Resumen (pedido de Oscar)
 
 - Oscar agregó al sheet de RRHH (el mismo que descarga el pipeline) una pestaña **TIENDAS** con la información de las

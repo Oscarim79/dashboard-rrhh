@@ -9,7 +9,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import XLSX from 'xlsx';
 import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS, GRUPOS_PUESTO } from './lib/estabilidad.mjs';
-import { columnasTiendas, contarTiendas } from './lib/tiendas.mjs';
+import { columnasTiendas, contarTiendas, unirRegistro } from './lib/tiendas.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const norm = (s) => String(s ?? '')
@@ -100,16 +100,14 @@ function detectar(wb, requeridos) {
 const colIdx = (headers, ...tokens) => headers.findIndex((h) => tokens.every((t) => h.includes(norm(t))));
 
 // ── resolución de tiendas ──────────────────────────────────────────────────
-const porAlias = new Map();
-for (const t of TIENDAS_CFG.tiendas) for (const a of t.alias) porAlias.set(a, { ...t, esTienda: true });
-for (const nt of TIENDAS_CFG.noTiendas) for (const a of nt.alias) porAlias.set(a, { nombre: nt.nombre, categoria: nt.categoria, esTienda: false });
+// porAlias y porNombre se arman más abajo, después de leer el libro, con el registro de tiendas unido
+// (pestaña TIENDAS del sheet + config/tiendas.json; ver "REGISTRO DE TIENDAS" en el main).
 // nombres ambiguos: se resuelven con la empresa de la fila
 const AMBIGUOS = {
   'CHIQUIMULA': { 'ABI Q': 'Abi Q Chiquimula', OTRA: 'Chiquimula Centro' },
   'CAYALA': { 'ABI Q': 'Abi Q Cayalá', OTRA: 'Abi Q Cayalá' }, // solo existe la Abi Q (Oscar, 2026-09-03)
   'PRADERA CONCEPCION': { 'ABI Q': 'Abi Q Pradera Concepción', OTRA: 'Abi Q Pradera Concepción' }, // idem
 };
-const porNombre = new Map(TIENDAS_CFG.tiendas.map((t) => [t.nombre, t]));
 function resolverLugar(lugarCrudo, empresaCruda) {
   const lug = norm(lugarCrudo);
   if (!lug) return { resuelto: null };
@@ -147,6 +145,36 @@ if (!process.env.XLSX_LOCAL) writeFileSync(path.join(ROOT, '.data', 'sheet.xlsx'
 const wb = XLSX.read(buf);
 
 const calidad = [];
+
+// ── REGISTRO DE TIENDAS (Oscar, 2026-10-12: "que el mapa también lea la pestaña TIENDAS") ──────────
+// La pestaña TIENDAS del sheet manda en qué tiendas hay y en su marca, tipo, estado, supervisor y ubicación;
+// config/tiendas.json aporta coordenadas, el nombre con que se cruzan las salidas y los alias (lib/tiendas.mjs →
+// unirRegistro). Con ese registro se reconocen las tiendas en vacantes y salidas (tipo para el costo) y se
+// publica tiendas.json para el mapa. Sin la pestaña, todo sale de config/tiendas.json como antes.
+let hojaTiendas = null;
+for (const nombre of wb.SheetNames) {
+  const filas = filasDe(wb.Sheets[nombre]);
+  if (!filas.length) continue;
+  const { idx, headers } = encabezadosDe(filas);
+  const cols = columnasTiendas(headers);
+  if (cols) { hojaTiendas = { nombre, filas: filas.slice(idx + 1), cols }; break; }
+}
+const DEPTOS_MAPA = JSON.parse(readFileSync(path.join(ROOT, 'public', 'geo', 'mapa-gt.json'), 'utf8')).departamentos.map((d) => d.nombre);
+const unido = hojaTiendas ? unirRegistro({ filas: hojaTiendas.filas, cols: hojaTiendas.cols, cfgTiendas: TIENDAS_CFG.tiendas, norm, deptosMapa: DEPTOS_MAPA }) : null;
+const REGISTRO = unido ? unido.tiendas : TIENDAS_CFG.tiendas;
+if (unido) {
+  console.log(`Registro de tiendas: pestaña "${hojaTiendas.nombre}" (${REGISTRO.filter((t) => t.enPestana).length} tiendas) + coordenadas y alias de config/tiendas.json`);
+  if (unido.sinPareja.length) calidad.push({ tipo: 'aviso', n: unido.sinPareja.length, mensaje: `Tiendas de la pestaña TIENDAS que no están en config/tiendas.json: ${unido.sinPareja.map((t) => `${t.nombre} (${t.marca}${t.ubicada ? ', ubicada por su municipio' : ', sin coordenadas: no sale como punto en el mapa'})`).join('; ')}. Para reconocer sus salidas y vacantes, agrega en la pestaña los nombres con que aparece en el sheet de RRHH.` });
+  if (unido.faltan.length) calidad.push({ tipo: 'aviso', n: unido.faltan.length, mensaje: `Tiendas activas en config/tiendas.json que no están en la pestaña TIENDAS (no salen en el mapa): ${unido.faltan.join(', ')}.` });
+  if (unido.sinUbicacion.length) calidad.push({ tipo: 'aviso', n: unido.sinUbicacion.length, mensaje: `La pestaña TIENDAS cambia la ubicación de estas tiendas y no hay coordenadas para el municipio nuevo (no salen como punto en el mapa): ${unido.sinUbicacion.join('; ')}.` });
+  if (unido.difTipo.length) calidad.push({ tipo: 'info', n: unido.difTipo.length, mensaje: `Tipo de tienda distinto en la pestaña TIENDAS y en config/tiendas.json (manda la pestaña, también para el costo): ${unido.difTipo.map((d) => `${d.nombre} ${d.registro} → ${d.pestana}`).join(', ')}.` });
+} else {
+  console.log('Registro de tiendas: no se encontró la pestaña TIENDAS; se usa config/tiendas.json');
+}
+const porAlias = new Map();
+for (const t of REGISTRO) for (const a of t.alias ?? []) porAlias.set(a, { ...t, esTienda: true });
+for (const nt of TIENDAS_CFG.noTiendas) for (const a of nt.alias) porAlias.set(a, { nombre: nt.nombre, categoria: nt.categoria, esTienda: false });
+const porNombre = new Map(REGISTRO.map((t) => [t.nombre, t]));
 
 // 1) VACANTES
 const REQ_VAC = [['ITEM'], ['FECHA', 'SOLICITUD'], ['FECHA', 'CIERRE'], ['DIAS', 'TRANSCURRIDOS'], ['MOTIVO', 'ORIGINA', 'VACANTE']];
@@ -942,20 +970,11 @@ let estabilidadJson = null;
 }
 
 // ── TIENDAS POR MARCA (Oscar, 2026-10-12): pestaña de tiendas del sheet de RRHH ───
-// Para el Resumen: tiendas activas por marca (y por tipo), contadas de la pestaña de tiendas que Oscar agregó
-// al sheet (ver lib/tiendas.mjs; solo tienda, marca, tipo y estado, solo conteos). Si la pestaña no aparece,
-// se cuenta desde config/tiendas.json (el espejo del registro de tiendas) y se avisa. El mapa y el costo por
-// tipo siguen usando config/tiendas.json: si la pestaña y el JSON no cuadran, se avisa para sincronizarlos.
+// Para el Resumen: tiendas activas por marca (y por tipo), contadas de la pestaña TIENDAS (detectada arriba, en
+// REGISTRO DE TIENDAS; solo conteos). Si la pestaña no aparece, se cuenta desde config/tiendas.json y se avisa.
 let conteoTiendas;
 {
-  let hoja = null;
-  for (const nombre of wb.SheetNames) {
-    const filas = filasDe(wb.Sheets[nombre]);
-    if (!filas.length) continue;
-    const { idx, headers } = encabezadosDe(filas);
-    const cols = columnasTiendas(headers);
-    if (cols) { hoja = { nombre, filas: filas.slice(idx + 1), cols }; break; }
-  }
+  const hoja = hojaTiendas;
   const delRegistro = contarTiendas(TIENDAS_CFG.tiendas.map((t) => [t.nombre, t.marca, t.tipo, t.activa ? 'ACTIVA' : 'CERRADA']), { tienda: 0, marca: 1, tipo: 2, estado: 3 }, norm);
   const resumen = (c) => Object.entries(c.porMarca).map(([m, v]) => `${m} ${v.activas}${v.cerradas ? ` (+${v.cerradas} cerradas)` : ''}`).join(' · ');
   if (hoja) {
@@ -967,9 +986,6 @@ let conteoTiendas;
     if (c.sinMarca) calidad.push({ tipo: 'aviso', n: c.sinMarca, mensaje: `${c.sinMarca} tiendas de la pestaña de tiendas no tienen marca; no entran en las tiendas por marca.` });
     if (c.sinEstado) calidad.push({ tipo: 'aviso', n: c.sinEstado, mensaje: `${c.sinEstado} tiendas de la pestaña de tiendas tienen un estado que no es "Activa" ni "Cerrada"; no se cuentan.` });
     if (c.repetidas) calidad.push({ tipo: 'aviso', n: c.repetidas, mensaje: `${c.repetidas} tiendas aparecen repetidas en la pestaña de tiendas; se cuentan una vez.` });
-    const distintas = [...new Set([...Object.keys(c.porMarca), ...Object.keys(delRegistro.porMarca)])]
-      .filter((m) => (c.porMarca[m]?.activas ?? 0) !== (delRegistro.porMarca[m]?.activas ?? 0));
-    if (distintas.length) calidad.push({ tipo: 'aviso', mensaje: `La pestaña de tiendas y config/tiendas.json no cuadran en tiendas activas de ${distintas.map((m) => `${m} (${c.porMarca[m]?.activas ?? 0} vs ${delRegistro.porMarca[m]?.activas ?? 0})`).join(', ')}: el Resumen usa la pestaña; el mapa y el costo por tipo siguen con config/tiendas.json hasta sincronizarlo.` });
   } else {
     conteoTiendas = { fuente: 'registro', fecha: TIENDAS_CFG.actualizado, porMarca: delRegistro.porMarca };
     console.log(`Tiendas por marca: no se encontró la pestaña de tiendas; se usa config/tiendas.json → ${resumen(delRegistro)} activas`);
@@ -1014,10 +1030,12 @@ function buscarFugas(valor, ruta, hallazgos) {
     if (RE_TEL.test(valor)) hallazgos.push(`posible teléfono (8 dígitos) en ${ruta}`);
   }
 }
-// Registro de tiendas para el mapa (config/tiendas.json): solo tipo, marca, supervisor y ubicación.
+// Registro de tiendas para el mapa (pestaña TIENDAS + coordenadas de config/tiendas.json; ver REGISTRO DE
+// TIENDAS): solo tipo, marca, estado, supervisor y ubicación.
 const tiendasJson = {
-  actualizado: TIENDAS_CFG.actualizado,
-  tiendas: TIENDAS_CFG.tiendas.map((t) => ({ nombre: t.nombre, tipo: t.tipo ?? null, marca: t.marca, activa: !!t.activa, supervisor: t.supervisor ?? null,
+  actualizado: unido ? hoyISO : TIENDAS_CFG.actualizado,
+  fuente: unido ? 'sheet' : 'registro',
+  tiendas: REGISTRO.map((t) => ({ nombre: t.nombre, tipo: t.tipo ?? null, marca: t.marca, activa: !!t.activa, supervisor: t.supervisor ?? null,
     departamento: t.departamento ?? null, municipio: t.municipio ?? null, lat: t.lat ?? null, lon: t.lon ?? null, observacion: t.observacion ?? null })),
   conteo: conteoTiendas, // tiendas activas por marca para el Resumen (pestaña de tiendas del sheet, o este registro si no está)
 };
