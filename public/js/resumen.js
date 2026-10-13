@@ -209,11 +209,16 @@ function pintar(depto, periodo) {
   // ── Equipo activo hoy (Oscar, 2026-10-12): cuántos colaboradores activos hay y cuántos son vendedores,
   // jefes de tienda, supervisores y administrativo (todos los demás puestos). Sale de la BASE DE DATOS
   // GENERAL (solo conteos, estabilidad.json). Es una foto de hoy: no depende del período. Alcance como el
-  // resto de la página: marca elegida > Comercial > toda la empresa.
+  // resto de la página: marca elegida > Comercial > toda la empresa. Comercial = solo vendedores, jefes de
+  // tienda y supervisores (CEO, 2026-10-13): los puestos administrativos que la base anota en Comercial los
+  // pasa el pipeline al área administrativa (`comercialAAdministrativo`), así que en Comercial no hay tarjeta
+  // "administrativo" y una nota dice cuántos se movieron.
   try {
     const marca = marcaActual();
     const E = estabilidad?.alcances?.[marca !== 'todas' ? marca : esCom ? 'comercial' : 'total'];
     const T = estabilidad?.alcances?.total, C = estabilidad?.alcances?.comercial;
+    const M = estabilidad?.comercialAAdministrativo; // ausente en un estabilidad.json anterior al cambio
+    const soloVenta = marca === 'todas' && esCom && !!M;
     document.getElementById('sec-equipo').hidden = !E?.n;
     if (E?.n) {
       const G = E.porGrupoPuesto;
@@ -221,14 +226,18 @@ function pintar(depto, periodo) {
       const nomPuesto = (p) => (p.charAt(0) + p.slice(1).toLowerCase()).replace(/\b(rrhh|cedi|it)\b/g, (m) => m.toUpperCase());
       const deQuien = marca !== 'todas' ? `marca ${etiquetaMarca()}` : esCom ? 'departamento Comercial' : 'toda la empresa';
       const contexto = marca === 'todas' && !esCom
-        ? (C?.n ? `${fmtNum(C.n)} en el departamento Comercial y ${fmtNum(E.n - C.n)} en las demás áreas` : '')
+        ? (C?.n ? `${fmtNum(C.n)} en el departamento Comercial y ${fmtNum(E.n - C.n)} en ${M ? 'el área administrativa y las demás áreas' : 'las demás áreas'}` : '')
         : (T?.n ? `de ${fmtNum(T.n)} en toda la empresa` : '');
-      const notaTotal = [contexto, G?.sinPuesto ? `${fmtNum(G.sinPuesto)} sin puesto anotado en la base` : ''].filter(Boolean).join(' · ');
+      const notaMovidos = soloVenta && M.n
+        ? `no incluye ${M.n === 1 ? 'a 1 persona' : `a ${fmtNum(M.n)} personas`} con puesto administrativo (${Object.entries(M.puestos).slice(0, 2).map(([p, n]) => `${nomPuesto(p).toLowerCase()} ${fmtNum(n)}`).join(', ')}${Object.keys(M.puestos).length > 2 ? '…' : ''}): ${M.n === 1 ? 'cuenta' : 'cuentan'} en el área administrativa`
+        : '';
+      const notaTotal = [contexto, notaMovidos, G?.sinPuesto ? `${fmtNum(G.sinPuesto)} sin puesto anotado en la base` : ''].filter(Boolean).join(' · ');
       const total = `<div class="kpi" style="margin-bottom:10px"><div class="kpi-valor grande">${fmtNum(E.n)}</div>
         <div class="kpi-eti">colaboradores activos · <b>${deQuien}</b></div>${notaTotal ? `<div class="kpi-nota">${notaTotal}</div>` : ''}</div>`;
       const tiles = [];
       if (G) {
         for (const [k, eti] of GRUPOS_PUESTO) {
+          if (soloVenta && k === 'administrativo') continue;
           const puestos = Object.entries(G[k].puestos);
           tiles.push(kpi(fmtNum(G[k].n), eti, k === 'administrativo'
             ? `${pct(G[k].n)} · todos los demás puestos${puestos.length ? `: ${puestos.slice(0, 3).map(([p, n]) => `${nomPuesto(p).toLowerCase()} (${fmtNum(n)})`).join(', ')}${puestos.length > 3 ? ` y ${puestos.length - 3} puestos más` : ''}` : ''}`
@@ -241,8 +250,15 @@ function pintar(depto, periodo) {
       const det = document.getElementById('equipo-puestos');
       det.hidden = !G;
       if (G) det.innerHTML = `<summary>¿Qué puestos entran en cada grupo?</summary>
-        <ul>${GRUPOS_PUESTO.map(([k, eti]) => `<li><b>${eti.charAt(0).toUpperCase() + eti.slice(1)}:</b> ${Object.entries(G[k].puestos).map(([p, n]) => `${nomPuesto(p)} (${fmtNum(n)}${NOTA_PUESTO[p] ? `: ${NOTA_PUESTO[p]}` : ''})`).join(' · ') || 'ninguno'}</li>`).join('')}</ul>
-        <p style="margin:6px 0 0">El grupo sale del puesto anotado en la base: vendedores y asesores de venta; jefes o encargados de agencia o tienda; supervisores de las tiendas; y administrativo es todo lo demás (oficinas, CEDI, cobros, logística, asistentes y apoyo de tienda).</p>`;
+        <ul>${GRUPOS_PUESTO.map(([k, eti]) => {
+          const lista = (puestos) => Object.entries(puestos).map(([p, n]) => `${nomPuesto(p)} (${fmtNum(n)}${NOTA_PUESTO[p] ? `: ${NOTA_PUESTO[p]}` : ''})`).join(' · ');
+          const titulo = `<b>${eti.charAt(0).toUpperCase() + eti.slice(1)}:</b>`;
+          if (soloVenta && k === 'administrativo') {
+            return `<li>${titulo} no cuenta en Comercial.${M.n ? ` ${M.n === 1 ? 'La persona que la base anota' : `Las ${fmtNum(M.n)} personas que la base anota`} en Comercial con puesto administrativo ${M.n === 1 ? 'se cuenta' : 'se cuentan'} en el área administrativa: ${lista(M.puestos)}` : ''}</li>`;
+          }
+          return `<li>${titulo} ${lista(G[k].puestos) || 'ninguno'}</li>`;
+        }).join('')}</ul>
+        <p style="margin:6px 0 0">El grupo sale del puesto anotado en la base: vendedores y asesores de venta; jefes o encargados de agencia o tienda; supervisores de las tiendas; y administrativo es todo lo demás (oficinas, CEDI, cobros, logística, asistentes y apoyo de tienda).${M ? ' Comercial cuenta solo vendedores, jefes de tienda y supervisores: quien la base anota en Comercial con un puesto administrativo (servicios varios, asistente administrativo, analista de créditos…) se cuenta en el área administrativa.' : ''}</p>`;
     }
   } catch (e) {
     console.warn('Equipo activo no disponible:', e);
@@ -459,7 +475,8 @@ function pintar(depto, periodo) {
           no dependen del período.</li>
         <li><b>Base de datos general</b>${estabilidad?.alcances?.total ? ` (${fmtNum(estabilidad.alcances.total.n)} colaboradores activos hoy)` : ''}: se cuenta quién sigue activo (fecha de alta sin
           fecha de salida) por marca, departamento y puesto → <b>equipo activo hoy</b> (vendedores, jefes de tienda, supervisores y
-          administrativo) y antigüedad del equipo. Solo conteos.</li>
+          administrativo) y antigüedad del equipo. Ahí Comercial cuenta solo vendedores, jefes de tienda y supervisores; los puestos
+          administrativos anotados en Comercial van al área administrativa. Solo conteos.</li>
         <li><b>Indicador de rotación mensual</b> (${fmtNum(meta.filasRotacionAcumulada)} filas): colaboradores al inicio y cierre de cada mes
           y % de rotación acumulada — de ahí sale la plantilla con la que se compara (total empresa o área comercial, según el selector).</li>
         <li><b>Privacidad</b>: del registro de salidas jamás se publican filas individuales ni nombres; los valores con menos de 3 casos

@@ -36,7 +36,13 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    cuenta cuántos son vendedores, jefes de tienda, supervisores y "administrativo" (= todos los demás puestos), deducido
    del texto del puesto (`grupoPuesto` en `scripts/lib/estabilidad.mjs` → `porGrupoPuesto` por alcance); el log del
    pipeline lista qué puestos cayeron en cada grupo para revisarlo. Foto de hoy: no depende del período. Jefe rotativo
-   (comodín que cubre plazas) y servicios varios cuentan en administrativo (Oscar, 2026-10-12). El "por qué se quedan" NO existe en el sheet: el pipeline lee una pestaña
+   (comodín que cubre plazas) y servicios varios cuentan en administrativo (Oscar, 2026-10-12). **Comercial = solo
+   vendedores, jefes de tienda y supervisores (CEO, 2026-10-13):** en el equipo activo (Resumen y "Los que sí se quedan")
+   quien la base anota en COMERCIAL con un puesto administrativo (servicios varios, asistente administrativo, analista de
+   créditos, jefe rotativo…) se cuenta en el área administrativa: sale del alcance `comercial` y su departamento pasa al
+   administrativo (`calcularEstabilidad`; `estabilidad.json → comercialAAdministrativo` con cuántos y qué puestos). Eso
+   solo toca la BASE DE DATOS GENERAL: la rotación calculada, salidas y vacantes siguen filtrando Comercial por la
+   columna de área (SALIDAS no se lee por puesto). El "por qué se quedan" NO existe en el sheet: el pipeline lee una pestaña
    PERMANENCIA (columna MOTIVO DE PERMANENCIA) si algún día RRHH la crea; mientras, la página dice qué falta.
    Excepción acordada con
    Oscar (2026-08-31): la pestaña SALIDAS sí se lee, pero SOLO se publican conteos agregados

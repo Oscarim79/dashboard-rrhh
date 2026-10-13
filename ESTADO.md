@@ -1,5 +1,23 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-13: Comercial cuenta solo la fuerza de venta en "Equipo activo hoy" (pedido del CEO)
+
+- El CEO vio en el Resumen (Comercial) la tarjeta "administrativo: 31" (servicios varios 12, asistente administrativo 6,
+  analista créditos 2 y 11 puestos más) y pidió pasar esos 31 al área administrativa.
+- **Pipeline** (`calcularEstabilidad` en lib/estabilidad.mjs): un activo con departamento COMERCIAL y puesto que
+  `grupoPuesto` clasifica como administrativo sale del alcance `comercial` y su departamento pasa al administrativo (si la
+  base ya trae un departamento que empieza con ADMINISTRA se usa ese; si no, ADMINISTRATIVO). Sin puesto anotado se queda
+  en Comercial. Publica `comercialAAdministrativo` ({ n, puestos, departamento }) y el log lo lista.
+- **Sitio:** Resumen en Comercial muestra solo vendedores, jefes de tienda y supervisores; la nota del total dice cuántos
+  con puesto administrativo cuentan en el área administrativa y el plegable los lista. En General: "N en el departamento
+  Comercial y M en el área administrativa y las demás áreas". "Los que sí se quedan" (Comercial) usa el mismo alcance y lo
+  dice en su nota.
+- **Lo que NO cambia (pendiente de confirmar con Oscar):** la rotación calculada (plantilla comercial), salidas y vacantes
+  siguen filtrando Comercial por la columna de área. Por eso la plantilla Comercial de la página Rotación es mayor que el
+  equipo Comercial del Resumen. Moverlo también en rotación exige leer el puesto en SALIDAS y ALTAS.
+- Probado con un libro sintético (`XLSX_LOCAL`): 32 movidos (31 Americana + 1 Abi Q; Friotec fuera), Comercial 154 =
+  110 + 39 + 5, anti-fugas limpia; capturas en teléfono y escritorio.
+
 ## ✅ HECHO 2026-10-12: el tipo de tienda vuelve a la clasificación de antes (Oscar)
 
 - La primera corrida con la pestaña TIENDAS como registro maestro cambió el tipo de 4 tiendas porque la pestaña los

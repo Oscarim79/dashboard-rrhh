@@ -886,6 +886,8 @@ let estabilidadJson = null;
       fuente: `BASE DE DATOS GENERAL: colaboradores con fecha de alta y sin fecha de salida, antigüedad contada hasta hoy. Columnas leídas: ${est.columnasLeidas.join(', ')}. Solo conteos.`,
       marcasExcluidas: [...MARCAS_EXCLUIDAS],
       alcances: est.alcances,
+      // Puestos administrativos que la base anota en Comercial y se cuentan en el área administrativa (CEO, 2026-10-13)
+      comercialAAdministrativo: est.comercialAAdministrativo,
       porQueSeQuedan: null, // se llena abajo si existe la pestaña de PERMANENCIA
     };
     console.log(`Estabilidad: ${est.activos} activos con antigüedad (${est.alcances.total?.mas5 ?? 0} con más de ${UMBRAL_ESTABLE_ANIOS} años en total) · columnas leídas: ${est.columnasLeidas.join(', ')}`);
@@ -895,6 +897,8 @@ let estabilidadJson = null;
       console.log(`Equipo activo por puesto (toda la empresa): ${GRUPOS_PUESTO.map((g) => `${g} ${GP[g].n}`).join(' · ')}${GP.sinPuesto ? ` · sin puesto ${GP.sinPuesto}` : ''}`);
       for (const g of GRUPOS_PUESTO) console.log(`  ${g}: ${Object.entries(GP[g].puestos).map(([p, n]) => `${p} ${n}`).join(' · ') || '—'}`);
       if (GP.sinPuesto) calidad.push({ tipo: 'aviso', n: GP.sinPuesto, mensaje: `${GP.sinPuesto} colaboradores activos de BASE DE DATOS GENERAL no tienen puesto; no entran en vendedores, jefes de tienda, supervisores ni administrativo.` });
+      const M = est.comercialAAdministrativo;
+      if (M.n) console.log(`  Comercial → área administrativa (${M.departamento}): ${M.n} · ${Object.entries(M.puestos).map(([p, n]) => `${p} ${n}`).join(' · ')}`);
     } else {
       calidad.push({ tipo: 'aviso', n: 1, mensaje: 'BASE DE DATOS GENERAL no tiene columna PUESTO: el Resumen muestra solo el total de activos, sin separar vendedores, jefes de tienda, supervisores y administrativo.' });
     }

@@ -66,6 +66,10 @@ function porClave(regs, clave) {
 
 // filas/headers: la pestaña BASE DE DATOS GENERAL ya detectada. escoposDe(marcaNorm, areaNorm) → alcances
 // ('total', 'comercial', 'americana', 'abiq', 'friotec') con las mismas reglas del indicador calculado.
+// Comercial = solo la fuerza de venta (pedido del CEO, 2026-10-13): quien la base anota en COMERCIAL pero tiene un
+// puesto administrativo (servicios varios, asistente administrativo, analista de créditos, jefe rotativo…) se cuenta
+// en el área administrativa: sale del alcance 'comercial' y su departamento pasa al administrativo (el que ya exista en
+// la base o ADMINISTRATIVO). Sin puesto anotado se queda en Comercial. Se devuelve cuántos se movieron, por puesto.
 export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, colIdx, diasEntre, escoposDe, areaNorm }) {
   const iAlta = colIdx(headers, 'FECHA DE ALTA'), iSal = colIdx(headers, 'FECHA DE SALIDA');
   const iMarca = headers.findIndex((h) => h === 'MARCA');
@@ -74,6 +78,8 @@ export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, co
   const iSup = headers.findIndex((h) => h.includes('SUPERVISOR') || h.includes('JEFE INMEDIATO'));
   const iAgencia = headers.findIndex((h) => h === 'AGENCIA' || h === 'TIENDA' || h.includes('LUGAR DE TRABAJO'));
   const columnasLeidas = ['FECHA DE ALTA', 'FECHA DE SALIDA', 'MARCA', 'DEPARTAMENTO', iPuesto >= 0 && 'PUESTO', iSup >= 0 && 'SUPERVISOR', iAgencia >= 0 && 'AGENCIA'].filter(Boolean);
+  const deptoAdmin = filas.map((f) => areaNorm(f[iDep])).find((d) => d?.startsWith('ADMINISTRA')) ?? 'ADMINISTRATIVO';
+  const movidos = { n: 0, puestos: {} };
   const porAlcance = {};
   let activos = 0, sinAlta = 0, altaFutura = 0;
   for (const f of filas) {
@@ -91,8 +97,15 @@ export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, co
       supervisor: iSup >= 0 ? (String(f[iSup] ?? '').trim() || null) : null,
       agencia: iAgencia >= 0 ? (String(f[iAgencia] ?? '').trim() || null) : null,
     };
-    for (const e of escoposDe(norm(f[iMarca]), areaNorm(f[iDep]))) (porAlcance[e] ??= []).push(reg);
+    let escopos = escoposDe(norm(f[iMarca]), areaNorm(f[iDep]));
+    if (reg.departamento === 'COMERCIAL' && grupoPuesto(reg.puesto, 'COMERCIAL') === 'administrativo') {
+      reg.departamento = deptoAdmin;
+      if (escopos.includes('comercial')) { movidos.n++; movidos.puestos[reg.puesto] = (movidos.puestos[reg.puesto] ?? 0) + 1; }
+      escopos = escopos.filter((e) => e !== 'comercial');
+    }
+    for (const e of escopos) (porAlcance[e] ??= []).push(reg);
   }
+  movidos.puestos = Object.fromEntries(Object.entries(movidos.puestos).sort((a, b) => b[1] - a[1]));
   const alcances = Object.fromEntries(Object.entries(porAlcance).map(([e, regs]) => [e, {
     ...resumen(regs),
     porDepartamento: porClave(regs, 'departamento'),
@@ -101,7 +114,7 @@ export function calcularEstabilidad({ filas, headers, hoyISO, norm, fechaISO, co
     porSupervisor: iSup >= 0 ? porClave(regs, 'supervisor') : null,
     porAgencia: iAgencia >= 0 ? porClave(regs, 'agencia') : null,
   }]));
-  return { alcances, activos, sinAlta, altaFutura, columnasLeidas };
+  return { alcances, activos, sinAlta, altaFutura, columnasLeidas, comercialAAdministrativo: { ...movidos, departamento: deptoAdmin } };
 }
 
 // Pestaña de PERMANENCIA (por qué se quedan). Hoy NO existe en el sheet: cuando RRHH la cree con una fila
