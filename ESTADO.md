@@ -1,5 +1,15 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-10-14: el sitio se actualiza cada hora (vacantes abiertas de más, pregunta de Oscar)
+
+- Síntoma (repetido varias veces): Vacantes mostraba 8 abiertas y el sheet menos. El cálculo está bien: el 14-oct
+  el sheet y el sitio coinciden (6 en General, 4 en Comercial). La causa era el **retraso**: la Action "de las 6:00"
+  corría de verdad entre las 9:20 y las 15:00 (GitHub retrasa los horarios en punto) y solo una vez al día, así que
+  lo que RRHH cerraba en el sheet seguía "abierto" en el sitio hasta la tarde del día siguiente.
+- Arreglo: cron `17 12-23,0-2 * * *` = cada hora de 6:17 a 20:17 de Guatemala. Repo público → minutos gratis.
+- Si el sheet y el sitio no cuadran: ver la hora en el pie de página del sitio y compararla con la última edición del
+  sheet; para forzar la actualización, "Run workflow" en la pestaña Actions.
+
 ## ✅ HECHO 2026-10-12: el tipo de tienda vuelve a la clasificación de antes (Oscar)
 
 - La primera corrida con la pestaña TIENDAS como registro maestro cambió el tipo de 4 tiendas porque la pestaña los
@@ -172,7 +182,7 @@
 - **Dashboard en vivo:** https://oscarim79.github.io/dashboard-rrhh/
 - **Repo público:** https://github.com/Oscarim79/dashboard-rrhh (cuenta `Oscarim79`; la
   "oscarimorales" de la spec no existe — Oscar confirmó usar la real)
-- **Actualización automática:** GitHub Action diaria a las 6:00 de Guatemala + botón
+- **Actualización automática:** GitHub Action cada hora de 6:17 a 20:17 de Guatemala (desde 2026-10-14) + botón
   "Run workflow" en la pestaña Actions. Secret `SHEET_ID` configurado.
 - 5 páginas: Resumen CEO · Vacantes · **Salidas** (nueva, 2026-08-31) · Rotación · Simulador.
   Verificado en vivo (curl + navegador, móvil y escritorio) y JSON publicado revisado: cero datos personales.

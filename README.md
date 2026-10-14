@@ -11,7 +11,7 @@ estático en GitHub Pages y se actualiza solo, todos los días, desde un Google 
    `public/data/vacantes.json`, `rotacion.json`, `salidas.json`, `integracion.json` y `meta.json` — solo cifras agregadas.
 2. Antes de escribir nada corre una **verificación anti-fugas**: si detecta encabezados
    prohibidos, posibles DPI (13 dígitos) o teléfonos (8 dígitos), aborta sin publicar.
-3. Una GitHub Action corre ese script todos los días a las 6:00 (hora de Guatemala),
+3. Una GitHub Action corre ese script cada hora de 6:00 a 20:00 (hora de Guatemala),
    valida el modelo de costo contra sus valores de control y despliega `public/` a Pages.
 4. `public/js/modelo.js` replica el modelo de costo del Excel de RRHH; el Simulador
    permite mover los supuestos y calibrarlos con los datos reales.
@@ -55,4 +55,4 @@ npx --yes http-server public -p 4173 -c-1
 - `scripts/actualizar_datos.mjs` — pipeline: descarga → sanitiza → agrega → verifica → publica.
 - `scripts/validar_modelo.mjs` — valores de control del modelo (si fallan, hay un bug).
 - `public/` — el sitio: Resumen (CEO) · Vacantes · Rotación · Simulador.
-- `.github/workflows/actualizar.yml` — actualización diaria + despliegue a Pages.
+- `.github/workflows/actualizar.yml` — actualización cada hora (6:17 a 20:17 Guatemala) + despliegue a Pages.

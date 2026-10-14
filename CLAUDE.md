@@ -11,7 +11,8 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   mencionaba la spec no existe; Oscar confirmó usar su cuenta real `Oscarim79`).
 - Datos: Google Sheet compartido con enlace, descargado como xlsx por
   `scripts/actualizar_datos.mjs` → genera `public/data/vacantes.json` y `public/data/rotacion.json`.
-- GitHub Action diaria (6:00 Guatemala) + `workflow_dispatch`: descarga → sanitiza → build → Pages.
+- GitHub Action cada hora de 6:17 a 20:17 Guatemala (antes una vez al día; ver ESTADO 2026-10-14)
+  + `workflow_dispatch`: descarga → sanitiza → build → Pages.
 - Node 20, paquete `xlsx` (SheetJS) para leer el Excel.
 
 ## Comandos

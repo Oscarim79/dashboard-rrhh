@@ -1,11 +1,15 @@
 # Descarga los datos del Google Sheet, los sanitiza y publica el dashboard en GitHub Pages.
-# Corre todos los días a las 6:00 de Guatemala (12:00 UTC), al hacer push a main,
-# y a mano desde la pestaña Actions (workflow_dispatch).
+# Corre cada hora de 6:00 a 20:00 de Guatemala, al hacer push a main y a mano desde la
+# pestaña Actions (workflow_dispatch).
+# Antes corría una vez al día "a las 6:00", pero GitHub retrasa los horarios en punto: de verdad
+# corría entre las 9:20 y las 15:00, y lo que RRHH cerraba en el sheet no salía en el sitio hasta
+# el día siguiente (el sitio mostraba más vacantes abiertas que el sheet; Oscar, 2026-10-14).
+# El minuto 17 evita la hora en punto, que es cuando GitHub más retrasa.
 name: Actualizar datos y publicar
 
 on:
   schedule:
-    - cron: '0 12 * * *' # 6:00 Guatemala (UTC-6)
+    - cron: '17 12-23,0-2 * * *' # cada hora, 6:17 a 20:17 Guatemala (UTC-6)
   workflow_dispatch:
   push:
     branches: [main]

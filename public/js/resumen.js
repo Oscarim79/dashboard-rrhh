@@ -471,7 +471,7 @@ function pintar(depto, periodo) {
           perdidas, curva de aprendizaje, tiempo de jefatura y RRHH, publicidad y finiquito/indemnización — con los días de vacante
           reales. Sus valores de control se verifican en cada publicación. Las salidas de oficinas, CEDI y regiones se costean con el
           mismo modelo pero sin ventas perdidas.</li>
-        <li><b>Actualización</b>: automática todos los días a las 6:00 (Guatemala) y en cada publicación. Antes de publicar corre una
+        <li><b>Actualización</b>: automática cada hora, de 6:00 a 20:00 (Guatemala), y en cada publicación. Antes de publicar corre una
           verificación anti-fugas: si detecta un dato personal, no publica nada.</li>
       </ul>
       <p class="pie">De las pestañas de altas y de la base de datos general solo se cuenta (altas por mes, activos, antigüedad, puesto):
