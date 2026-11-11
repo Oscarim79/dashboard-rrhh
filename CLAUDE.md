@@ -47,6 +47,16 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
    renuncias, despidos y antes de 6 meses por supervisor). Oscar lo decidió sabiendo que el sitio es
    público y tras la advertencia de que son personas identificables; 'SUPERVISOR' salió de la lista
    anti-fugas. De los colaboradores que salieron sigue sin publicarse nada individual.
+   **Cuarta excepción (Oscar, 2026-10-14): pestaña PERSONAL ESTABLE** (asesores y jefes de agencia con 2 años o
+   más, armada a mano por RRHH). Trae nombre, DPI, NIT, afiliación, link del DPI, teléfono, nacimiento y dirección:
+   NADA de eso se lee. Solo puesto, agencia, fecha de alta, género, edad, estado civil, marca, área y región
+   (supervisor), y se publican solo conteos de UNA dimensión a la vez (nunca cruces tipo tienda × edad); un alcance
+   con menos de 5 personas publica solo su total (`contarPersonalEstable` en `scripts/lib/estabilidad.mjs` →
+   `estabilidad.json → personalEstable`; sección "Personal estable: quiénes son" al final de Salidas). Ojo: esa
+   pestaña tiene las fechas escritas día/mes (el resto del sheet es mes/día) y sus columnas RANGO DE EDAD, TOTAL AÑOS
+   LAB y RANGO ESTABILIDAD son valores fijos que no cuadran; el pipeline detecta el día/mes y cuenta la antigüedad
+   desde la fecha de alta. **Publicada el 2026-11-11 sin la lista "tiendas activas sin nadie del grupo"** (Oscar: a la
+   pestaña le faltan personas y la lista salía con tiendas de más); esa lista va solo al log del pipeline.
    Segunda excepción (Oscar, 2026-09-07): la pestaña CONTROL DE INTEGRACIÓN (llamadas de
    seguimiento a nuevos) se lee SOLO para contar, por año y departamento, cuántos tienen cada
    llamada marcada (`public/data/integracion.json`). Nombres y respuestas jamás se leen.

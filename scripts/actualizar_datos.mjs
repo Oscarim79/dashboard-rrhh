@@ -8,7 +8,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import XLSX from 'xlsx';
-import { calcularEstabilidad, contarPermanencia, UMBRAL_ESTABLE_ANIOS, GRUPOS_PUESTO } from './lib/estabilidad.mjs';
+import { calcularEstabilidad, contarPermanencia, contarPersonalEstable, UMBRAL_ESTABLE_ANIOS, GRUPOS_PUESTO } from './lib/estabilidad.mjs';
 import { columnasTiendas, contarTiendas, unirRegistro } from './lib/tiendas.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -889,6 +889,45 @@ let estabilidadJson = null;
       porQueSeQuedan: null, // se llena abajo si existe la pestaña de PERMANENCIA
     };
     console.log(`Estabilidad: ${est.activos} activos con antigüedad (${est.alcances.total?.mas5 ?? 0} con más de ${UMBRAL_ESTABLE_ANIOS} años en total) · columnas leídas: ${est.columnasLeidas.join(', ')}`);
+    // Personal estable (Oscar, 2026-10-14): pestaña PERSONAL ESTABLE que RRHH arma a mano (asesores y jefes de
+    // agencia con 2 años o más). SOLO conteos de una dimensión; ver lib/estabilidad.mjs → contarPersonalEstable.
+    const hojaPE = detectar(wb, [['PUESTO'], ['AGENCIA'], ['ALTA'], ['ESTABILIDAD']]);
+    const SUPS = [...new Set(REGISTRO.map((t) => t.supervisor).filter(Boolean))];
+    const CLAVE_MARCA = { americana: 'Americana', abiq: 'Abi Q', friotec: 'Friotec' };
+    const pe = contarPersonalEstable({
+      hoja: hojaPE, hoyISO: hoyISOEst, norm, escoposDe,
+      // la pestaña escribe la marca "ABIQ" y a veces la tienda como "ABIQ <nombre>"
+      tiendaDe: (ag, marca) => {
+        const emp = marca === 'ABIQ' || marca === 'ABI Q' ? 'Abi Q' : marca;
+        const r = resolverLugar(ag, emp).resuelto ?? resolverLugar(ag.replace(/^ABI ?Q\s+/i, ''), 'Abi Q').resuelto;
+        return r?.esTienda ? r.nombre : null;
+      },
+      // REGION trae el nombre de pila del supervisor ("MYRA"): se busca su nombre completo en el registro de tiendas
+      supervisorDe: (region) => {
+        const n = norm(region), hits = SUPS.filter((s) => norm(s) === n || norm(s).split(' ')[0] === n);
+        return hits.length === 1 ? hits[0] : null;
+      },
+      tiendasActivas: (alcance) => REGISTRO.filter((t) => t.activa && (CLAVE_MARCA[alcance]
+        ? t.marca === CLAVE_MARCA[alcance] : !MARCAS_EXCLUIDAS.has(t.marca))).map((t) => t.nombre),
+    });
+    if (pe) {
+      // "Tiendas sin nadie del grupo" NO se publica (Oscar, 2026-11-11): a la pestaña le faltan personas que sí cumplen
+      // el criterio (según la BASE DE DATOS GENERAL) y la lista salía con tiendas de más. Queda solo en el log.
+      const sinEstables = pe.alcances.total?.tiendasSinEstables ?? [];
+      for (const a of Object.values(pe.alcances)) delete a.tiendasSinEstables;
+      estabilidadJson.personalEstable = {
+        fuente: `Pestaña ${pe.pestana}: asesores y jefes de agencia con 2 años o más, según RRHH. Columnas leídas: ${pe.columnasLeidas.join(', ')}. Antigüedad desde la fecha de alta hasta hoy. Solo conteos de una dimensión a la vez.`,
+        fecha: hoyISOEst, alcances: pe.alcances, marcasExcluidas: [...MARCAS_EXCLUIDAS],
+      };
+      console.log(`Personal estable: pestaña "${pe.pestana}" (${pe.filas} filas${pe.diaPrimero ? ', fechas escritas día/mes' : ''}) · ${Object.entries(pe.alcances).map(([e, a]) => `${e} ${a.n}`).join(' · ')} · columnas leídas: ${pe.columnasLeidas.join(', ')}`);
+      if (sinEstables.length) console.log(`  Tiendas activas sin nadie del personal estable (solo log, no se publica): ${sinEstables.join(' · ')}`);
+      if (pe.avisos.sinAlta) calidad.push({ tipo: 'aviso', n: pe.avisos.sinAlta, mensaje: `${pe.avisos.sinAlta} filas de la pestaña ${pe.pestana} no tienen una fecha de alta legible; no se cuentan.` });
+      const sinT = Object.entries(pe.avisos.sinTienda);
+      if (sinT.length) calidad.push({ tipo: 'aviso', n: sinT.length, mensaje: `Agencias de la pestaña ${pe.pestana} que no se reconocen como tienda del registro (se muestran tal cual): ${sinT.map(([a, k]) => `${a} (${k})`).join(', ')}.` });
+      if (pe.avisos.sinSupervisor.length) calidad.push({ tipo: 'aviso', n: pe.avisos.sinSupervisor.length, mensaje: `Regiones de la pestaña ${pe.pestana} que no corresponden a un supervisor del registro de tiendas (se muestran tal cual): ${pe.avisos.sinSupervisor.join(', ')}.` });
+    } else {
+      calidad.push({ tipo: 'info', mensaje: 'No hay pestaña de PERSONAL ESTABLE (busqué columnas PUESTO, AGENCIA, ALTA y RANGO ESTABILIDAD); Salidas no muestra el perfil del personal estable.' });
+    }
     // Equipo activo por tipo de puesto (Resumen, Oscar 2026-10-12): se loguea qué puestos cayeron en cada grupo para revisarlo
     const GP = est.alcances.total?.porGrupoPuesto;
     if (GP) {

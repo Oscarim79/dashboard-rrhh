@@ -28,11 +28,41 @@
   Zona 10 no sale (el log y meta.json avisan "Tiendas activas en config/tiendas.json que no están en la pestaña
   TIENDAS: Abi Q Zona 10"). Simulado con la pestaña ya corregida: Zona 10 activa, tipo A, en el mapa; Oakland inactiva;
   salidas, rotación e integración idénticas; solo cambia `lugarActivo` de 4 vacantes de Oakland (no lo usa el sitio).
-- Para cuando se publique "Personal estable": con Oakland cerrada, la persona del grupo registrada en "ABIQ OAKLAND
-  MALL" sigue contando como Oakland y Zona 10 sale en "tiendas sin nadie del grupo" hasta que RRHH le cambie la agencia.
+- "Personal estable": con Oakland cerrada, la persona del grupo registrada en "ABIQ OAKLAND MALL" sigue contando
+  como Oakland en "Por tienda" hasta que RRHH le cambie la agencia.
 - Diferencias encontradas, sin tocar: el directorio unificado pone Ipala en "Region 3" (la de Sergio Corado), pero el
   registro y el directorio de RRHH la tienen con Myra Santos (se dejó así). El directorio de RRHH escribe "MAYRA"; el
   sheet de RRHH dice siempre "Myra Santos" (correcto en el sitio).
+
+## ✅ HECHO 2026-10-14, PUBLICADO 2026-11-11: "Personal estable: quiénes son" al final de Salidas (pestaña PERSONAL ESTABLE de Oscar)
+
+- **Publicado el 2026-11-11 sin la lista "tiendas activas sin nadie del grupo"** (decisión de Oscar: "sin esa lista").
+  Esa lista salía con tiendas de más porque a la pestaña le faltan personas (ver abajo). Ya no va en la página ni en
+  `estabilidad.json`: el pipeline la imprime solo en el log ("Tiendas activas sin nadie del personal estable"). Si RRHH
+  completa la pestaña y Oscar la quiere de vuelta, el bloque de la página está en el historial de git (commit del
+  2026-11-11) y en el pipeline basta con quitar el `delete a.tiendasSinEstables`. Al 11-nov: 60 personas, 18 con 5 años
+  o más, mediana 3 años, 57% mujeres; la pestaña sigue con 61 filas (las 3 personas que faltan no se han agregado).
+- Oscar agregó al sheet la pestaña PERSONAL ESTABLE (61 filas: asesores y jefes de agencia con 2 años o más). El
+  pipeline la detecta por encabezados (PUESTO, AGENCIA, ALTA, RANGO ESTABILIDAD) y publica en
+  `estabilidad.json → personalEstable` solo conteos: antigüedad (desde la fecha de alta), puesto, género, edad,
+  estado civil, supervisor, tienda y tiendas activas sin nadie del grupo. Privacidad: ver la cuarta excepción en CLAUDE.md.
+- Resultado al 14-oct (sin Friotec): 60 personas, 17 con 5 años o más, antigüedad mediana 3 años, 57% mujeres, edad
+  más común 28-32; 19 tiendas activas sin nadie del grupo. Abi Q (2 personas) muestra solo el total.
+- Revisado contra la BASE DE DATOS GENERAL (por DPI, solo en local, sin publicar nada):
+  - Las fechas de la pestaña están escritas día/mes: Google convirtió mal las que tienen día ≤ 12 y dejó como texto el
+    resto. Leídas como día/mes, 59 de 60 coinciden con la BD. El pipeline lo detecta solo.
+  - RANGO DE EDAD y RANGO ESTABILIDAD no cuadran con EDAD ni con los años reales (p. ej. "DE 1 A 2 AÑOS" agrupa a
+    gente de 2 y 3 años; "18-22" incluye 24 y 25): no se usan.
+  - **Pendiente con Oscar:** según la BD faltan 3 personas que cumplen el criterio (asesor ventas Abi Q Pradera
+    Concepción, alta jul-2024; asesor ventas Monjas, ago-2024; jefe agencia "Zona 9" código A051, ene-2021); la
+    cuarta que parecía faltar (jefe agencia Gualán) está en la pestaña con el DPI distinto en 1 dígito. Por eso
+    Abi Q Pradera Concepción y Monjas Jalapa salen de más en "tiendas sin nadie del grupo". Además, 2 personas de tiendas Abi Q tienen marca AMERICANA en la pestaña.
+  - Lista fila por fila entregada a Oscar para su asistente (14-oct): faltan 3 (BD filas 106 = Abi Q Pradera
+    Concepción, 176 = Monjas, 238 = "Zona 9"); la BD fila 153 NO falta: es la fila 26 de la pestaña con el DPI distinto
+    en 1 dígito; puesto distinto en filas 3, 22, 54, 60 y 62; marca de filas 2 y 3 (Abi Q Cayalá);
+    alta de la fila 12 (16 vs 18-ago-2023). Las etiquetas de RANGO ESTABILIDAD están corridas un tramo (los grupos
+    son 2-3, 4-5, 6-7 y 8-9 años) y RANGO DE EDAD está mal en 27 filas; ninguna de las dos la usa el sitio.
+  - ~~Publicación pendiente~~ → resuelto el 2026-11-11: publicado sin "tiendas sin nadie del grupo" (ver arriba).
 
 ## ✅ HECHO 2026-10-14: el sitio se actualiza cada hora (vacantes abiertas de más, pregunta de Oscar)
 

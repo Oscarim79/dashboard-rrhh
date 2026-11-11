@@ -124,3 +124,117 @@ export function contarPermanencia({ hoja, norm, colIdx }) {
   }
   return { n, motivos: Object.fromEntries(Object.entries(motivos).sort((a, b) => b[1] - a[1])), porDepartamento: iDep >= 0 ? porDepartamento : null, pestana: hoja.nombre };
 }
+
+// ── PERSONAL ESTABLE (pedido de Oscar, 2026-10-14) ─────────────────────────────────────────────────────────
+// Pestaña que RRHH arma a mano: asesores y jefes de agencia que llevan 2 años o más. Trae muchos datos
+// personales (nombre, DPI, NIT, afiliación, teléfono, dirección, nacimiento…): de aquí SOLO se leen puesto,
+// agencia, fecha de alta, género, edad, estado civil, marca, área y región (supervisor), y solo se publican
+// conteos de una dimensión a la vez (nunca cruces como tienda × edad). Un alcance con menos de MIN_DESGLOSE
+// personas publica solo su total.
+// Fechas: la pestaña está escrita día/mes/año, al revés que el resto del sheet (mes/día). Google convirtió en
+// fecha las que pudo leer como mes/día (con día y mes cambiados) y dejó como texto las demás. Si alguna fecha
+// de texto empieza con un número mayor que 12, toda la columna se lee como día/mes; si RRHH la corrige algún
+// día (todas fechas reales), se lee normal.
+// RANGO DE EDAD, TOTAL AÑOS LAB y RANGO ESTABILIDAD son valores fijos escritos a mano (y los rangos no cuadran
+// con la edad ni los años): no se usan. La antigüedad se cuenta desde la fecha de alta hasta hoy.
+export const MIN_DESGLOSE = 5;
+export const RANGOS_ESTABLE = ['MENOS DE 2', '2 A 3', '3 A 4', '4 A 5', '5 O MAS'];
+export const RANGOS_EDAD = ['18 A 22', '23 A 27', '28 A 32', '33 A 37', '38 A 42', '43 O MAS'];
+const rangoEstable = (a) => (a < 2 ? 'MENOS DE 2' : a < 3 ? '2 A 3' : a < 4 ? '3 A 4' : a < 5 ? '4 A 5' : '5 O MAS');
+const rangoEdad = (e) => (e < 23 ? '18 A 22' : e < 28 ? '23 A 27' : e < 33 ? '28 A 32' : e < 38 ? '33 A 37' : e < 43 ? '38 A 42' : '43 O MAS');
+
+// celda → { y, a, b } con a/b = primer y segundo número tal como los dejó Google (serial: a = mes, b = día)
+function partesFecha(v) {
+  if (typeof v === 'number' && v > 20000 && v < 60000) {
+    const d = new Date(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000);
+    return { y: d.getUTCFullYear(), a: d.getUTCMonth() + 1, b: d.getUTCDate(), texto: false };
+  }
+  const m = String(v ?? '').trim().match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  return m ? { y: +m[3], a: +m[1], b: +m[2], texto: true } : null;
+}
+const p2 = (n) => String(n).padStart(2, '0');
+function aniosCumplidos(isoA, isoB) {
+  const [y1, m1, d1] = isoA.split('-').map(Number), [y2, m2, d2] = isoB.split('-').map(Number);
+  return y2 - y1 - (m2 < m1 || (m2 === m1 && d2 < d1) ? 1 : 0);
+}
+const contar = (regs, clave, orden) => {
+  const c = {};
+  for (const r of regs) if (r[clave] != null) c[r[clave]] = (c[r[clave]] ?? 0) + 1;
+  const e = Object.entries(c);
+  return Object.fromEntries(orden ? orden.filter((k) => c[k]).map((k) => [k, c[k]]) : e.sort((a, b) => b[1] - a[1]));
+};
+
+// hoja: la pestaña ya detectada ({ nombre, filas, headers }). escoposDe: los mismos alcances del resto del
+// sitio. tiendaDe(agencia, marca) → nombre canónico de la tienda o null. supervisorDe(region) → nombre completo.
+// tiendasActivas(alcance) → tiendas activas de ese alcance (para "tiendas sin nadie con 2 años o más").
+export function contarPersonalEstable({ hoja, hoyISO, norm, escoposDe, tiendaDe, supervisorDe, tiendasActivas }) {
+  if (!hoja) return null;
+  const H = hoja.headers;
+  const col = (pred) => H.findIndex(pred);
+  const i = {
+    puesto: col((h) => h === 'PUESTO'),
+    agencia: col((h) => h === 'AGENCIA' || h === 'TIENDA'),
+    alta: col((h) => h === 'ALTA' || h.startsWith('FECHA DE ALTA')),
+    genero: col((h) => h === 'GENERO' || h === 'SEXO'),
+    edad: col((h) => h === 'EDAD'),
+    civil: col((h) => h.includes('ESTADO CIVIL')),
+    marca: col((h) => h === 'MARCA'),
+    area: col((h) => h.startsWith('AREA') || h === 'DEPARTAMENTO'),
+    region: col((h) => h === 'REGION' || h.includes('SUPERVISOR')),
+  };
+  if (i.alta < 0 || i.puesto < 0) return null;
+  const vacia = (f) => ![i.puesto, i.agencia, i.alta].some((k) => k >= 0 && String(f[k] ?? '').trim());
+  const filas = hoja.filas.filter((f) => !vacia(f));
+  const diaPrimero = filas.some((f) => { const p = partesFecha(f[i.alta]); return p?.texto && p.a > 12; });
+  const avisos = { sinAlta: 0, sinTienda: new Map(), sinSupervisor: new Set() };
+  const porAlcance = {};
+  for (const f of filas) {
+    const p = partesFecha(f[i.alta]);
+    const [mes, dia] = p ? (diaPrimero ? [p.b, p.a] : [p.a, p.b]) : [0, 0];
+    if (!p || mes < 1 || mes > 12 || dia < 1 || dia > 31) { avisos.sinAlta++; continue; }
+    const alta = `${p.y}-${p2(mes)}-${p2(dia)}`;
+    const anios = aniosCumplidos(alta, hoyISO);
+    const marca = i.marca >= 0 ? norm(f[i.marca]) : '';
+    const agenciaCruda = i.agencia >= 0 ? String(f[i.agencia] ?? '').trim() : '';
+    const tienda = agenciaCruda ? tiendaDe(agenciaCruda, marca) : null;
+    if (agenciaCruda && !tienda) avisos.sinTienda.set(agenciaCruda, (avisos.sinTienda.get(agenciaCruda) ?? 0) + 1);
+    const regionCruda = i.region >= 0 ? String(f[i.region] ?? '').trim() : '';
+    const supervisor = regionCruda ? supervisorDe(regionCruda) : null;
+    if (regionCruda && !supervisor) avisos.sinSupervisor.add(regionCruda);
+    const edad = i.edad >= 0 && Number.isFinite(Number(f[i.edad])) && String(f[i.edad] ?? '').trim() ? Number(f[i.edad]) : null;
+    const g = i.genero >= 0 ? norm(f[i.genero]) : '';
+    const reg = {
+      anios, rango: rangoEstable(anios),
+      puesto: norm(f[i.puesto]).replace(/\bDE\b/g, '').replace(/\s+/g, ' ').trim() || null,
+      genero: g.startsWith('FEM') || g === 'F' || g === 'MUJER' ? 'MUJERES' : g.startsWith('MAS') || g === 'M' || g === 'HOMBRE' ? 'HOMBRES' : null,
+      edad: edad == null ? null : rangoEdad(edad),
+      civil: i.civil >= 0 ? norm(f[i.civil]) || null : null,
+      supervisor: supervisor ?? (regionCruda || null),
+      tienda: tienda ?? (agenciaCruda || null),
+    };
+    for (const e of escoposDe(marca, i.area >= 0 ? norm(f[i.area]) : 'COMERCIAL')) (porAlcance[e] ??= []).push(reg);
+  }
+  const alcances = Object.fromEntries(Object.entries(porAlcance).map(([e, regs]) => {
+    if (regs.length < MIN_DESGLOSE) return [e, { n: regs.length }];
+    const anios = regs.map((r) => r.anios).sort((a, b) => a - b), m = Math.floor(anios.length / 2);
+    const conEstables = new Set(regs.map((r) => r.tienda));
+    return [e, {
+      n: regs.length,
+      medianaAnios: anios.length % 2 ? anios[m] : (anios[m - 1] + anios[m]) / 2,
+      mas5: regs.filter((r) => r.anios >= 5).length,
+      porAntiguedad: contar(regs, 'rango', RANGOS_ESTABLE),
+      porPuesto: contar(regs, 'puesto'),
+      porGenero: contar(regs, 'genero'),
+      porEdad: contar(regs, 'edad', RANGOS_EDAD),
+      porEstadoCivil: contar(regs, 'civil'),
+      porSupervisor: contar(regs, 'supervisor'),
+      porTienda: contar(regs, 'tienda'),
+      tiendasSinEstables: tiendasActivas(e).filter((t) => !conEstables.has(t)).sort(),
+    }];
+  }));
+  return {
+    pestana: hoja.nombre, filas: filas.length, alcances, diaPrimero,
+    columnasLeidas: Object.entries(i).filter(([, k]) => k >= 0).map(([, k]) => H[k]),
+    avisos: { sinAlta: avisos.sinAlta, sinTienda: Object.fromEntries(avisos.sinTienda), sinSupervisor: [...avisos.sinSupervisor] },
+  };
+}

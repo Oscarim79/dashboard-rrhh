@@ -3,7 +3,7 @@
 // (columna AREA LAB del sheet). Selector de período (global): todo el registro,
 // últimos 12 meses, un año (el año en curso = "a la fecha") o un mes concreto.
 import { pintarPie, marcarNavActiva, fmtNum, pintarSelectorDepto, salidasDe, notaAlcance, aplicarDesglose, SIN_DETALLE, activarDetalles,
-  pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO, marcaActual, MARCAS } from './comun.js';
+  pintarSelectorPeriodo, dimsSalidas, dimsAcumulado, etiquetaPeriodo, mesesDelPeriodo, aniosYMeses, fmtYm, fmtYmCorto, MES_LARGO, MES_CORTO, marcaActual, MARCAS, COLOR_SUPERVISOR } from './comun.js';
 import { DATOS } from './propuesta-datos.js';
 import { barrasH, columnas, anchoDe } from './graficas.js';
 
@@ -351,12 +351,84 @@ if (!salidasTodo.total) {
     }
   }
 
-  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); });
+  // ── Personal estable: quiénes son (Oscar, 2026-10-14). Pestaña PERSONAL ESTABLE de RRHH: asesores y jefes de
+  // agencia con 2 años o más; solo conteos de una dimensión. Foto de hoy (no depende del período). Un alcance
+  // con pocas personas trae solo el total (el pipeline no publica su desglose). ──
+  const ETI_PE_ANT = { 'MENOS DE 2': 'Menos de 2 años', '2 A 3': '2 a 3 años', '3 A 4': '3 a 4 años', '4 A 5': '4 a 5 años', '5 O MAS': '5 años o más' };
+  const ETI_PE_EDAD = { '18 A 22': '18 a 22 años', '23 A 27': '23 a 27 años', '28 A 32': '28 a 32 años', '33 A 37': '33 a 37 años', '38 A 42': '38 a 42 años', '43 O MAS': '43 años o más' };
+  const ETI_PE_PUESTO = { 'ASESOR VENTAS': 'Asesor de ventas', 'JEFE AGENCIA': 'Jefe de agencia', 'ASESOR ONLINE': 'Asesor en línea' };
+  const ETI_PE_CIVIL = { SOLTERO: 'Soltero(a)', SOLTERA: 'Soltero(a)', CASADO: 'Casado(a)', CASADA: 'Casado(a)', UNIDO: 'Unido(a)', UNIDA: 'Unido(a)', DIVORCIADO: 'Divorciado(a)', DIVORCIADA: 'Divorciado(a)', VIUDO: 'Viudo(a)', VIUDA: 'Viudo(a)' };
+  function pintarPersonalEstable(depto) {
+    const caja = document.getElementById('pe');
+    const PE = estabilidad?.personalEstable;
+    const marca = marcaActual();
+    const alcance = marca !== 'todas' ? marca : depto === 'comercial' ? 'comercial' : 'total';
+    const deQuien = marca !== 'todas' ? ` de ${MARCAS[marca]}` : '';
+    const P = PE?.alcances?.[alcance];
+    if (!P || !P.n) {
+      caja.innerHTML = `<div class="tarjeta"><p class="sub" style="margin:0">${PE ? `No hay asesores ni jefes de agencia${deQuien} en el registro de personal estable.` : 'El registro de personal estable de RRHH aún no está publicado.'}</p></div>`;
+      return;
+    }
+    if (!P.porAntiguedad) { // pocas personas: solo el total
+      caja.innerHTML = `<div class="tarjeta"><p class="titular" style="margin:0"><b>${fmtNum(P.n)} ${P.n === 1 ? 'asesor o jefe de agencia' : 'asesores y jefes de agencia'}${deQuien}</b> ${P.n === 1 ? 'lleva' : 'llevan'} 2 años o más en la empresa.</p></div>`;
+      return;
+    }
+    const n = P.n;
+    const mayor = (obj) => Object.entries(obj ?? {}).sort((a, b) => b[1] - a[1])[0];
+    const edadTop = mayor(P.porEdad);
+    const mujeres = P.porGenero?.MUJERES ?? 0;
+    const barras = (obj, eti, color) => Object.entries(obj ?? {}).map(([k, v]) => ({ eti: eti(k), valor: v, extra: pctDe(v, n), color: typeof color === 'function' ? color(k) : color }));
+    const tiendas = Object.entries(P.porTienda ?? {}).slice(0, 10);
+    caja.innerHTML = `
+      <div class="tarjeta">
+        <p class="titular"><b>${fmtNum(n)} asesores y jefes de agencia${deQuien} llevan 2 años o más</b> en la empresa; ${fmtNum(P.mas5)} de ellos, 5 años o más. La antigüedad mediana del grupo es de <b>${P.medianaAnios.toLocaleString('es-GT')} años</b>.${edadTop ? ` La edad más común va de ${ETI_PE_EDAD[edadTop[0]] ?? edadTop[0]}` : ''}${P.porGenero ? ` y ${pctDe(mujeres, n)} son mujeres` : ''}.</p>
+        <div class="kpis">
+          <div class="kpi"><div class="kpi-valor verde">${fmtNum(n)}</div><div class="kpi-eti">con 2 años o más</div></div>
+          <div class="kpi"><div class="kpi-valor">${P.medianaAnios.toLocaleString('es-GT')} años</div><div class="kpi-eti">antigüedad mediana</div></div>
+          <div class="kpi"><div class="kpi-valor">${pctDe(mujeres, n)}</div><div class="kpi-eti">son mujeres</div></div>
+          <div class="kpi"><div class="kpi-valor medio">${edadTop ? (ETI_PE_EDAD[edadTop[0]] ?? edadTop[0]) : '—'}</div><div class="kpi-eti">la edad más común</div></div>
+        </div>
+      </div>
+      <div class="tarjeta">
+        <h3>Cuánto tiempo llevan</h3>
+        <div class="grafica" id="pe-ant"></div>
+        <p class="pie">Antigüedad contada desde la fecha de alta hasta hoy (${PE.fecha}). La barra es cuántas personas hay en cada tramo; al lado, qué parte del grupo son.</p>
+      </div>
+      <div class="tarjeta">
+        <h3>Puesto</h3><div class="grafica" id="pe-puesto"></div>
+        <h3 style="margin-top:14px">Edad</h3><div class="grafica" id="pe-edad"></div>
+        <h3 style="margin-top:14px">Género</h3><div class="grafica" id="pe-genero"></div>
+        <h3 style="margin-top:14px">Estado civil</h3><div class="grafica" id="pe-civil"></div>
+        <p class="pie">Cada gráfica cuenta a las mismas ${fmtNum(n)} personas desde un ángulo distinto. Solo conteos: ningún dato individual.</p>
+      </div>
+      <div class="tarjeta" id="card-pe-sup">
+        <h3>Por supervisor</h3>
+        <div class="grafica" id="pe-sup"></div>
+        <p class="pie">Cuántas de estas personas trabajan en las tiendas de cada supervisor.</p>
+      </div>
+      <div class="tarjeta">
+        <h3>Por tienda: dónde están${tiendas.length < Object.keys(P.porTienda ?? {}).length ? ' (las 10 con más)' : ''}</h3>
+        <div class="grafica" id="pe-tienda"></div>
+      </div>`;
+    const dibujar = (id, items) => { document.getElementById(id).innerHTML = barrasH(items, { formato: fmtNum, ancho: anchoDe(id) }); };
+    dibujar('pe-ant', barras(P.porAntiguedad, (k) => ETI_PE_ANT[k] ?? k, (k) => (k === '5 O MAS' ? '#0B7A55' : '#8FA69B')));
+    dibujar('pe-puesto', barras(P.porPuesto, (k) => ETI_PE_PUESTO[k] ?? titulo(k), '#46615A'));
+    dibujar('pe-edad', barras(P.porEdad, (k) => ETI_PE_EDAD[k] ?? k, '#46615A'));
+    dibujar('pe-genero', barras(P.porGenero, (k) => titulo(k), '#46615A'));
+    dibujar('pe-civil', barras(P.porEstadoCivil, (k) => ETI_PE_CIVIL[k] ?? titulo(k), '#46615A'));
+    const sup = Object.entries(P.porSupervisor ?? {});
+    document.getElementById('card-pe-sup').hidden = !sup.length;
+    if (sup.length) dibujar('pe-sup', sup.map(([k, v]) => ({ eti: k, valor: v, extra: pctDe(v, n), color: COLOR_SUPERVISOR[k] ?? '#46615A' })));
+    dibujar('pe-tienda', tiendas.map(([k, v]) => ({ eti: k, valor: v, extra: v === 1 ? 'persona' : 'personas', color: '#0B7A55' })));
+  }
+
+  let depto = pintarSelectorDepto((d) => { depto = d; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); pintarPersonalEstable(depto); });
   let periodo = pintarSelectorPeriodo({ ...aniosYMeses({ salidas: salidasTodo }), generado: salidasTodo.generado },
-    (p) => { periodo = p; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); }); // también al cambiar la marca
+    (p) => { periodo = p; pintar(depto, periodo); pintarComparativa(depto); pintarEstabilidad(depto, periodo); pintarPersonalEstable(depto); }); // también al cambiar la marca
   pintar(depto, periodo);
   pintarComparativa(depto);
   pintarEstabilidad(depto, periodo);
+  pintarPersonalEstable(depto);
   activarDetalles();
   pintarPie(meta);
 }
