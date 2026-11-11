@@ -1,5 +1,39 @@
 # Estado del proyecto — Dashboard RRHH
 
+## ✅ HECHO 2026-11-11: directorio unificado de tiendas (Soporte Técnico) → coordenadas exactas y Abi Q Zona 10
+
+- Oscar pasó el enlace de un archivo "con información actualizada de las tiendas, con tiendas nuevas". Es el
+  **"Directorio Unificado Corporación Americana.xlsx"** (carpeta Soporte Técnico de otra cuenta de Google de Oscar,
+  sincronizada en `H:\Mi unidad\Soporte Técnico\`; no está compartido con enlace, el pipeline no puede descargarlo).
+  Trae región, tienda, departamento, dirección, coordenadas de Google Maps / Waze y horario, y además correo, teléfono
+  y nombre del encargado: eso último no se usa ni se copió a ningún lado. (Ojo: en `J:\Mi unidad\RRHH\COLABORADORES\` hay otro
+  archivo parecido, "DIRECTORIO DE TIENDAS 4 SOCIEDAD NOV 2026.xlsx": 43 tiendas Americana + 2 Friotec, todas ya
+  registradas, sin coordenadas; no es el del enlace.)
+- Se importó UNA vez a `config/tiendas.json` (no se agregó al pipeline):
+  - **Coordenadas exactas de 32 tiendas** (antes: cabecera del municipio, INE), validadas a ≤ 6 km de la cabecera y en
+    el mismo departamento. Descartadas porque Maps ubicaba otro lugar: Concepción Las Minas (traía el mismo punto que
+    Pradera Chiquimula), Asunción Mita (a 19 km, cerca de Jutiapa) y Santa Lucía Cotzumalguapa (a 6 km). Sin coordenadas
+    en el directorio (siguen en la cabecera): Tactic, Sanarate, Amates, Santa Catarina Mita, San Luis Petén, Friotec ×2,
+    Abi Q Cayalá, Chimaltenango, Jalpatagua, San Pedro Pinula, Santa Elena Petén y Santa Cruz.
+  - Alias nuevos: TAC TIC, CENTRAL QUEZALTEPEQUE, AMATES IZABAL, FRIOTEC CHIQUIMULA, FRIOTEC PUERTO BARRIOS.
+  - **Abi Q Zona 10** (atrás del Hotel Westin Camino Real) es la única tienda nueva. Decisión de Oscar: **reemplaza a
+    Oakland Mall** (cerró o se mudó). Oakland queda `activa: false` con sus alias, así su historial de salidas,
+    vacantes y altas sigue contando como Oakland. Zona 10 va sin tipo en el JSON: lo toma de la pestaña TIENDAS.
+- Mapa (`public/js/pag-mapa.js`): las tiendas a menos de ~5 km entre sí se reparten en un circulito alrededor de su
+  punto medio, conservando su orientación real (antes solo las de coordenada idéntica). Medido: 5 pares de puntos
+  encimados contra 8 antes. Controles del modelo de costo: cuadran.
+- **PENDIENTE (Oscar / RRHH): en la pestaña TIENDAS del sheet de RRHH, cambiar la fila "Oakland Mall" por "Zona 10"**
+  (misma marca ABIQ; tipo A si se mantiene el de Oakland). La pestaña solo tiene #, Tienda, Tipo y Marca (no hay columna
+  Estado), así que basta con renombrar la fila. Mientras no se haga, el sitio sigue mostrando Oakland Mall activa y
+  Zona 10 no sale (el log y meta.json avisan "Tiendas activas en config/tiendas.json que no están en la pestaña
+  TIENDAS: Abi Q Zona 10"). Simulado con la pestaña ya corregida: Zona 10 activa, tipo A, en el mapa; Oakland inactiva;
+  salidas, rotación e integración idénticas; solo cambia `lugarActivo` de 4 vacantes de Oakland (no lo usa el sitio).
+- Para cuando se publique "Personal estable": con Oakland cerrada, la persona del grupo registrada en "ABIQ OAKLAND
+  MALL" sigue contando como Oakland y Zona 10 sale en "tiendas sin nadie del grupo" hasta que RRHH le cambie la agencia.
+- Diferencias encontradas, sin tocar: el directorio unificado pone Ipala en "Region 3" (la de Sergio Corado), pero el
+  registro y el directorio de RRHH la tienen con Myra Santos (se dejó así). El directorio de RRHH escribe "MAYRA"; el
+  sheet de RRHH dice siempre "Myra Santos" (correcto en el sitio).
+
 ## ✅ HECHO 2026-10-14: el sitio se actualiza cada hora (vacantes abiertas de más, pregunta de Oscar)
 
 - Síntoma (repetido varias veces): Vacantes mostraba 8 abiertas y el sheet menos. El cálculo está bien: el 14-oct

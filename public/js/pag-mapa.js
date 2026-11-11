@@ -55,13 +55,30 @@ function aplicarFiltroMarca() {
   for (const t of ubicadas) (porDepto[t.departamento] ??= []).push(t);
   supervisores = [...new Set(tiendas.map((t) => t.supervisor).filter(Boolean))].sort();
 }
-// varias tiendas en el mismo municipio comparten coordenada: se reparten en un circulito
-const porCoord = {};
-for (const t of ubicadasTodas) (porCoord[`${t.lat},${t.lon}`] ??= []).push(t);
-for (const grupo of Object.values(porCoord)) grupo.forEach((t, i) => {
-  const ang = grupo.length > 1 ? (i / grupo.length) * Math.PI * 2 - Math.PI / 2 : 0, rad = grupo.length > 1 ? 13 : 0;
-  t.x = px(t.lon) + Math.cos(ang) * rad; t.y = py(t.lat) + Math.sin(ang) * rad;
-});
+// Tiendas a pocos km entre sí (mismo pueblo, o la misma cabecera si no hay ubicación exacta) se encimarían:
+// se reparten en un circulito alrededor de su punto medio. Desde 2026-11-11 casi todas traen su ubicación exacta
+// (Directorio Unificado de Soporte Técnico), así que el grupo se arma por cercanía y no por coordenada idéntica,
+// y cada tienda conserva su orientación real (la del norte queda arriba).
+const JUNTAS = 12, RADIO = 13; // en unidades del mapa (1 km ≈ 2.2)
+for (const t of ubicadasTodas) { t.x0 = px(t.lon); t.y0 = py(t.lat); }
+const grupos = [];
+for (const t of ubicadasTodas) {
+  const cerca = grupos.filter((g) => g.some((o) => Math.hypot(o.x0 - t.x0, o.y0 - t.y0) < JUNTAS));
+  const g = cerca.flat(); g.push(t);
+  for (const c of cerca) grupos.splice(grupos.indexOf(c), 1);
+  grupos.push(g);
+}
+for (const grupo of grupos) {
+  const cx = grupo.reduce((s, t) => s + t.x0, 0) / grupo.length, cy = grupo.reduce((s, t) => s + t.y0, 0) / grupo.length;
+  const real = grupo.map((t, i) => ({ t, i, ang: Math.hypot(t.x0 - cx, t.y0 - cy) > 0.5 ? Math.atan2(t.y0 - cy, t.x0 - cx) : null }));
+  const conAng = real.some((r) => r.ang != null);
+  if (conAng) real.sort((a, b) => (a.ang ?? 9) - (b.ang ?? 9) || a.i - b.i);
+  const inicio = conAng ? real.find((r) => r.ang != null).ang : -Math.PI / 2;
+  real.forEach(({ t }, k) => {
+    const ang = inicio + (k / grupo.length) * Math.PI * 2, rad = grupo.length > 1 ? RADIO : 0;
+    t.x = cx + Math.cos(ang) * rad; t.y = cy + Math.sin(ang) * rad;
+  });
+}
 aplicarFiltroMarca();
 const dominante = (lista) => {
   const c = {};

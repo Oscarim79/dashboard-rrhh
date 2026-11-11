@@ -81,6 +81,14 @@ Proyecto interno de Oscar (gestor de RRHH), no es para un cliente externo.
   están en la pestaña quedan inactivas (no salen en el mapa; su historial sigue resolviendo). Avisos en meta.json:
   tienda nueva sin pareja (se ubica por su municipio si hay coordenadas), activa en config pero no en la pestaña,
   ubicación cambiada sin coordenadas, tipo distinto en la pestaña (se mantiene el del JSON). Sin la pestaña, todo sale de config/tiendas.json.
+- **Coordenadas exactas y Abi Q Zona 10 (Oscar, 2026-11-11).** Las coordenadas de config/tiendas.json salen, donde
+  había, del "Directorio Unificado Corporación Americana.xlsx" de Soporte Técnico (ubicación de Google Maps / Waze,
+  validada a ≤ 6 km de la cabecera del municipio; las demás siguen en la cabecera INE). Ese archivo trae correos,
+  teléfonos y nombres de encargados: no entra al pipeline ni al repo; se importó una vez a mano. El mapa reparte en un
+  circulito las tiendas a menos de ~5 km entre sí (`JUNTAS` en pag-mapa.js). **Abi Q Zona 10 reemplaza a Oakland Mall**
+  (cerró o se mudó): Oakland queda inactiva con sus alias para su historial. Ojo: hoy la pestaña TIENDAS solo trae
+  #, Tienda, Tipo y Marca (sin Estado, supervisor ni ubicación, que salen de config/tiendas.json); una tienda que
+  cierra se quita o se renombra en la pestaña.
 
 ## Modelo de costo — valores de control
 

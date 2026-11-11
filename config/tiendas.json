@@ -1,7 +1,7 @@
 {
-  "actualizado": "2026-09-09",
+  "actualizado": "2026-11-11",
   "fuente": "TIPO DE TIENDAS A Y B.xlsx (clasificación de Oscar, agosto 2026, con marcas A2K/ABIQ/FRIOTEC). Tipos por venta mensual: AA arriba de Q1M, A entre Q500k y Q1M, B entre Q300k y Q500k, C abajo de Q300k.",
-  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada). 2026-09-09: se agregan supervisor (archivo AGENCIAS POR REGION de Oscar), departamento, municipio y coordenadas (centroides INE censo 2018) para el mapa; el registro maestro pasa a vivir en el Google Sheet \"Registro de tiendas\" y este archivo debe seguirlo. Afinado por Oscar en el Sheet el 2026-09-09: Pradera 2 = Pradera Chiquimula (Myra); Catocha = Santa Catarina Mita (activa, tipo C, Myra); Abi Q Online → Diana; Online → \"Online Americana\" (Luisa).",
+  "nota": "Los alias son los nombres tal como aparecen (normalizados sin acentos ni mayúsculas) en la columna LUGAR DE TRABAJO del control de vacantes. Reclasificación de Oscar 2026-09-03: Cayalá y Pradera Concepción son tiendas Abi Q (no existe versión Americana); CLM = Concepción Las Minas; Central = Quezaltepeque Central; Peque 2 = Quezaltepeque 2; Catocha y Petapa cerraron. Catocha y Petapa eran tipo C (Oscar, 2026-09-03), así sus salidas históricas se costean como dato. Única tienda con tipo null: Zona 9 (cerrada). 2026-09-09: se agregan supervisor (archivo AGENCIAS POR REGION de Oscar), departamento, municipio y coordenadas (centroides INE censo 2018) para el mapa; el registro maestro pasa a vivir en el Google Sheet \"Registro de tiendas\" y este archivo debe seguirlo. Afinado por Oscar en el Sheet el 2026-09-09: Pradera 2 = Pradera Chiquimula (Myra); Catocha = Santa Catarina Mita (activa, tipo C, Myra); Abi Q Online → Diana; Online → \"Online Americana\" (Luisa). 2026-11-11 (Oscar): Oakland Mall cerró o se mudó y la reemplaza Abi Q Zona 10 (atrás del Hotel Westin Camino Real); Oakland queda inactiva con sus alias para que su historial siga contando como Oakland. Abi Q Zona 10 va sin tipo: lo toma de la pestaña TIENDAS (tienda nueva). Coordenadas exactas de 33 tiendas (32 ya registradas y Abi Q Zona 10) tomadas del \"Directorio Unificado Corporación Americana\" (Soporte Técnico), validadas contra la cabecera de su municipio (se descartaron Concepción Las Minas, Asunción Mita y Santa Lucía Cotzumalguapa, que Maps ubicaba en otro lugar).",
   "tiendas": [
     {
       "nombre": "Jocotán",
@@ -14,9 +14,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Chiquimula",
       "municipio": "Jocotán",
-      "lat": 14.81927,
-      "lon": -89.3896,
-      "fuenteCoord": "INE censo 2018, cabecera \"Jocotan\""
+      "lat": 14.81787,
+      "lon": -89.38658,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Quezaltepeque Central",
@@ -26,14 +26,15 @@
       "alias": [
         "QUEZALTEPEQUE CENTRAL",
         "QUEZALTEPEQUE",
-        "CENTRAL"
+        "CENTRAL",
+        "CENTRAL QUEZALTEPEQUE"
       ],
       "supervisor": "Luisa De Leon",
       "departamento": "Chiquimula",
       "municipio": "Quezaltepeque",
-      "lat": 14.63564,
-      "lon": -89.4428,
-      "fuenteCoord": "INE censo 2018, cabecera \"Quezaltepeque\""
+      "lat": 14.63464,
+      "lon": -89.44275,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Gualán",
@@ -46,9 +47,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Zacapa",
       "municipio": "Gualán",
-      "lat": 15.11328,
-      "lon": -89.36157,
-      "fuenteCoord": "INE censo 2018, cabecera \"Gualan\""
+      "lat": 15.11395,
+      "lon": -89.36131,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Esquipulas",
@@ -61,9 +62,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "Chiquimula",
       "municipio": "Esquipulas",
-      "lat": 14.56557,
-      "lon": -89.35128,
-      "fuenteCoord": "INE censo 2018, cabecera \"Esquipulas\""
+      "lat": 14.58416,
+      "lon": -89.32721,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Pradera Chiquimula",
@@ -78,9 +79,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Chiquimula",
       "municipio": "Chiquimula",
-      "lat": 14.79442,
-      "lon": -89.54527,
-      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
+      "lat": 14.80853,
+      "lon": -89.53238,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Pradera Zacapa",
@@ -93,9 +94,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Zacapa",
       "municipio": "Zacapa",
-      "lat": 14.96887,
-      "lon": -89.53548,
-      "fuenteCoord": "INE censo 2018, cabecera \"Zacapa\""
+      "lat": 14.98189,
+      "lon": -89.51269,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Morales Izabal",
@@ -109,9 +110,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Izabal",
       "municipio": "Morales",
-      "lat": 15.47598,
-      "lon": -88.82624,
-      "fuenteCoord": "INE censo 2018, cabecera \"Morales\""
+      "lat": 15.46926,
+      "lon": -88.8393,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Jalapa",
@@ -124,9 +125,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Jalapa",
       "municipio": "Jalapa",
-      "lat": 14.63476,
-      "lon": -89.99118,
-      "fuenteCoord": "INE censo 2018, cabecera \"Jalapa\""
+      "lat": 14.63355,
+      "lon": -89.98448,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Concepción Las Minas",
@@ -156,9 +157,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Chiquimula",
       "municipio": "Chiquimula",
-      "lat": 14.79442,
-      "lon": -89.54527,
-      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
+      "lat": 14.80058,
+      "lon": -89.5403,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Quezaltepeque 2",
@@ -173,9 +174,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "Chiquimula",
       "municipio": "Quezaltepeque",
-      "lat": 14.63564,
-      "lon": -89.4428,
-      "fuenteCoord": "INE censo 2018, cabecera \"Quezaltepeque\""
+      "lat": 14.632,
+      "lon": -89.43804,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Pradera Escuintla",
@@ -188,9 +189,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Escuintla",
       "municipio": "Escuintla",
-      "lat": 14.30032,
-      "lon": -90.78574,
-      "fuenteCoord": "INE censo 2018, cabecera \"Escuintla\""
+      "lat": 14.29001,
+      "lon": -90.78451,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (enlace de Google Maps)"
     },
     {
       "nombre": "Pradera Puerto Barrios",
@@ -205,9 +206,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Izabal",
       "municipio": "Puerto Barrios",
-      "lat": 15.72828,
-      "lon": -88.59282,
-      "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
+      "lat": 15.69657,
+      "lon": -88.58691,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "San Luis Jilotepeque",
@@ -220,9 +221,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Jalapa",
       "municipio": "San Luis Jilotepeque",
-      "lat": 14.64462,
-      "lon": -89.72936,
-      "fuenteCoord": "INE censo 2018, cabecera \"San Luis Jilotepeque\""
+      "lat": 14.64539,
+      "lon": -89.7288,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Progreso Jutiapa",
@@ -235,9 +236,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Jutiapa",
       "municipio": "El Progreso",
-      "lat": 14.35438,
-      "lon": -89.84753,
-      "fuenteCoord": "INE censo 2018, cabecera \"El Progreso\""
+      "lat": 14.35603,
+      "lon": -89.83369,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "San Luis Petén",
@@ -265,9 +266,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "El Progreso",
       "municipio": "Guastatoya",
-      "lat": 14.8533,
-      "lon": -90.06996,
-      "fuenteCoord": "INE censo 2018, cabecera \"Guastatoya\""
+      "lat": 14.86032,
+      "lon": -90.07258,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Amates",
@@ -276,7 +277,8 @@
       "activa": true,
       "alias": [
         "AMATES",
-        "LOS AMATES"
+        "LOS AMATES",
+        "AMATES IZABAL"
       ],
       "supervisor": "Myra Santos",
       "departamento": "Izabal",
@@ -296,9 +298,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Jutiapa",
       "municipio": "Agua Blanca",
-      "lat": 14.4964,
-      "lon": -89.65649,
-      "fuenteCoord": "INE censo 2018, cabecera \"Agua Blanca\""
+      "lat": 14.49827,
+      "lon": -89.65028,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Teculután",
@@ -311,9 +313,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Zacapa",
       "municipio": "Teculután",
-      "lat": 14.99109,
-      "lon": -89.71912,
-      "fuenteCoord": "INE censo 2018, cabecera \"Teculutan\""
+      "lat": 14.99142,
+      "lon": -89.71812,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Ipala",
@@ -326,9 +328,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Chiquimula",
       "municipio": "Ipala",
-      "lat": 14.61601,
-      "lon": -89.62168,
-      "fuenteCoord": "INE censo 2018, cabecera \"Ipala\""
+      "lat": 14.61951,
+      "lon": -89.62055,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Carchá",
@@ -342,9 +344,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "Alta Verapaz",
       "municipio": "San Pedro Carchá",
-      "lat": 15.47846,
-      "lon": -90.31028,
-      "fuenteCoord": "INE censo 2018, cabecera \"San Pedro Carcha\""
+      "lat": 15.4758,
+      "lon": -90.30698,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Zacapa Centro",
@@ -358,9 +360,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Zacapa",
       "municipio": "Zacapa",
-      "lat": 14.96887,
-      "lon": -89.53548,
-      "fuenteCoord": "INE censo 2018, cabecera \"Zacapa\""
+      "lat": 14.9679,
+      "lon": -89.5343,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (enlace de Google Maps)"
     },
     {
       "nombre": "Tactic",
@@ -368,7 +370,8 @@
       "marca": "Americana",
       "activa": true,
       "alias": [
-        "TACTIC"
+        "TACTIC",
+        "TAC TIC"
       ],
       "supervisor": "Luisa De Leon",
       "departamento": "Alta Verapaz",
@@ -389,9 +392,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Petén",
       "municipio": "Poptún",
-      "lat": 16.3362,
-      "lon": -89.43217,
-      "fuenteCoord": "INE censo 2018, cabecera \"Poptun\""
+      "lat": 16.35202,
+      "lon": -89.42311,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "San Benito Petén",
@@ -405,9 +408,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Petén",
       "municipio": "San Benito",
-      "lat": 16.92262,
-      "lon": -89.9169,
-      "fuenteCoord": "INE censo 2018, cabecera \"San Benito\""
+      "lat": 16.9258,
+      "lon": -89.90125,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Monjas Jalapa",
@@ -421,9 +424,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Jalapa",
       "municipio": "Monjas",
-      "lat": 14.50467,
-      "lon": -89.87319,
-      "fuenteCoord": "INE censo 2018, cabecera \"Monjas\""
+      "lat": 14.50167,
+      "lon": -89.87326,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Santa Catarina Mita",
@@ -453,9 +456,9 @@
       "supervisor": "Myra Santos",
       "departamento": "Jutiapa",
       "municipio": "Jutiapa",
-      "lat": 14.29255,
-      "lon": -89.89583,
-      "fuenteCoord": "INE censo 2018, cabecera \"Jutiapa\""
+      "lat": 14.28917,
+      "lon": -89.89478,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Salamá",
@@ -468,9 +471,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "Baja Verapaz",
       "municipio": "Salamá",
-      "lat": 15.10078,
-      "lon": -90.31747,
-      "fuenteCoord": "INE censo 2018, cabecera \"Salama\""
+      "lat": 15.10432,
+      "lon": -90.31674,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Mazatenango",
@@ -483,9 +486,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Suchitepéquez",
       "municipio": "Mazatenango",
-      "lat": 14.53252,
-      "lon": -91.50543,
-      "fuenteCoord": "INE censo 2018, cabecera \"Mazatenango\""
+      "lat": 14.5323,
+      "lon": -91.50168,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Cobán",
@@ -498,9 +501,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "Alta Verapaz",
       "municipio": "Cobán",
-      "lat": 15.46836,
-      "lon": -90.36909,
-      "fuenteCoord": "INE censo 2018, cabecera \"Coban\""
+      "lat": 15.47135,
+      "lon": -90.38614,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Puerto Barrios Centro",
@@ -516,9 +519,9 @@
       "supervisor": "Sergio Corado",
       "departamento": "Izabal",
       "municipio": "Puerto Barrios",
-      "lat": 15.72828,
-      "lon": -88.59282,
-      "fuenteCoord": "INE censo 2018, cabecera \"Puerto Barrios\""
+      "lat": 15.7271,
+      "lon": -88.60023,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Escuintla Centro",
@@ -532,9 +535,9 @@
       "supervisor": "Alejandro Zelada",
       "departamento": "Escuintla",
       "municipio": "Escuintla",
-      "lat": 14.30032,
-      "lon": -90.78574,
-      "fuenteCoord": "INE censo 2018, cabecera \"Escuintla\""
+      "lat": 14.30605,
+      "lon": -90.78387,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Morazán",
@@ -547,9 +550,9 @@
       "supervisor": "Luisa De Leon",
       "departamento": "El Progreso",
       "municipio": "Morazán",
-      "lat": 14.93244,
-      "lon": -90.14555,
-      "fuenteCoord": "INE censo 2018, cabecera \"Morazan\""
+      "lat": 14.93218,
+      "lon": -90.14506,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (Google Maps)"
     },
     {
       "nombre": "Sanarate",
@@ -681,7 +684,8 @@
       "marca": "Friotec",
       "activa": true,
       "alias": [
-        "FRIOTEC"
+        "FRIOTEC",
+        "FRIOTEC CHIQUIMULA"
       ],
       "supervisor": "Myra Santos",
       "departamento": "Chiquimula",
@@ -696,7 +700,8 @@
       "marca": "Friotec",
       "activa": true,
       "alias": [
-        "FRIOTEC BARRIOS"
+        "FRIOTEC BARRIOS",
+        "FRIOTEC PUERTO BARRIOS"
       ],
       "supervisor": "Sergio Corado",
       "departamento": "Izabal",
@@ -739,7 +744,7 @@
       "nombre": "Oakland Mall",
       "tipo": "A",
       "marca": "Abi Q",
-      "activa": true,
+      "activa": false,
       "alias": [
         "OAKLAND",
         "OAKLAND MALL",
@@ -752,6 +757,23 @@
       "lat": 14.62219,
       "lon": -90.50711,
       "fuenteCoord": "INE censo 2018, promedio de 22 poblados"
+    },
+    {
+      "nombre": "Abi Q Zona 10",
+      "tipo": null,
+      "marca": "Abi Q",
+      "activa": true,
+      "alias": [
+        "ABI Q ZONA 10",
+        "ABIQ ZONA 10",
+        "ZONA 10"
+      ],
+      "supervisor": "Diana Mendez",
+      "departamento": "Guatemala",
+      "municipio": "Guatemala",
+      "lat": 14.59682,
+      "lon": -90.51548,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (enlace de Waze)"
     },
     {
       "nombre": "Abi Q Cayalá",
@@ -781,9 +803,9 @@
       "supervisor": "Diana Mendez",
       "departamento": "Chiquimula",
       "municipio": "Chiquimula",
-      "lat": 14.79442,
-      "lon": -89.54527,
-      "fuenteCoord": "INE censo 2018, cabecera \"Chiquimula\""
+      "lat": 14.80642,
+      "lon": -89.53576,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (enlace de Waze)"
     },
     {
       "nombre": "Abi Q Pradera Concepción",
@@ -799,9 +821,9 @@
       "supervisor": "Diana Mendez",
       "departamento": "Guatemala",
       "municipio": "Santa Catarina Pinula",
-      "lat": 14.57035,
-      "lon": -90.49887,
-      "fuenteCoord": "INE censo 2018, cabecera \"Santa Catarina Pinula\"",
+      "lat": 14.55227,
+      "lon": -90.45222,
+      "fuenteCoord": "Directorio Unificado Corporación Americana (Soporte Técnico, 2026-11-11), ubicación de la tienda (enlace de Waze)",
       "observacion": "Ubicación aproximada (centro comercial Pradera Concepción, carretera a El Salvador)."
     },
     {
